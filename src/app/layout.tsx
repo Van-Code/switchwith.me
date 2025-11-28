@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Button } from "../components/ui/button"
 import { isSeatMapEnabled } from "../lib/features"
 import { SocketProvider } from "../contexts/SocketContext"
+import Footer from "../components/Footer"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,14 +25,14 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <SocketProvider>
           <nav className="border-b">
             <div className="container mx-auto px-4 py-4 flex items-center justify-between">
               <Link href="/" className="text-xl font-bold">
                 Valkyries Seat Swap
               </Link>
-              
+
               <div className="flex items-center gap-4">
                 {session ? (
                   <>
@@ -73,10 +74,12 @@ export default async function RootLayout({
               </div>
             </div>
           </nav>
-          
-          <main className="container mx-auto px-4 py-8">
+
+          <main className="container mx-auto px-4 py-8 flex-1">
             {children}
           </main>
+
+          <Footer />
         </SocketProvider>
       </body>
     </html>
