@@ -57,12 +57,18 @@ export default async function RootLayout({
                     <Link href="/profile">
                       <Button variant="ghost">Profile</Button>
                     </Link>
+                    <Link href="/about">
+                      <Button variant="ghost">About the Creator</Button>
+                    </Link>
                     <form action="/api/auth/signout" method="post">
                       <Button variant="outline" type="submit">Sign Out</Button>
                     </form>
                   </>
                 ) : (
                   <>
+                    <Link href="/about">
+                      <Button variant="ghost">About the Creator</Button>
+                    </Link>
                     <Link href="/auth/signin">
                       <Button variant="ghost">Sign In</Button>
                     </Link>
