@@ -144,87 +144,45 @@ export default async function Home() {
       </section>
 
       {/* Support Card */}
-      <section className="max-w-4xl mx-auto px-4">
-        <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50/40 to-amber-50 shadow-lg">
-          <CardHeader className="text-center space-y-4 pb-6">
-            <div className="flex justify-center">
-              <div className="h-16 w-16 rounded-full bg-rose-100 flex items-center justify-center">
-                <Heart className="h-9 w-9 text-rose-600 fill-rose-200" />
-              </div>
-            </div>
-            <CardTitle className="text-4xl text-slate-900">Support This Community Project</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-8 pb-8">
-            <div className="text-center space-y-4 max-w-2xl mx-auto">
-              <p className="text-lg text-slate-700 leading-relaxed">
-                This site is a solo passion project from a Valkyries fan who wanted an easier way for us to sit
-                together instead of being scattered around the arena. The goal is to keep it free, simple, and
-                community first.
-              </p>
-              <div className="flex items-center justify-center gap-2 text-amber-700">
-                <Users className="h-5 w-5" />
-                <p className="text-sm font-medium">Built for fans, by a fan</p>
-              </div>
-            </div>
+      <section className="max-w-xl mx-auto">
+  <div className="text-center space-y-3 p-6 rounded-lg bg-gradient-to-br from-purple-600/10 to-pink-600/10 border border-purple-500/20">
+    <h3 className="text-xl font-semibold flex items-center justify-center gap-2">
+      <Heart className="h-5 w-5 text-pink-500" />
+      Support the Project
+    </h3>
 
-            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-8 space-y-5 border border-amber-200/50">
-              <div className="text-center space-y-6">
-                <div>
-                  <h3 className="text-2xl font-semibold mb-3 text-slate-900">Help Keep It Running</h3>
-                  <p className="text-slate-600 leading-relaxed mb-6 max-w-xl mx-auto">
-                    Hosting, maintenance, and new features take real time and resources. If this tool has helped you,
-                    you can support it so it stays online for the community.
-                  </p>
-                </div>
+    <p className="text-sm text-muted-foreground">
+      This site is a community project built and maintained by one fan.  
+      If you’d like to help keep it running, you can chip in below.
+    </p>
 
-                <div className="flex flex-col items-center gap-4">
-                  <form
-                    action="https://www.paypal.com/donate"
-                    method="post"
-                    target="_top"
-                    className="flex justify-center"
-                  >
-                    <input type="hidden" name="business" value="YOUR_PAYPAL_EMAIL" />
-                    <input type="hidden" name="no_recurring" value="0" />
-                    <input
-                      type="hidden"
-                      name="item_name"
-                      value="Support Golden State Valkyries Ticket Swap"
-                    />
-                    <input type="hidden" name="currency_code" value="USD" />
-                    <Button
-                      type="submit"
-                      size="lg"
-                      className="bg-rose-600 hover:bg-rose-700 text-white shadow-md"
-                    >
-                      <Heart className="mr-2 h-5 w-5" />
-                      Donate via PayPal
-                    </Button>
-                  </form>
+    <form
+      action="https://www.paypal.com/donate"
+      method="post"
+      target="_top"
+      className="flex justify-center"
+    >
+      <input type="hidden" name="business" value="YOUR_PAYPAL_EMAIL" />
+      <input type="hidden" name="no_recurring" value="0" />
+      <input type="hidden" name="item_name" value="Support Golden State Valkyries Ticket Swap" />
+      <input type="hidden" name="currency_code" value="USD" />
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-amber-700 border-amber-300 hover:bg-amber-50"
-                    asChild
-                  >
-                    <a href="mailto:youremail@example.com">Sponsor or Partner</a>
-                  </Button>
+      <Button
+        type="submit"
+        size="sm"
+        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+      >
+        <Heart className="mr-2 h-4 w-4" />
+        Donate
+      </Button>
+    </form>
 
-                  <p className="text-xs text-slate-500 text-center max-w-md leading-relaxed">
-                    Every contribution goes toward hosting, maintenance, and future improvements, not ticket fees.
-                  </p>
-                </div>
-              </div>
-            </div>
+    <p className="text-xs text-muted-foreground">
+      Optional, appreciated, never expected.
+    </p>
+  </div>
+</section>
 
-            <div className="border-t border-amber-300/40 pt-6 text-center text-xs text-slate-500 leading-relaxed max-w-2xl mx-auto">
-              This is an independent fan project and is not affiliated with or endorsed by the Golden State
-              Valkyries, the WNBA, or Ticketmaster.
-            </div>
-          </CardContent>
-        </Card>
-      </section>
     </div>
   )
 }

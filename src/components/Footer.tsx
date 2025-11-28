@@ -27,13 +27,10 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-3">Get Involved</h4>
             <p className="text-sm text-muted-foreground">
-              Want to support this project or become a sponsor?  
-              <a href="mailto:youremail@example.com" className="underline hover:text-purple-400">
-                Reach out anytime
-              </a>.  
-              Community-aligned partners are always welcome.
+              Have ideas or want to help the project grow? I’d love to hear from you.
             </p>
           </div>
+
         </div>
 
         {/* Legal Disclaimer */}

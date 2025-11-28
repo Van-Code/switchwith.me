@@ -1,112 +1,113 @@
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
-import {Button} from "@/components/ui/button"
 import Image from "next/image"
-import { Heart } from "lucide-react"
-
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { HeartHandshake } from "lucide-react"
 
 export default function AboutPage() {
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4 space-y-10">
-      
-      {/* Header */}
-      <div className="text-center space-y-3">
-        <h1 className="text-4xl font-bold tracking-tight">
-          About the Creator
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          A little story about how this whole thing happened
-        </p>
-      </div>
+    <div className="max-w-4xl mx-auto py-10 px-4 space-y-8">
+      {/* Top section - portrait + bio side by side on desktop */}
+      <Card className="bg-muted/30 border-border">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            {/* Portrait */}
+            <div className="flex-shrink-0 self-center md:self-auto">
+              <div className="rounded-full overflow-hidden border shadow-md w-32 h-32 md:w-40 md:h-40 bg-muted">
+                <Image
+                  src="/images/sketch.png" // update to your actual file path
+                  alt="Cartoon illustration of Van"
+                  width={160}
+                  height={160}
+                  className="object-cover"
+                />
+              </div>
+            </div>
 
-      {/* Sketch / Portrait */}
-      <div className="flex justify-center">
-        <div className="rounded-full overflow-hidden border shadow-md w-40 h-40">
-          <Image
-            src="/sketch.jpeg"
-            alt="Cartoon sketch of Van"
-            width={160}
-            height={160}
-            className="object-cover"
-          />
-        </div>
-      </div>
+            {/* Text */}
+            <div className="space-y-4">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  About the Creator
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  The human behind the seat swap experiment
+                </p>
+              </div>
 
-      {/* Card Section */}
-      <Card className="bg-muted/30 border-purple-300/20">
-        <CardHeader>
-          <h2 className="text-2xl font-semibold">Hi, I'm Van</h2>
-        </CardHeader>
+              <div className="space-y-3 text-base md:text-lg leading-relaxed text-muted-foreground">
+                <p>
+                  Hi, I am Van. I am a queer BIPOC developer who built this project after
+                  hearing a friend talk about how chaotic it was to renew season tickets
+                  and try to sit near other queer fans. I am not the loudest Valkyries
+                  superfan in the building, but I love going to games and being surrounded
+                  by queer joy in the stands. The community is what makes it special.
+                </p>
 
-        <CardContent className="space-y-4 text-lg leading-relaxed">
-            <p className="text-lg leading-relaxed text-muted-foreground">
-                Hey there! I'm Van — the person behind this little corner of the internet.
-                I built this project after hearing friends talk about how chaotic swapping
-                Valkyries tickets could be. I'm not a superfan in the “paint my face gold” way,
-                but I <em>do</em> love watching the games and being surrounded by the incredible
-                energy of queer fans. Honestly, the community is what pulled me in.
-            </p>
+                <p>
+                  I enjoy making small, community centered tools that reduce friction for
+                  real people. A lot of my time goes into helping nonprofits and community
+                  spaces keep their sites running, updating content and fixing the little
+                  technical things that tend to pile up.
+                </p>
 
-            <p className="text-lg leading-relaxed text-muted-foreground">
-                Outside of coding things like this, I spend a lot of time with my dogs
-                (they're definitely my emotional support gremlins), trying out new recipes,
-                and planning my next trip even if I have zero business traveling anywhere.
-                I like simple joys: the SF breeze, beautiful hikes, and those rare days when
-                I actually remember to stretch.
-            </p>
+                <p>
+                  Outside of screens, I am usually hanging out with my dogs, playing board
+                  games, cooking for friends, or planning a trip I probably have not fully
+                  thought through yet. I like slow nights with good conversation as much as
+                  I like yelling at a great play from the stands.
+                </p>
 
-            <p className="text-lg leading-relaxed text-muted-foreground">
-                I also do volunteer tech work for nonprofits and community spaces. It's my
-                small way of helping projects I care about thrive. If you've ever been part of
-                grassroots anything, you know how much heart goes into keeping things running.
-            </p>
+                <p>
+                  I am currently between jobs, so this project is part passion, part
+                  portfolio, and part love letter to queer sports fans who just want to
+                  sit near their people. If this site helps you move around the arena in a
+                  way that feels better, that is a win.
+                </p>
 
-            <p className="text-lg leading-relaxed text-muted-foreground">
-                This ticket swap started as a tiny idea and turned into something I really
-                enjoyed building. If it ends up being useful to you or makes your game day
-                a little better, that means a lot.
-            </p>
-
-            <p className="text-lg leading-relaxed text-muted-foreground">
-                Thanks for being here. And if you ever see me at a game — feel free to say hi.
-            </p>
+                <p>
+                  If you would like to reach out about work, collaboration, or feedback on
+                  the project, you can email me at <strong>youremail@example.com</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
         </CardContent>
-      
       </Card>
-      <div  className="space-y-6">
-        <form
-            action="https://www.paypal.com/donate"
-            method="post"
-            target="_top"
-            className="flex justify-center"
-            >
-            <input type="hidden" name="business" value="YOUR_PAYPAL_EMAIL" />
-            <input type="hidden" name="no_recurring" value="0" />
-            <input
-                type="hidden"
-                name="item_name"
-                value="Support Golden State Valkyries Ticket Swap"
-            />
-            <input type="hidden" name="currency_code" value="USD" />
-            <Button
-                type="submit"
-                size="lg"
-                className="bg-rose-600 hover:bg-rose-700 text-white shadow-md"
-            >
-                <Heart className="mr-2 h-5 w-5" />
-                Donate via PayPal
-            </Button>
-        </form>
-        <div className="text-center">
-            <Button
-            variant="outline"
-            size="sm"
-            className="text-amber-700 border-amber-300 hover:bg-amber-50 "
-            asChild
-            >
-            <a href="mailto:youremail@example.com">Sponsor or Partner</a>
-            </Button>
-        </div>
-        </div>
+
+      {/* Support / Sponsorship - smaller, not its own huge block */}
+      <Card className="bg-background/70 border-dashed border-purple-400/40">
+        <CardHeader className="flex flex-row items-center gap-2 pb-2">
+          <HeartHandshake className="h-5 w-5 text-purple-500" />
+          <h2 className="text-xl font-semibold">Support and Sponsorship</h2>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm md:text-base text-muted-foreground">
+          <p>
+            This site is a solo, fan run project. If it has been useful and you want to
+            support it, there are a few simple ways to help.
+          </p>
+
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <span className="font-medium">Share it</span> with other fans who might want
+              to swap seats or sit closer to community.
+            </li>
+            <li>
+              <span className="font-medium">Offer feedback</span> so I can keep improving
+              the experience over time.
+            </li>
+            <li>
+              <span className="font-medium">Sponsor or support</span> if you have a
+              business or organization that aligns with this crowd and want to help keep
+              it running.
+            </li>
+          </ul>
+
+          <p>
+            For sponsorship or collaboration conversations, email{" "}
+            <strong>youremail@example.com</strong> with a few lines about who you are and
+            how you would like to be involved.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
