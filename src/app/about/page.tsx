@@ -22,7 +22,7 @@ export default function AboutPage() {
       <div className="flex justify-center">
         <div className="rounded-full overflow-hidden border shadow-md w-40 h-40">
           <Image
-            src="/sketch-2.png"
+            src="/sketch.jpeg"
             alt="Cartoon sketch of Van"
             width={160}
             height={160}
