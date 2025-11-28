@@ -86,9 +86,6 @@ export function SectionListingsPanel({
                         {listing.user.profile.firstName} {listing.user.profile.lastInitial}.
                       </p>
                       <ProfileBadge
-                        emailVerified={listing.user.profile.emailVerified}
-                        phoneVerified={listing.user.profile.phoneVerified}
-                        seasonTicketHolderVerified={listing.user.profile.seasonTicketHolderVerified}
                         successfulSwapsCount={listing.user.profile.successfulSwapsCount}
                       />
                     </div>

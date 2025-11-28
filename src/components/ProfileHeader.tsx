@@ -5,9 +5,6 @@ interface ProfileHeaderProps {
   lastInitial: string
   avatarUrl?: string | null
   bio?: string | null
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  seasonTicketHolderVerified?: boolean
   successfulSwapsCount?: number,
   favoritePlayer:string | null
 }
@@ -17,9 +14,6 @@ export function ProfileHeader({
   lastInitial,
   avatarUrl,
   bio,
-  emailVerified,
-  phoneVerified,
-  seasonTicketHolderVerified,
   successfulSwapsCount,
 }: ProfileHeaderProps) {
   return (
@@ -38,9 +32,6 @@ export function ProfileHeader({
         {bio && <p className="text-muted-foreground mt-1">{bio}</p>}
         <div className="mt-2">
           <ProfileBadge
-            emailVerified={emailVerified}
-            phoneVerified={phoneVerified}
-            seasonTicketHolderVerified={seasonTicketHolderVerified}
             successfulSwapsCount={successfulSwapsCount}
           />
         </div>

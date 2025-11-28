@@ -44,9 +44,6 @@ export default async function ProfilePage() {
           lastInitial={user.profile.lastInitial}
           avatarUrl={user.profile.avatarUrl}
           bio={user.profile.bio}
-          emailVerified={user.profile.emailVerified}
-          phoneVerified={user.profile.phoneVerified}
-          seasonTicketHolderVerified={user.profile.seasonTicketHolderVerified}
           successfulSwapsCount={user.profile.successfulSwapsCount}
           favoritePlayer={user.profile.favoritePlayer}
         />

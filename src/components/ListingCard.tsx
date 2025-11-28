@@ -21,9 +21,6 @@ interface ListingCardProps {
       profile?: {
         firstName: string
         lastInitial: string
-        emailVerified: boolean
-        phoneVerified: boolean
-        seasonTicketHolderVerified: boolean
         successfulSwapsCount: number
       } | null
     }
@@ -99,9 +96,6 @@ export function ListingCard({ listing, onMessage, showOwner = true }: ListingCar
               {listing.user.profile.firstName} {listing.user.profile.lastInitial}.
             </p>
             <ProfileBadge
-              emailVerified={listing.user.profile.emailVerified}
-              phoneVerified={listing.user.profile.phoneVerified}
-              seasonTicketHolderVerified={listing.user.profile.seasonTicketHolderVerified}
               successfulSwapsCount={listing.user.profile.successfulSwapsCount}
             />
           </div>
