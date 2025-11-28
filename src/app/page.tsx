@@ -1,3 +1,4 @@
+import React from 'react';
 import { Button } from "../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import Link from "next/link"
@@ -5,26 +6,27 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../lib/auth"
 import { ArrowRight, Shield, MessageSquare, Search, Heart, Users } from "lucide-react"
 
+
 export default async function Home() {
   const session = await getServerSession(authOptions)
 
   return (
-    <div className="space-y-16 pb-8">
-      {/* Hero Section */}
-      <section className="text-center space-y-6 py-16 px-4 bg-gradient-to-b from-amber-50/50 via-white to-transparent">
-        <div className="max-w-3xl mx-auto space-y-5">
-          <h1 className="text-6xl font-bold text-slate-900 tracking-tight">
-            Valkyries Seat Swap
-          </h1>
-          <div className="h-1 w-24 mx-auto bg-gradient-to-r from-cyan-500 to-amber-500 rounded-full"></div>
-          <p className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            Connect with fellow Golden State Valkyries fans to swap tickets and find your perfect seats.
-          </p>
-          <p className="text-sm text-amber-700 italic">
-            Because we're better when we sit together
-          </p>
-        </div>
-        <div className="flex gap-4 justify-center pt-6">
+  <div className="space-y-16 pb-8">
+
+    <section className="text-center space-y-6 py-16 px-4 bg-gradient-to-b from-amber-50/50 via-white to-transparent">
+      <div className="max-w-3xl mx-auto space-y-5">
+        <h1 className="text-6xl font-bold text-slate-900 tracking-tight">
+          Valkyries Seat Swap
+        </h1>
+        <div className="h-1 w-24 mx-auto bg-gradient-to-r from-cyan-500 to-amber-500 rounded-full"></div>
+        <p className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
+          Connect with fellow Golden State Valkyries fans to swap tickets and find your perfect seats.
+        </p>
+        <p className="text-sm text-amber-700 italic">
+          Because we're better when we sit together
+        </p>
+      </div>
+      <div className="flex gap-4 justify-center pt-6">
           {session ? (
             <>
               <Link href="/listings">
