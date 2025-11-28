@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from "next/image"
-import {Button} from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Heart } from "lucide-react"
 import ContactForm from "@/components/contact-form"
@@ -86,7 +86,6 @@ export default function AboutPage() {
           </div>
         </CardContent>
       </Card>
-
      {/* Support Section */}
      <Card className="bg-gradient-to-br from-rose-50/50 to-purple-50/50 border-rose-200/30">
         <CardHeader>
