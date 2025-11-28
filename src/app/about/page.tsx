@@ -86,7 +86,7 @@ export default function AboutPage() {
           </div>
         </CardContent>
       </Card>
-     {/* Support Section */}
+
      <Card className="bg-gradient-to-br from-rose-50/50 to-purple-50/50 border-rose-200/30">
         <CardHeader>
           <h2 className="text-2xl font-semibold text-center">Support the Project</h2>
