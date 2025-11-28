@@ -1,6 +1,4 @@
-import { Heart } from 'lucide-react'
-import { Button } from './ui/button'
-import { Card } from './ui/card'
+import  Link  from 'next/link';
 
 export default function Footer() {
   return (
@@ -41,7 +39,9 @@ export default function Footer() {
         {/* Legal Disclaimer */}
         <div className="text-center text-xs text-muted-foreground mb-4">
           This is an independent fan project and is not affiliated with or endorsed by the Golden State Valkyries,
-          the WNBA, or Ticketmaster.
+          the WNBA, or Ticketmaster. <Link href="/terms-and-conditions" className="hover:text-foreground underline">
+              Terms & Safety
+            </Link>
         </div>
 
         {/* Copyright */}
