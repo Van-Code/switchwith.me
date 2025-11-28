@@ -14,10 +14,14 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Notification settings
+  emailNotificationsEnabled Boolean @default(false)
+
   profile       Profile?
   listings      Listing[]
   sentMessages  Message[]      @relation("SentMessages")
-  conversations ConversationParticipant[]  
+  conversations ConversationParticipant[]
+  notifications Notification[]
 }
 
 model Profile {
@@ -113,10 +117,32 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   senderId       String
   sender         User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  
+
   text      String
-  
+
   createdAt DateTime @default(now())
-  
+
   @@index([conversationId, createdAt])
+}
+
+// Notification system
+enum NotificationType {
+  MESSAGE
+  MATCH
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  data      Json             // Flexible storage for notification details
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes for performance
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
 }
