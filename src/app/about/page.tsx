@@ -1,8 +1,10 @@
+import React from 'react'
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
+import {Button} from "@/components/ui/button"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Heart } from "lucide-react"
 import ContactForm from "@/components/contact-form"
+
 
 export default function AboutPage() {
   return (
@@ -57,12 +59,18 @@ export default function AboutPage() {
                 as I like a loud fourth quarter.
               </p>
 
-              <p>
-                I&apos;m currently between jobs, so this project is part passion, part
-                portfolio, and part love letter to queer sports fans who just want to sit
-                near their people. If this helps you move around the arena in a way that
-                feels better, that&apos;s a win.
-              </p>
+                <p>
+                  I am currently between jobs, so this project is part passion, part
+                  portfolio, and part love letter to queer sports fans who just want to
+                  sit near their people. If this site helps you move around the arena in a
+                  way that feels better, that is a win.
+                </p>
+
+                <p>
+                  If you would like to reach out about work, collaboration, or feedback on
+                  the project, you can email me at <strong>bonsaitrees@gmail.com</strong>.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -79,80 +87,60 @@ export default function AboutPage() {
         </CardContent>
       </Card>
 
-      {/* Support + Contact in a compact grid */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Support Section */}
-        <Card className="bg-gradient-to-br from-rose-50/60 to-purple-50/40 border-rose-200/40">
-          <CardHeader className="pb-3">
-            <h2 className="text-xl font-semibold text-center md:text-left">
-              Support the Project
-            </h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              This site is a fan-run side project. If it&apos;s helpful and you want to
-              support hosting and future tweaks, you can chip in here:
-            </p>
-
-            <form
-              action="https://www.paypal.com/donate"
-              method="post"
-              target="_top"
-              className="flex justify-center md:justify-start"
+     {/* Support Section */}
+     <Card className="bg-gradient-to-br from-rose-50/50 to-purple-50/50 border-rose-200/30">
+        <CardHeader>
+          <h2 className="text-2xl font-semibold text-center">Support the Project</h2>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <form
+            action="https://www.paypal.com/donate"
+            method="post"
+            target="_top"
+            className="flex justify-center"
+          >
+            <input type="hidden" name="business" value="this.props@gmail.com" />
+            <input type="hidden" name="no_recurring" value="0" />
+            <input
+              type="hidden"
+              name="item_name"
+              value="Support Golden State Valkyries Ticket Swap"
+            />
+            <input type="hidden" name="currency_code" value="USD" />
+            <Button
+              type="submit"
+              size="lg"
+              className="bg-rose-600 hover:bg-rose-700 text-white shadow-md"
             >
-              <input type="hidden" name="business" value="this.props@gmail.com" />
-              <input type="hidden" name="no_recurring" value="0" />
-              <input
-                type="hidden"
-                name="item_name"
-                value="Support Golden State Valkyries Ticket Swap"
-              />
-              <input type="hidden" name="currency_code" value="USD" />
-              <Button
-                type="submit"
-                size="sm"
-                className="bg-rose-600 hover:bg-rose-700 text-white shadow-md"
-              >
-                <Heart className="mr-2 h-4 w-4" />
-                Donate via PayPal
-              </Button>
-            </form>
-
-            <p className="text-xs text-muted-foreground">
-              Optional, appreciated, never expected.
-            </p>
-
-            <div className="pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-amber-700 border-amber-300 hover:bg-amber-50"
-                asChild
-              >
-                <a href="mailto:bonsaitrees@gmail.com">Sponsor or partner</a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Contact Section */}
-        <Card className="bg-muted/30 border-purple-300/30">
-          <CardHeader className="pb-3">
-            <h2 className="text-xl font-semibold">Get in Touch</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Have feedback, ideas, or questions about the project? Curious about
-              collaboration or sponsorship? I&apos;d love to hear from you.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              You can also use this form to report bugs or anything that isn&apos;t working
-              the way you expect — it really helps me keep things running smoothly.
-            </p>
-            <ContactForm />
-          </CardContent>
-        </Card>
-      </div>
+              <Heart className="mr-2 h-5 w-5" />
+              Donate via PayPal
+            </Button>
+          </form>
+          <div className="text-center">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-amber-700 border-amber-300 hover:bg-amber-50"
+              asChild
+            >
+              <a href="mailto:bonsaitrees@gmail.com">Sponsor or Partner</a>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+       {/* Contact Section */}
+       <Card className="bg-muted/30 border-purple-300/20">
+        <CardHeader>
+          <h2 className="text-2xl font-semibold">Get in Touch</h2>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            Have feedback, questions, or ideas for collaboration? Want to discuss sponsorship
+            opportunities or just say hi? I'd love to hear from you!
+          </p>
+          <ContactForm />
+        </CardContent>
+      </Card>
     </div>
   )
 }
