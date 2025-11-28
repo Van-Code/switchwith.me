@@ -150,6 +150,13 @@ export function MessageThread({
 
   return (
     <div className="flex flex-col h-[600px]">
+      {/* Safety Disclaimer */}
+      <div className="bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs px-3 py-2 text-center border-b border-blue-200 dark:border-blue-800">
+        <strong>Friendly reminder:</strong> This is a peer-to-peer chat. Please double-check tickets
+        in the original ticketing app, and only swap with people you trust. This platform doesn&apos;t
+        verify ticket ownership or handle payments.
+      </div>
+
       {/* Connection Status */}
       {!isConnected && (
         <div className="bg-yellow-500/10 text-yellow-700 text-xs px-3 py-2 text-center">
