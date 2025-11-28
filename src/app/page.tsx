@@ -15,7 +15,7 @@ export default async function Home() {
           Valkyries Seat Swap
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Connect with fellow Golden State Valkyries fans to swap tickets and find your perfect seats
+          Connect with fellow Golden State Valkyries fans to swap tickets and find your perfect seats.
         </p>
         <div className="flex gap-4 justify-center pt-4">
           {session ? (
@@ -24,7 +24,9 @@ export default async function Home() {
                 <Button size="lg">Browse Listings</Button>
               </Link>
               <Link href="/listings/new">
-                <Button size="lg" variant="outline">Create Listing</Button>
+                <Button size="lg" variant="outline">
+                  Create Listing
+                </Button>
               </Link>
             </>
           ) : (
@@ -35,7 +37,9 @@ export default async function Home() {
                 </Button>
               </Link>
               <Link href="/auth/signin">
-                <Button size="lg" variant="outline">Sign In</Button>
+                <Button size="lg" variant="outline">
+                  Sign In
+                </Button>
               </Link>
             </>
           )}
@@ -50,7 +54,7 @@ export default async function Home() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              List the seats you have and specify what you want. Our matching system finds compatible swaps.
+              List the seats you have and specify what you want. Our matching system helps surface compatible swaps.
             </p>
           </CardContent>
         </Card>
@@ -62,7 +66,7 @@ export default async function Home() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Connect directly with other fans through our secure in-app messaging system.
+              Connect directly with other fans through in app messaging to compare seats and work out the details.
             </p>
           </CardContent>
         </Card>
@@ -70,11 +74,12 @@ export default async function Home() {
         <Card>
           <CardHeader>
             <Shield className="h-8 w-8 mb-2 text-purple-600" />
-            <CardTitle>Trust & Safety</CardTitle>
+            <CardTitle>Trust and Safety</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Verified badges and swap history help you make informed decisions about who to swap with.
+              Clear listing statuses, safety tips, and transparent conversations help you decide who to swap with,
+              while you keep transfers in the official ticketing app.
             </p>
           </CardContent>
         </Card>
@@ -85,23 +90,26 @@ export default async function Home() {
         <ol className="space-y-3">
           <li className="flex gap-3">
             <span className="font-bold text-purple-600">1.</span>
-            <span>Create an account and list the seats you have</span>
+            <span>Create an account and list the seats you have.</span>
           </li>
           <li className="flex gap-3">
             <span className="font-bold text-purple-600">2.</span>
-            <span>Specify what sections or zones you'd like to swap for</span>
+            <span>Specify what sections or zones you would like to swap for.</span>
           </li>
           <li className="flex gap-3">
             <span className="font-bold text-purple-600">3.</span>
-            <span>Browse matches or let others find you</span>
+            <span>Browse other listings or let people find yours.</span>
           </li>
           <li className="flex gap-3">
             <span className="font-bold text-purple-600">4.</span>
-            <span>Message potential swap partners to coordinate</span>
+            <span>Message potential swap partners to compare seats and see if it feels fair.</span>
           </li>
           <li className="flex gap-3">
             <span className="font-bold text-purple-600">5.</span>
-            <span>Complete your swap through Ticketmaster (we don't handle transfers or payments)</span>
+            <span>
+              Complete your swap through Ticketmaster or the official ticketing app. This site does not handle
+              transfers or payments.
+            </span>
           </li>
         </ol>
       </section>
@@ -117,9 +125,9 @@ export default async function Home() {
           <CardContent className="space-y-6">
             <div className="text-center space-y-3">
               <p className="text-lg">
-                This platform was built by an individual who saw a need for a better way
-                for Valkyries fans to swap tickets. The goal is simple: bring our community
-                together and keep this service <span className="font-bold text-purple-400">completely free</span>.
+                This site is a solo passion project from a Valkyries fan who wanted an easier way for us to sit
+                together instead of being scattered around the arena. The goal is to keep it free, simple, and
+                community first.
               </p>
               <div className="flex items-center justify-center gap-2 text-muted-foreground">
                 <Users className="h-5 w-5" />
@@ -129,40 +137,56 @@ export default async function Home() {
 
             <div className="bg-background/50 rounded-lg p-6 space-y-4">
               <div className="text-center">
-                <h3 className="text-xl font-semibold mb-2 text-purple-300">
-                  Help Keep the Lights On
-                </h3>
+                <h3 className="text-xl font-semibold mb-2 text-purple-300">Help Keep It Running</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Running servers, maintaining features, and keeping everything secure takes time and resources.
-                  Your support helps ensure this platform stays free for everyone.
+                  Hosting, maintenance, and new features take real time and resources. If this tool has helped you,
+                  you can support it so it stays online for the community.
                 </p>
-                <form action="https://www.paypal.com/donate" method="post" target="_top" className="flex justify-center">
-                  <input type="hidden" name="business" value="YOUR_PAYPAL_EMAIL" />
-                  <input type="hidden" name="no_recurring" value="0" />
-                  <input type="hidden" name="item_name" value="Support Golden State Valkyries Ticket Swap" />
-                  <input type="hidden" name="currency_code" value="USD" />
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+
+                <div className="flex flex-col items-center gap-3">
+                  <form
+                    action="https://www.paypal.com/donate"
+                    method="post"
+                    target="_top"
+                    className="flex justify-center"
                   >
-                    <Heart className="mr-2 h-5 w-5" />
-                    Donate via PayPal
+                    <input type="hidden" name="business" value="YOUR_PAYPAL_EMAIL" />
+                    <input type="hidden" name="no_recurring" value="0" />
+                    <input
+                      type="hidden"
+                      name="item_name"
+                      value="Support Golden State Valkyries Ticket Swap"
+                    />
+                    <input type="hidden" name="currency_code" value="USD" />
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    >
+                      <Heart className="mr-2 h-5 w-5" />
+                      Donate via PayPal
+                    </Button>
+                  </form>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                    asChild
+                  >
+                     <a href="mailto:youremail@example.com">Sponsor or Partner</a>
                   </Button>
-                </form>
+
+                  <p className="text-xs text-muted-foreground text-center max-w-xs">
+                    Every contribution goes toward hosting, maintenance, and future improvements, not ticket fees.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="border-t border-purple-500/30 pt-6">
-              <div className="text-center space-y-2">
-                <p className="font-semibold text-lg text-purple-300">
-                  Looking for Sponsors & Partners
-                </p>
-                <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-                  If your business or organization is interested in supporting this community platform,
-                  we'd love to explore partnership opportunities. Help us grow while keeping the service free for all fans.
-                </p>
-              </div>
+            <div className="border-t border-purple-500/30 pt-4 text-center text-xs text-muted-foreground">
+              This is an independent fan project and is not affiliated with or endorsed by the Golden State
+              Valkyries, the WNBA, or Ticketmaster.
             </div>
           </CardContent>
         </Card>
