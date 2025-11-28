@@ -77,12 +77,12 @@ export default async function MessagesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Messages</h1>
-        <p className="text-muted-foreground">Your conversations</p>
+        <h1 className="text-3xl font-bold text-slate-900">Messages</h1>
+        <p className="text-slate-600">Your conversations</p>
       </div>
 
       {serializedConversations.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+        <div className="text-center py-8 text-slate-600">
           No conversations yet. Start by messaging someone from a listing!
         </div>
       ) : (

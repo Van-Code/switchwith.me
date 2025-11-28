@@ -58,33 +58,34 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-12">
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign Up</CardTitle>
-          <CardDescription>Create your Valkyries Seat Swap account</CardDescription>
+    <div className="max-w-md mx-auto mt-12 px-4">
+      <Card className="border-slate-200 shadow-lg">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-3xl text-slate-900">Sign Up</CardTitle>
+          <CardDescription className="text-slate-600">Create your Valkyries Seat Swap account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md text-sm">
+              <div className="bg-rose-50 text-rose-700 border border-rose-200 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
-            
+
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-slate-700">Email</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 required
                 placeholder="you@example.com"
+                className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
 
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-slate-700">Password</Label>
               <Input
                 id="password"
                 name="password"
@@ -92,39 +93,46 @@ export default function SignUpPage() {
                 required
                 placeholder="••••••••"
                 minLength={6}
+                className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName" className="text-slate-700">First Name</Label>
                 <Input
                   id="firstName"
                   name="firstName"
                   required
                   placeholder="Jane"
+                  className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500"
                 />
               </div>
               <div>
-                <Label htmlFor="lastInitial">Last Initial</Label>
+                <Label htmlFor="lastInitial" className="text-slate-700">Last Initial</Label>
                 <Input
                   id="lastInitial"
                   name="lastInitial"
                   required
                   placeholder="D"
                   maxLength={1}
+                  className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500"
                 />
               </div>
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
+            >
               {loading ? "Creating account..." : "Sign Up"}
             </Button>
           </form>
 
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-6 text-center text-sm text-slate-600">
             Already have an account?{" "}
-            <Link href="/auth/signin" className="text-primary hover:underline">
+            <Link href="/auth/signin" className="text-cyan-600 hover:text-cyan-700 font-medium hover:underline">
               Sign in
             </Link>
           </div>

@@ -63,58 +63,58 @@ export function MatchesClient({ currentUserId }: MatchesClientProps) {
   }
 
   if (loading) {
-    return <div>Loading matches...</div>
+    return <div className="text-slate-600">Loading matches...</div>
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Your Matches</h1>
-        <p className="text-muted-foreground">Potential swaps based on your listings</p>
+        <h1 className="text-3xl font-bold text-slate-900">Your Matches</h1>
+        <p className="text-slate-600">Potential swaps based on your listings</p>
       </div>
 
       {matches.length === 0 ? (
-        <Card>
+        <Card className="border-slate-200">
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">No matches found yet.</p>
+            <p className="text-slate-600 mb-4">No matches found yet.</p>
             <Link href="/listings/new">
-              <Button>Create a listing to find matches</Button>
+              <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">Create a listing to find matches</Button>
             </Link>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {matches.map((match: any, index: number) => (
-            <Card key={index}>
+            <Card key={index} className="border-slate-200 hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Match Score: {match.score}</CardTitle>
-                  <Badge>{match.reason}</Badge>
+                  <CardTitle className="text-lg text-slate-900">Match Score: {match.score}</CardTitle>
+                  <Badge className="bg-amber-100 text-amber-800 border-amber-200">{match.reason}</Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm font-semibold mb-2">Your Listing:</p>
-                    <p className="text-sm">
+                    <p className="text-sm font-semibold mb-2 text-slate-900">Your Listing:</p>
+                    <p className="text-sm text-slate-700">
                       Section {match.myListing.haveSection}, Row {match.myListing.haveRow}, Seat {match.myListing.haveSeat}
                     </p>
-                    <p className="text-xs text-muted-foreground">{match.myListing.haveZone}</p>
+                    <p className="text-xs text-slate-500">{match.myListing.haveZone}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold mb-2">Their Listing:</p>
-                    <p className="text-sm">
+                    <p className="text-sm font-semibold mb-2 text-slate-900">Their Listing:</p>
+                    <p className="text-sm text-slate-700">
                       Section {match.matchedListing.haveSection}, Row {match.matchedListing.haveRow}, Seat {match.matchedListing.haveSeat}
                     </p>
-                    <p className="text-xs text-muted-foreground">{match.matchedListing.haveZone}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-slate-500">{match.matchedListing.haveZone}</p>
+                    <p className="text-xs text-slate-500 mt-1">
                       Owner: {match.matchedListing.user.profile.firstName} {match.matchedListing.user.profile.lastInitial}.
                     </p>
                   </div>
                 </div>
                 <div className="mt-4">
-                <Button 
-                  className="w-full"
+                <Button
+                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
                   onClick={() => handleMessageOwner(
                     match.matchedListing.user.id,
                     match.matchedListing.id // Pass listing ID

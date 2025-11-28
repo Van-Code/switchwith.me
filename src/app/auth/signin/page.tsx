@@ -44,50 +44,56 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-12">
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign In</CardTitle>
-          <CardDescription>Welcome back to Valkyries Seat Swap</CardDescription>
+    <div className="max-w-md mx-auto mt-12 px-4">
+      <Card className="border-slate-200 shadow-lg">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-3xl text-slate-900">Sign In</CardTitle>
+          <CardDescription className="text-slate-600">Welcome back to Valkyries Seat Swap</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md text-sm">
+              <div className="bg-rose-50 text-rose-700 border border-rose-200 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
-            
+
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-slate-700">Email</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 required
                 placeholder="you@example.com"
+                className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
 
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-slate-700">Password</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
                 required
                 placeholder="••••••••"
+                className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
+            >
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-6 text-center text-sm text-slate-600">
             Don't have an account?{" "}
-            <Link href="/auth/signup" className="text-primary hover:underline">
+            <Link href="/auth/signup" className="text-cyan-600 hover:text-cyan-700 font-medium hover:underline">
               Sign up
             </Link>
           </div>

@@ -87,17 +87,17 @@ export default async function ConversationPage({ params }: { params: { id: strin
     <div className="max-w-4xl mx-auto space-y-4">
       <div className="flex items-center gap-4">
         <Link href="/messages">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="hover:bg-slate-100">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold text-slate-900">
             {otherParticipant?.user.profile
               ? `${otherParticipant.user.profile.firstName} ${otherParticipant.user.profile.lastInitial}.`
               : "Unknown User"}
           </h1>
-          <p className="text-sm text-muted-foreground">Conversation</p>
+          <p className="text-sm text-slate-600">Conversation</p>
         </div>
       </div>
 

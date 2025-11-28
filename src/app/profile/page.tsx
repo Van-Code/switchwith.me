@@ -48,41 +48,41 @@ export default async function ProfilePage() {
           favoritePlayer={user.profile.favoritePlayer}
         />
         <Link href="/profile/edit">
-          <Button>
+          <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
             <Edit className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
         </Link>
       </div>
 
-      <Card>
+      <Card className="border-slate-200">
         <CardHeader>
-          <CardTitle>Account Information</CardTitle>
+          <CardTitle className="text-slate-900">Account Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Email:</span>
-            <span>{user.email}</span>
+            <span className="text-slate-600">Email:</span>
+            <span className="text-slate-900">{user.email}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Member since:</span>
-            <span>{new Date(user.createdAt).toLocaleDateString()}</span>
+            <span className="text-slate-600">Member since:</span>
+            <span className="text-slate-900">{new Date(user.createdAt).toLocaleDateString()}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Total listings:</span>
-            <span>{user.listings.length}</span>
+            <span className="text-slate-600">Total listings:</span>
+            <span className="text-slate-900">{user.listings.length}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Active listings:</span>
-            <span>{activeListings.length}</span>
+            <span className="text-slate-600">Active listings:</span>
+            <span className="text-slate-900">{activeListings.length}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Inactive listings:</span>
-            <span>{inactiveListings.length}</span>
+            <span className="text-slate-600">Inactive listings:</span>
+            <span className="text-slate-900">{inactiveListings.length}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Completed swaps:</span>
-            <span>{user.profile.successfulSwapsCount}</span>
+            <span className="text-slate-600">Completed swaps:</span>
+            <span className="text-slate-900">{user.profile.successfulSwapsCount}</span>
           </div>
         </CardContent>
       </Card>
@@ -110,15 +110,15 @@ function MyListingsSection({
       {/* Active Listings */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Your Active Listings</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Your Active Listings</h2>
           <Link href="/listings/new">
-            <Button>Create New Listing</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">Create New Listing</Button>
           </Link>
         </div>
 
         {activeListings.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
+          <Card className="border-slate-200">
+            <CardContent className="py-8 text-center text-slate-600">
               You don't have any active listings.
             </CardContent>
           </Card>
@@ -134,7 +134,7 @@ function MyListingsSection({
       {/* Inactive Listings */}
       {inactiveListings.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Inactive Listings</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Inactive Listings</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {inactiveListings.map((listing:any) => (
               <MyListingCard key={listing.id} listing={listing} />
@@ -146,7 +146,7 @@ function MyListingsSection({
       {/* Completed Swaps */}
       {matchedListings.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Completed Swaps</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Completed Swaps</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {matchedListings.map((listing:any) => (
               <MyListingCard key={listing.id} listing={listing} />
@@ -160,20 +160,20 @@ function MyListingsSection({
 
 function MyListingCard({ listing }: { listing: any }) {
   return (
-    <Card>
+    <Card className="border-slate-200 hover:shadow-md transition-shadow">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-base">
+            <CardTitle className="text-base text-slate-900">
               Sec {listing.haveSection} • Row {listing.haveRow} • Seat {listing.haveSeat}
             </CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">{listing.haveZone}</p>
+            <p className="text-xs text-slate-500 mt-1">{listing.haveZone}</p>
           </div>
           <ListingStatusBadge status={listing.status} />
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-slate-600">
           <MapPin className="h-4 w-4" />
           {new Date(listing.gameDate).toLocaleDateString()}
         </div>

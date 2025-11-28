@@ -54,29 +54,29 @@ export default async function ListingsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Browse Listings</h1>
-          <p className="text-muted-foreground">Find tickets to swap</p>
+          <h1 className="text-3xl font-bold text-slate-900">Browse Listings</h1>
+          <p className="text-slate-600">Find tickets to swap</p>
         </div>
         <div className="flex gap-2">
           {isSeatMapEnabled() && (
             <Link href="/listings/map">
-              <Button variant="outline">
+              <Button variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-50">
                 <Map className="h-4 w-4 mr-2" />
                 Map View
               </Button>
             </Link>
           )}
           <Link href="/listings/new">
-            <Button>Create Listing</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">Create Listing</Button>
           </Link>
         </div>
       </div>
 
       {serializedListings.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">No active listings yet.</p>
+          <p className="text-slate-600 mb-4">No active listings yet.</p>
           <Link href="/listings/new">
-            <Button>Be the first to create one!</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">Be the first to create one!</Button>
           </Link>
         </div>
       ) : (
