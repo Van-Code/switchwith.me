@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Button } from "../components/ui/button"
 import { isSeatMapEnabled } from "../lib/features"
 import { SocketProvider } from "../contexts/SocketContext"
+import Footer from "../components/Footer"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -77,6 +78,8 @@ export default async function RootLayout({
           <main className="container mx-auto px-4 py-8">
             {children}
           </main>
+
+          <Footer />
         </SocketProvider>
       </body>
     </html>
