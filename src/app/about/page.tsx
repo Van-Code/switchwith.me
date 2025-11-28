@@ -1,6 +1,10 @@
+import React from 'react'
 import Image from "next/image"
+import {Button} from "@/components/ui/button"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
-import { HeartHandshake } from "lucide-react"
+import { Heart } from "lucide-react"
+import ContactForm from "@/components/contact-form"
+
 
 export default function AboutPage() {
   return (
@@ -13,7 +17,7 @@ export default function AboutPage() {
             <div className="flex-shrink-0 self-center md:self-auto">
               <div className="rounded-full overflow-hidden border shadow-md w-32 h-32 md:w-40 md:h-40 bg-muted">
                 <Image
-                  src="/images/sketch.png" // update to your actual file path
+                  src="/images/thiswilldo.jpeg" // update to your actual file path
                   alt="Cartoon illustration of Van"
                   width={160}
                   height={160}
@@ -65,7 +69,7 @@ export default function AboutPage() {
 
                 <p>
                   If you would like to reach out about work, collaboration, or feedback on
-                  the project, you can email me at <strong>youremail@example.com</strong>.
+                  the project, you can email me at <strong>bonsaitrees@gmail.com</strong>.
                 </p>
               </div>
             </div>
@@ -73,39 +77,58 @@ export default function AboutPage() {
         </CardContent>
       </Card>
 
-      {/* Support / Sponsorship - smaller, not its own huge block */}
-      <Card className="bg-background/70 border-dashed border-purple-400/40">
-        <CardHeader className="flex flex-row items-center gap-2 pb-2">
-          <HeartHandshake className="h-5 w-5 text-purple-500" />
-          <h2 className="text-xl font-semibold">Support and Sponsorship</h2>
+     {/* Support Section */}
+     <Card className="bg-gradient-to-br from-rose-50/50 to-purple-50/50 border-rose-200/30">
+        <CardHeader>
+          <h2 className="text-2xl font-semibold text-center">Support the Project</h2>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm md:text-base text-muted-foreground">
-          <p>
-            This site is a solo, fan run project. If it has been useful and you want to
-            support it, there are a few simple ways to help.
+        <CardContent className="space-y-6">
+          <form
+            action="https://www.paypal.com/donate"
+            method="post"
+            target="_top"
+            className="flex justify-center"
+          >
+            <input type="hidden" name="business" value="this.props@gmail.com" />
+            <input type="hidden" name="no_recurring" value="0" />
+            <input
+              type="hidden"
+              name="item_name"
+              value="Support Golden State Valkyries Ticket Swap"
+            />
+            <input type="hidden" name="currency_code" value="USD" />
+            <Button
+              type="submit"
+              size="lg"
+              className="bg-rose-600 hover:bg-rose-700 text-white shadow-md"
+            >
+              <Heart className="mr-2 h-5 w-5" />
+              Donate via PayPal
+            </Button>
+          </form>
+          <div className="text-center">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-amber-700 border-amber-300 hover:bg-amber-50"
+              asChild
+            >
+              <a href="mailto:bonsaitrees@gmail.com">Sponsor or Partner</a>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+       {/* Contact Section */}
+       <Card className="bg-muted/30 border-purple-300/20">
+        <CardHeader>
+          <h2 className="text-2xl font-semibold">Get in Touch</h2>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            Have feedback, questions, or ideas for collaboration? Want to discuss sponsorship
+            opportunities or just say hi? I'd love to hear from you!
           </p>
-
-          <ul className="list-disc pl-5 space-y-1">
-            <li>
-              <span className="font-medium">Share it</span> with other fans who might want
-              to swap seats or sit closer to community.
-            </li>
-            <li>
-              <span className="font-medium">Offer feedback</span> so I can keep improving
-              the experience over time.
-            </li>
-            <li>
-              <span className="font-medium">Sponsor or support</span> if you have a
-              business or organization that aligns with this crowd and want to help keep
-              it running.
-            </li>
-          </ul>
-
-          <p>
-            For sponsorship or collaboration conversations, email{" "}
-            <strong>youremail@example.com</strong> with a few lines about who you are and
-            how you would like to be involved.
-          </p>
+          <ContactForm />
         </CardContent>
       </Card>
     </div>
