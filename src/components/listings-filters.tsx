@@ -59,6 +59,10 @@ export default function ListingsFilters({
   // Auto-fill toDate when fromDate changes
   useEffect(() => {
     if (fromDate && !toDate) {
+      // If toDate is empty, set it to fromDate
+      setToDate(fromDate);
+    } else if (fromDate && toDate && fromDate > toDate) {
+      // If fromDate is later than toDate, update toDate to match fromDate
       setToDate(fromDate);
     }
   }, [fromDate, toDate]);
@@ -118,7 +122,7 @@ export default function ListingsFilters({
     Object.entries(updates).forEach(([key, value]) => {
       if (value && value.trim() !== "") {
         params.set(key, value);
-      } else {t
+      } else {
         params.delete(key);
       }
     });
@@ -179,6 +183,9 @@ export default function ListingsFilters({
   // Check if any filters are active
   const hasActiveFilters = !!(currentSearch || currentSection || currentMinPrice || currentMaxPrice || currentFrom || currentTo);
   const hasSuggestions = suggestions.sections.length > 0 || suggestions.zones.length > 0;
+
+  // Get today's date in YYYY-MM-DD format for min attribute
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <Card className="overflow-hidden border-2 border-cyan-200 shadow-lg bg-gradient-to-br from-cyan-50 via-white to-orange-50">
@@ -335,6 +342,7 @@ export default function ListingsFilters({
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
+                min={today}
                 className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
               />
             </div>
@@ -346,7 +354,7 @@ export default function ListingsFilters({
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
                 disabled={!fromDate}
-                min={fromDate || undefined}
+                min={fromDate || today}
                 className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
