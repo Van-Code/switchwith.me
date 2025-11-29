@@ -18,6 +18,10 @@ interface ListingCardProps {
     status: string
     user?: {
       id: string
+      profile?: {
+        firstName: string
+        lastInitial: string
+      } | null
     }
   }
   onMessage?: () => void
@@ -85,9 +89,14 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
           )}
         </div>
 
-        <div className="pt-3 border-t">
-          <span className="text-sm text-muted-foreground">Listing owner</span>
-        </div>
+        {isAuthenticated && listing.user?.profile && (
+          <div className="pt-3 border-t">
+            <span className="text-xs text-muted-foreground">Listed by</span>
+            <p className="text-sm font-medium mt-0.5">
+              {listing.user.profile.firstName} {listing.user.profile.lastInitial}.
+            </p>
+          </div>
+        )}
       </CardContent>
 
       {listing.status === "ACTIVE" && (

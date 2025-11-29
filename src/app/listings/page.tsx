@@ -77,6 +77,8 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
     if (from) {
       const fromDate = new Date(from);
       if (!isNaN(fromDate.getTime())) {
+        // Set to start of day
+        fromDate.setHours(0, 0, 0, 0);
         where.gameDate.gte = fromDate;
       }
     }
@@ -120,6 +122,12 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
       user: {
         select: {
           id: true,
+          profile: {
+            select: {
+              firstName: true,
+              lastInitial: true,
+            },
+          },
         },
       },
     },
