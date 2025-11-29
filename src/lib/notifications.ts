@@ -56,8 +56,12 @@ export async function createNotification({
       where: { id: userId },
       select: {
         email: true,
-        name: true,
         emailNotificationsEnabled: true,
+        profile: {
+          select: {
+            firstName: true,
+          },
+        },
       },
     });
 
@@ -65,7 +69,7 @@ export async function createNotification({
     if (user?.emailNotificationsEnabled && user.email) {
       await sendNotificationEmail({
         to: user.email,
-        userName: user.name || "there",
+        userName: user.profile?.firstName || "there",
         type,
         data,
       }).catch((error) => {

@@ -108,7 +108,7 @@ export async function POST(req: Request) {
                     },
                 },
             },
-        })
+        });
 
         // Find matches for the new listing and notify users
         // Run asynchronously to not block the response
