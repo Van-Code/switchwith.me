@@ -56,6 +56,13 @@ export default function ListingsFilters({
     setSearchValue(currentSearch ?? "");
   }, [currentSearch]);
 
+  // Auto-fill toDate when fromDate changes
+  useEffect(() => {
+    if (fromDate && !toDate) {
+      setToDate(fromDate);
+    }
+  }, [fromDate, toDate]);
+
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -324,21 +331,29 @@ export default function ListingsFilters({
         {/* Game Date Range */}
         <div className="space-y-2">
           <Label className="text-sm font-semibold text-slate-700">Game Date</Label>
-          <div className="space-y-2">
-            <Input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
-              placeholder="From"
-            />
-            <Input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
-              placeholder="To"
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label htmlFor="date-from" className="text-xs text-slate-600">From</Label>
+              <Input
+                id="date-from"
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="date-to" className="text-xs text-slate-600">To</Label>
+              <Input
+                id="date-to"
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                disabled={!fromDate}
+                min={fromDate || undefined}
+                className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
           </div>
         </div>
 
