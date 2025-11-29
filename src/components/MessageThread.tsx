@@ -4,7 +4,16 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "./ui/button"
 import { Textarea } from "./ui/textarea"
 import { Card, CardContent } from "./ui/card"
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
 import { useSocket } from "../contexts/SocketContext"
+import { EndChatDialog } from "./EndChatDialog"
+import { MoreVertical, XCircle, CheckCircle2 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
 
 interface Message {
   id: string
@@ -24,6 +33,9 @@ interface MessageThreadProps {
   messages: Message[]
   currentUserId: string
   onSendMessage: (text: string) => Promise<void>
+  conversationStatus?: "ACTIVE" | "ENDED"
+  onEndConversation?: () => void
+  onArchiveConversation?: () => void
 }
 
 export function MessageThread({
@@ -31,15 +43,22 @@ export function MessageThread({
   messages: initialMessages,
   currentUserId,
   onSendMessage,
+  conversationStatus = "ACTIVE",
+  onEndConversation,
+  onArchiveConversation,
 }: MessageThreadProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [newMessage, setNewMessage] = useState("")
   const [sending, setSending] = useState(false)
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
+  const [showEndDialog, setShowEndDialog] = useState(false)
+  const [isEnding, setIsEnding] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout>()
-  
+
   const { socket, isConnected } = useSocket()
+
+  const isEnded = conversationStatus === "ENDED"
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -119,13 +138,13 @@ export function MessageThread({
   }
 
   const handleSend = async () => {
-    if (!newMessage.trim() || sending) return
+    if (!newMessage.trim() || sending || isEnded) return
 
     setSending(true)
     try {
       await onSendMessage(newMessage)
       setNewMessage("")
-      
+
       // Stop typing indicator
       if (socket) {
         socket.emit("typing", {
@@ -141,6 +160,52 @@ export function MessageThread({
     }
   }
 
+  const handleEndChat = async (reason: string, otherText?: string) => {
+    setIsEnding(true)
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/end`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason, otherReasonText: otherText }),
+      })
+
+      if (response.ok) {
+        setShowEndDialog(false)
+        onEndConversation?.()
+      } else {
+        const data = await response.json()
+        console.error("Failed to end conversation:", data.error)
+        alert("Failed to end conversation. Please try again.")
+      }
+    } catch (error) {
+      console.error("Error ending conversation:", error)
+      alert("Failed to end conversation. Please try again.")
+    } finally {
+      setIsEnding(false)
+    }
+  }
+
+  const handleArchive = async () => {
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/archive`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archived: true }),
+      })
+
+      if (response.ok) {
+        onArchiveConversation?.()
+      } else {
+        const data = await response.json()
+        console.error("Failed to archive conversation:", data.error)
+        alert("Failed to archive conversation. Please try again.")
+      }
+    } catch (error) {
+      console.error("Error archiving conversation:", error)
+      alert("Failed to archive conversation. Please try again.")
+    }
+  }
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -150,6 +215,36 @@ export function MessageThread({
 
   return (
     <div className="flex flex-col h-[600px]">
+      {/* Options Menu */}
+      <div className="flex justify-between items-center px-3 py-2 border-b">
+        <div className="text-sm font-medium">
+          {isEnded && (
+            <span className="text-muted-foreground flex items-center gap-1">
+              <XCircle className="h-4 w-4" />
+              Chat Ended
+            </span>
+          )}
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {!isEnded && (
+              <DropdownMenuItem onClick={() => setShowEndDialog(true)}>
+                <XCircle className="mr-2 h-4 w-4" />
+                End chat
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={handleArchive}>
+              Archive conversation
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       {/* Safety Disclaimer */}
       <div className="bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs px-3 py-2 text-center border-b border-blue-200 dark:border-blue-800">
         <strong>Friendly reminder:</strong> This is a peer-to-peer chat. Please double-check tickets
@@ -203,20 +298,33 @@ export function MessageThread({
       )}
 
       <div className="border-t p-4">
-        <div className="flex gap-2">
-          <Textarea
-            value={newMessage}
-            onChange={(e) => handleTyping(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type a message..."
-            className="resize-none"
-            rows={2}
-          />
-          <Button onClick={handleSend} disabled={sending || !newMessage.trim()}>
-            {sending ? "..." : "Send"}
-          </Button>
-        </div>
+        {isEnded ? (
+          <div className="text-center py-4 text-muted-foreground">
+            <p className="text-sm">This chat has been ended. You can still read past messages.</p>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <Textarea
+              value={newMessage}
+              onChange={(e) => handleTyping(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type a message..."
+              className="resize-none"
+              rows={2}
+            />
+            <Button onClick={handleSend} disabled={sending || !newMessage.trim()}>
+              {sending ? "..." : "Send"}
+            </Button>
+          </div>
+        )}
       </div>
+
+      <EndChatDialog
+        open={showEndDialog}
+        onOpenChange={setShowEndDialog}
+        onConfirm={handleEndChat}
+        isEnding={isEnding}
+      />
     </div>
   )
 }

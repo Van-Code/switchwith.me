@@ -57,6 +57,14 @@ export async function POST(
       )
     }
 
+    // Check if conversation is ended
+    if (conversation.status === "ENDED") {
+      return NextResponse.json(
+        { error: "Cannot send messages in an ended conversation" },
+        { status: 400 }
+      )
+    }
+
     // Create message
     const message = await prisma.message.create({
       data: {
@@ -78,6 +86,39 @@ export async function POST(
       where: { id: params.id },
       data: { updatedAt: new Date() },
     })
+
+    // Detect potential swap completion
+    const completionKeywords = [
+      "transferred",
+      "sent you the ticket",
+      "sent the ticket",
+      "got the ticket",
+      "received the ticket",
+      "swap is done",
+      "swap complete",
+      "all set",
+      "we're good",
+      "thanks for the swap",
+      "swap successful",
+      "ticket transferred",
+    ]
+
+    const messageTextLower = text.trim().toLowerCase()
+    const suggestSetInactive = completionKeywords.some((keyword) =>
+      messageTextLower.includes(keyword)
+    )
+
+    // If swap might be complete and conversation has a listing owned by sender
+    let listingId = null
+    if (suggestSetInactive && conversation.listingId) {
+      const listing = await prisma.listing.findUnique({
+        where: { id: conversation.listingId },
+      })
+      // Only suggest if the sender owns the listing and it's still active
+      if (listing && listing.userId === session.user.id && listing.status === "ACTIVE") {
+        listingId = listing.id
+      }
+    }
 
     // Emit socket event to all clients in the conversation room
     if (global.io) {
@@ -119,7 +160,11 @@ export async function POST(
       })
     }
 
-    return NextResponse.json({ message })
+    return NextResponse.json({
+      message,
+      suggestSetInactive: !!listingId,
+      listingId,
+    })
   } catch (error) {
     console.error("Error sending message:", error)
     return NextResponse.json(

@@ -109,6 +109,8 @@ export default async function ConversationPage({ params }: { params: { id: strin
         conversationId={conversation.id}
         initialMessages={serializedMessages}
         currentUserId={session.user.id}
+        conversationStatus={conversation.status}
+        listingId={conversation.listingId}
       />
     </div>
   )

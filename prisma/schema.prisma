@@ -97,6 +97,11 @@ enum ListingStatus {
   EXPIRED
 }
 
+enum ConversationStatus {
+  ACTIVE
+  ENDED
+}
+
 model Listing {
   id        String   @id @default(cuid())
   userId    String
@@ -131,14 +136,20 @@ model Listing {
 
 model Conversation {
   id        String   @id @default(cuid())
-  
+
   participants ConversationParticipant[]
   messages     Message[]
-  
+
   // Add listing relationship
   listing      Listing?  @relation(fields: [listingId], references: [id])
   listingId    String?
-  
+
+  // Conversation lifecycle
+  status       ConversationStatus @default(ACTIVE)
+  endedReason  String?
+  endedAt      DateTime?
+  endedBy      String?  // userId who ended the conversation
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -149,11 +160,15 @@ model ConversationParticipant {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   userId         String
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  // Per-user archiving
+  archived       Boolean  @default(false)
+
   createdAt DateTime @default(now())
-  
+
   @@unique([conversationId, userId])
   @@index([userId])
+  @@index([userId, archived])
 }
 
 model Message {

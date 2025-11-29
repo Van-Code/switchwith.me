@@ -1,12 +1,13 @@
 import { Card, CardContent } from "./ui/card"
 import { Badge } from "./ui/badge"
 import Link from "next/link"
-import { Calendar, MapPin } from "lucide-react"
+import { Calendar, MapPin, XCircle } from "lucide-react"
 
 interface ConversationListItemProps {
   conversation: {
     id: string
     updatedAt: Date | string
+    status?: "ACTIVE" | "ENDED"
     participants: Array<{
       user: {
         id: string
@@ -37,18 +38,27 @@ export function ConversationListItem({ conversation, currentUserId }: Conversati
     (p:any) => p.user.id !== currentUserId
   )
   const lastMessage = conversation.messages[0]
-  
+  const isEnded = conversation.status === "ENDED"
+
   return (
     <Link href={`/messages/${conversation.id}`}>
-      <Card className="hover:bg-accent cursor-pointer transition-colors">
+      <Card className={`hover:bg-accent cursor-pointer transition-colors ${isEnded ? "opacity-75" : ""}`}>
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2">
             <div className="flex-1">
-              <h3 className="font-semibold">
-                {otherParticipant?.user.profile
-                  ? `${otherParticipant.user.profile.firstName} ${otherParticipant.user.profile.lastInitial}.`
-                  : "Unknown User"}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold">
+                  {otherParticipant?.user.profile
+                    ? `${otherParticipant.user.profile.firstName} ${otherParticipant.user.profile.lastInitial}.`
+                    : "Unknown User"}
+                </h3>
+                {isEnded && (
+                  <Badge variant="outline" className="text-xs flex items-center gap-1">
+                    <XCircle className="h-3 w-3" />
+                    Ended
+                  </Badge>
+                )}
+              </div>
               {lastMessage && (
                 <p className="text-sm text-muted-foreground truncate max-w-md mt-1">
                   {lastMessage.text}
