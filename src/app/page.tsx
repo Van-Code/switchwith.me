@@ -16,7 +16,7 @@ export default async function Home() {
     <section className="text-center space-y-6 py-16 px-4 bg-gradient-to-b from-amber-50/50 via-white to-transparent">
       <div className="max-w-3xl mx-auto space-y-5">
         <h1 className="text-6xl font-bold text-slate-900 tracking-tight">
-          Valkyries Seat Swap
+          Switch With Me
         </h1>
         <div className="h-1 w-24 mx-auto bg-gradient-to-r from-cyan-500 to-amber-500 rounded-full"></div>
         <p className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
@@ -153,7 +153,7 @@ export default async function Home() {
 
     <p className="text-sm text-muted-foreground">
       This site is a community project built and maintained by one fan.  
-      If you’d like to help keep it running, you can chip in below.
+      If you'd like to help keep it running, you can chip in below.
     </p>
 
     <form

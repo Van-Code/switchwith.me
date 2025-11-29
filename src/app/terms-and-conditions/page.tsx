@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata: Metadata = {
-  title: 'Terms, Safety & Common Sense - Valkyries Seat Swap',
-  description: 'Terms of service and safety guidelines for Valkyries Seat Swap',
+  title: 'Terms, Safety & Common Sense - Switch With Me',
+  description: 'Terms of service and safety guidelines for Switch With Me',
 };
 
 export default function TermsAndConditionsPage() {

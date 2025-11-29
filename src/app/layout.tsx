@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../lib/auth"
 import Link from "next/link"
 import { Button } from "../components/ui/button"
+import Image from "next/image"
 import { isSeatMapEnabled } from "../lib/features"
 import { SocketProvider } from "../contexts/SocketContext"
 import Footer from "../components/Footer"
@@ -13,7 +14,7 @@ import { NotificationBell } from "../components/notification-bell"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Valkyries Seat Swap",
+  title: "Switch With Me",
   description: "Find and swap Golden State Valkyries tickets with other fans",
 }
 
@@ -30,9 +31,22 @@ export default async function RootLayout({
         <SocketProvider>
           <nav className="border-b">
             <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-              <Link href="/" className="text-xl font-bold">
-                Valkyries Seat Swap
-              </Link>
+              <div className="flex">
+                <Link href="/" className="text-xl font-bold">
+                  <div className="flex mx-auto items-center gap-4">
+                    <div className="rounded-full overflow-hidden border shadow-md w-28 h-28 md:w-32 md:h-32 bg-muted">
+                      <Image
+                        src="/images/switch_logo.jpeg"
+                        alt="Switch With Me logo"
+                        width={128}
+                        height={128}
+                        className="object-cover"
+                      />
+                    </div>
+                      Switch With Me
+                  </div>
+                </Link>
+              </div>
 
               <div className="flex items-center gap-4">
                 {session ? (

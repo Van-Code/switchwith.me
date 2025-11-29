@@ -27,7 +27,7 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-3">Get Involved</h4>
             <p className="text-sm text-muted-foreground">
-              Have ideas or want to help the project grow? I’d love to hear from you.
+              Have ideas or want to help the project grow? I&apos;d love to hear from you.
             </p>
           </div>
 
@@ -35,8 +35,8 @@ export default function Footer() {
 
         {/* Legal Disclaimer */}
         <div className="text-center text-xs text-muted-foreground mb-4">
-          This is an independent fan project and is not affiliated with or endorsed by the Golden State Valkyries,
-          the WNBA, or Ticketmaster. <Link href="/terms-and-conditions" className="hover:text-foreground underline">
+        This is a fan-created project and is not affiliated with Golden State Valkyries,
+          the WNBA, Ticketmaster, or Chase Center. <Link href="/terms-and-conditions" className="hover:text-foreground underline">
               Terms & Safety
             </Link>
         </div>
@@ -44,7 +44,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="text-center pt-6 border-t border-border">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Golden State Valkyries Ticket Swap. Built with ❤️ for the community.
+            © {new Date().getFullYear()} Switch With Me. Built with ❤️ for the community.
           </p>
         </div>
       </div>

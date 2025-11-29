@@ -62,7 +62,7 @@ export default function SignUpPage() {
       <Card className="border-slate-200 shadow-lg">
         <CardHeader className="space-y-2">
           <CardTitle className="text-3xl text-slate-900">Sign Up</CardTitle>
-          <CardDescription className="text-slate-600">Create your Valkyries Seat Swap account</CardDescription>
+          <CardDescription className="text-slate-600">Create your Switch With Me account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

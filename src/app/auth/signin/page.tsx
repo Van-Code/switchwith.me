@@ -48,7 +48,7 @@ export default function SignInPage() {
       <Card className="border-slate-200 shadow-lg">
         <CardHeader className="space-y-2">
           <CardTitle className="text-3xl text-slate-900">Sign In</CardTitle>
-          <CardDescription className="text-slate-600">Welcome back to Valkyries Seat Swap</CardDescription>
+          <CardDescription className="text-slate-600">Welcome back to Switch With Me</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

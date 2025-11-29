@@ -93,8 +93,8 @@ function buildEmailContent({
       return buildMatchEmail(userName, data as MatchNotificationData);
     default:
       return {
-        subject: "New notification on Valkyries Seat Swap",
-        text: `Hi ${userName},\n\nYou have a new notification on Valkyries Seat Swap.\n\nView it here: ${APP_BASE_URL}\n\nThanks,\nThe Valkyries Seat Swap Team`,
+        subject: "New notification on Switch With Me",
+        text: `Hi ${userName},\n\nYou have a new notification on Switch With Me.\n\nView it here: ${APP_BASE_URL}\n\nThanks,\nThe Switch With Me Team`,
       };
   }
 }
@@ -108,7 +108,7 @@ function buildMessageEmail(
 ): { subject: string; text: string } {
   const conversationUrl = `${APP_BASE_URL}/conversations/${data.conversationId}`;
 
-  const subject = "New message on Valkyries Seat Swap";
+  const subject = "New message on Switch With Me";
 
   const text = `Hi ${userName},
 
@@ -119,7 +119,7 @@ ${data.senderName} sent you a message:
 Reply here: ${conversationUrl}
 
 Thanks,
-The Valkyries Seat Swap Team
+The Switch With Me Team
 
 ---
 To turn off email notifications, visit ${APP_BASE_URL}/profile`;
@@ -149,7 +149,7 @@ View your matches here: ${matchesUrl}
 Don't wait too long—good matches go fast!
 
 Thanks,
-The Valkyries Seat Swap Team
+The Switch With Me Team
 
 ---
 To turn off email notifications, visit ${APP_BASE_URL}/profile`;

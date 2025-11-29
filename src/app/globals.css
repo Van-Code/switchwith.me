@@ -4,25 +4,42 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Base surfaces */
+    --background: 42 100% 97%;        /* warm cream */
+    --foreground: 210 45% 15%;        /* deep teal-navy for main text */
+
+    --card: 42 100% 99%;              /* slightly lighter cream */
+    --card-foreground: 210 45% 15%;
+
+    --popover: 42 100% 99%;
+    --popover-foreground: 210 45% 15%;
+
+    /* Primary – teal from the seats */
+    --primary: 188 76% 45%;           /* bright aqua/teal */
+    --primary-foreground: 43 100% 98%;/* very light cream on teal */
+
+    /* Secondary – soft aqua background */
+    --secondary: 188 56% 90%;         /* pale teal */
+    --secondary-foreground: 210 45% 20%;
+
+    /* Muted / subtle surfaces & text */
+    --muted: 200 30% 93%;             /* light teal-grey */
+    --muted-foreground: 210 15% 40%;  /* medium grey-teal for secondary text */
+
+    /* Accent – sunset arc (yellow–orange) */
+    --accent: 30 95% 55%;             /* warm orange */
+    --accent-foreground: 210 50% 12%; /* dark teal text on accent */
+
+    /* Destructive */
+    --destructive: 352 85% 55%;       /* slightly cool red so it doesn't fight the orange */
+    --destructive-foreground: 43 100% 98%;
+
+    /* Borders / inputs / focus */
+    --border: 200 25% 85%;            /* soft border against cream */
+    --input: 200 25% 85%;
+    --ring: 188 76% 45%;              /* same as primary teal */
+
+    /* Radius */
     --radius: 0.5rem;
   }
 }
