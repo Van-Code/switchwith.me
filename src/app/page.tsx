@@ -20,8 +20,11 @@ export default async function Home() {
         </h1>
         <div className="h-1 w-24 mx-auto bg-gradient-to-r from-cyan-500 to-amber-500 rounded-full"></div>
         <p className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
-          Connect with fellow Golden State Valkyries fans to swap tickets and find your perfect seats.
+        A seat-swap hub for Valkyries fans
+
         </p>
+        <p className="text-l text-slate-600 leading-relaxed max-w-2xl mx-auto">
+        List a single seat, a few games, or your whole season. Browse open tickets from other fans, find a great seat for a night out, or try out a new section before committing. Trade with folks who share your vibe, or let someone awesome take that extra ticket off your hands. Simple, safe, community-run. </p>
         <p className="text-sm text-amber-700 italic">
           Because we're better when we sit together
         </p>

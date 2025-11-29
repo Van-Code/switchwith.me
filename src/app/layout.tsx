@@ -33,12 +33,12 @@ export default async function RootLayout({
               <div className="flex">
                 <Link href="/" className="text-xl font-bold">
                   <div className="flex mx-auto items-center gap-4">
-                    <div className="rounded-full overflow-hidden border shadow-md w-28 h-28 md:w-32 md:h-32 bg-muted">
+                    <div className="square-full overflow-hidden w-8 h-8 md:w-8 md:h-8 bg-muted">
                       <Image
                         src="/images/switch_logo.jpeg"
                         alt="Switch With Me logo"
-                        width={128}
-                        height={128}
+                        width={60}
+                        height={60}
                         className="object-cover"
                       />
                     </div>
