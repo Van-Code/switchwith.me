@@ -5,8 +5,10 @@
     "scripts": {
         "build:dev": "env-cmd -f .env.development next build",
         "build:prod": "env-cmd -f .env.production next build",
+        "build": "next build",
         "start:dev": "env-cmd -f .env.development node server.js",
         "start:prod": "env-cmd -f .env.production node server.js",
+        "start": "NODE_ENV=production node server.js",
         "lint": "next lint",
         "db:push": "prisma db push",
         "db:migrate": "prisma migrate dev",
