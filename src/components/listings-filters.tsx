@@ -5,9 +5,11 @@ import { useState, useEffect, useRef, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Search, X, SlidersHorizontal } from "lucide-react";
+import { Search, X, SlidersHorizontal, Calendar as CalendarIcon } from "lucide-react";
+import { useMask } from "@react-input/mask";
 
 interface ListingsFiltersProps {
   currentSearch?: string;
@@ -15,13 +17,52 @@ interface ListingsFiltersProps {
   currentSection?: string;
   currentMinPrice?: string;
   currentMaxPrice?: string;
-  currentFrom?: string;
-  currentTo?: string;
+  currentFrom?: string; // ISO YYYY-MM-DD
+  currentTo?: string;   // ISO YYYY-MM-DD
 }
 
 interface Suggestions {
   sections: string[];
   zones: string[];
+}
+
+// ISO YYYY-MM-DD -> MM/DD/YYYY
+function isoToDisplay(iso?: string | null): string {
+  if (!iso) return "";
+  const [year, month, day] = iso.split("-");
+  if (!year || !month || !day) return "";
+  return `${month.padStart(2, "0")}/${day.padStart(2, "0")}/${year}`;
+}
+
+// MM/DD/YYYY -> ISO YYYY-MM-DD (returns null if invalid)
+function displayToIso(display: string): string | null {
+  const trimmed = display.trim();
+  if (!trimmed) return null;
+
+  const parts = trimmed.split("/");
+  if (parts.length !== 3) return null;
+
+  const [mm, dd, yyyy] = parts.map((part) => part.trim());
+  const month = Number(mm);
+  const day = Number(dd);
+  const year = Number(yyyy);
+
+  if (!Number.isInteger(month) || !Number.isInteger(day) || !Number.isInteger(year)) {
+    return null;
+  }
+
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  const monthStr = String(month).padStart(2, "0");
+  const dayStr = String(day).padStart(2, "0");
+  return `${year}-${monthStr}-${dayStr}`;
 }
 
 export default function ListingsFilters({
@@ -44,33 +85,67 @@ export default function ListingsFilters({
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Filter state
+  // Filters
   const [section, setSection] = useState(currentSection ?? "");
   const [minPrice, setMinPrice] = useState(currentMinPrice ?? "");
   const [maxPrice, setMaxPrice] = useState(currentMaxPrice ?? "");
+
+  // Date filter: ISO values for query
   const [fromDate, setFromDate] = useState(currentFrom ?? "");
   const [toDate, setToDate] = useState(currentTo ?? "");
 
-  // Update search value when prop changes
+  // Raw text in inputs (MM/DD/YYYY)
+  const [fromRaw, setFromRaw] = useState(() =>
+    currentFrom ? isoToDisplay(currentFrom) : ""
+  );
+  const [toRaw, setToRaw] = useState(() =>
+    currentTo ? isoToDisplay(currentTo) : ""
+  );
+
+  // Date objects for the calendar
+  const [fromDateObj, setFromDateObj] = useState<Date | undefined>(() =>
+    currentFrom ? new Date(currentFrom) : undefined
+  );
+  const [toDateObj, setToDateObj] = useState<Date | undefined>(() =>
+    currentTo ? new Date(currentTo) : undefined
+  );
+  
+  // Errors
+  const [fromError, setFromError] = useState<string | null>(null);
+  const [toError, setToError] = useState<string | null>(null);
+  
+  const fromMaskRef = useMask({
+    mask: "__/__/____",
+    replacement: { _: /\d/ },
+  });
+
+  const toMaskRef = useMask({
+    mask: "__/__/____",
+    replacement: { _: /\d/ },
+  });
+
+  // Keep search in sync with URL
   useEffect(() => {
     setSearchValue(currentSearch ?? "");
   }, [currentSearch]);
 
-  // Auto-fill toDate when fromDate changes
+  // If fromDate is set and toDate empty, auto fill toDate to match
   useEffect(() => {
     if (fromDate && !toDate) {
-      // If toDate is empty, set it to fromDate
       setToDate(fromDate);
-    } else if (fromDate && toDate && fromDate > toDate) {
-      // If fromDate is later than toDate, update toDate to match fromDate
-      setToDate(fromDate);
+      setToRaw(isoToDisplay(fromDate));
+      setToError(null);
+      setToDateObj(fromDate ? new Date(fromDate) : undefined);
     }
   }, [fromDate, toDate]);
 
-  // Close suggestions when clicking outside
+  // Close suggestions on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target as Node)) {
+      if (
+        searchWrapperRef.current &&
+        !searchWrapperRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };
@@ -79,7 +154,7 @@ export default function ListingsFilters({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch suggestions with debounce
+  // Suggestions fetch with debounce
   useEffect(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -95,7 +170,9 @@ export default function ListingsFilters({
     debounceTimer.current = setTimeout(async () => {
       setIsLoadingSuggestions(true);
       try {
-        const response = await fetch(`/api/listings/suggestions?query=${encodeURIComponent(query)}`);
+        const response = await fetch(
+          `/api/listings/suggestions?query=${encodeURIComponent(query)}`
+        );
         if (response.ok) {
           const data = await response.json();
           setSuggestions(data);
@@ -115,7 +192,6 @@ export default function ListingsFilters({
     };
   }, [searchValue]);
 
-  // Update URL with new params while preserving others
   const updateParams = (updates: Record<string, string | undefined>) => {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -131,7 +207,6 @@ export default function ListingsFilters({
     router.push(query ? `/listings?${query}` : "/listings");
   };
 
-  // Handle search submit
   const handleSearchSubmit = (e: FormEvent) => {
     e.preventDefault();
     updateParams({ search: searchValue.trim() });
@@ -149,19 +224,100 @@ export default function ListingsFilters({
     updateParams({ search: undefined });
     setShowSuggestions(false);
   };
+// ISO YYYY-MM-DD -> MM/DD/YYYY for initial values
+function isoToDisplay(iso?: string | null): string {
+  if (!iso) return "";
+  const [year, month, day] = iso.split("-");
+  if (!year || !month || !day) return "";
+  return `${month.padStart(2, "0")}/${day.padStart(2, "0")}/${year}`;
+}
 
-  // Apply filters
+// Masked MM/DD/YYYY (with underscores, slashes, etc) -> ISO, or null if invalid
+function displayToIso(display: string): string | null {
+  const digits = display.replace(/\D/g, ""); // remove non-digits
+  if (digits.length !== 8) return null;
+
+  const mm = digits.slice(0, 2);
+  const dd = digits.slice(2, 4);
+  const yyyy = digits.slice(4, 8);
+
+  const month = Number(mm);
+  const day = Number(dd);
+  const year = Number(yyyy);
+
+  if (!Number.isInteger(month) || !Number.isInteger(day) || !Number.isInteger(year)) {
+    return null;
+  }
+
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  const monthStr = String(month).padStart(2, "0");
+  const dayStr = String(day).padStart(2, "0");
+  return `${year}-${monthStr}-${dayStr}`;
+}
+
+
+  // Blur parsers
+  const handleFromBlur = () => {
+    if (!fromRaw.trim()) {
+      setFromDate("");
+      setFromDateObj(undefined);
+      setFromError(null);
+      return;
+    }
+
+    const iso = displayToIso(fromRaw);
+    if (!iso) {
+      setFromError("Enter a valid date in MM/DD/YYYY.");
+      return;
+    }
+
+    setFromDate(iso);
+    setFromDateObj(new Date(iso));
+    setFromError(null);
+  };
+
+  const handleToBlur = () => {
+    if (!toRaw.trim()) {
+      setToDate("");
+      setToDateObj(undefined);
+      setToError(null);
+      return;
+    }
+
+    const iso = displayToIso(toRaw);
+    if (!iso) {
+      setToError("Enter a valid date in MM/DD/YYYY.");
+      return;
+    }
+
+    if (fromDate && iso < fromDate) {
+      setToError("End date cannot be before start date.");
+      return;
+    }
+
+    setToDate(iso);
+    setToDateObj(new Date(iso));
+    setToError(null);
+  };
+
   const applyFilters = () => {
     updateParams({
       section: section,
       minPrice: minPrice,
       maxPrice: maxPrice,
-      from: fromDate,
-      to: toDate,
+      from: fromDate || undefined,
+      to: toDate || undefined,
     });
   };
 
-  // Clear all filters (including search)
   const clearAllFilters = () => {
     setSearchValue("");
     setSection("");
@@ -169,6 +325,12 @@ export default function ListingsFilters({
     setMaxPrice("");
     setFromDate("");
     setToDate("");
+    setFromRaw("");
+    setToRaw("");
+    setFromDateObj(undefined);
+    setToDateObj(undefined);
+    setFromError(null);
+    setToError(null);
 
     updateParams({
       search: undefined,
@@ -180,12 +342,16 @@ export default function ListingsFilters({
     });
   };
 
-  // Check if any filters are active
-  const hasActiveFilters = !!(currentSearch || currentSection || currentMinPrice || currentMaxPrice || currentFrom || currentTo);
-  const hasSuggestions = suggestions.sections.length > 0 || suggestions.zones.length > 0;
-
-  // Get today's date in YYYY-MM-DD format for min attribute
-  const today = new Date().toISOString().split('T')[0];
+  const hasActiveFilters = !!(
+    currentSearch ||
+    currentSection ||
+    currentMinPrice ||
+    currentMaxPrice ||
+    currentFrom ||
+    currentTo
+  );
+  const hasSuggestions =
+    suggestions.sections.length > 0 || suggestions.zones.length > 0;
 
   return (
     <Card className="overflow-hidden border-2 border-cyan-200 shadow-lg bg-gradient-to-br from-cyan-50 via-white to-orange-50">
@@ -195,15 +361,17 @@ export default function ListingsFilters({
             <SlidersHorizontal className="h-5 w-5 text-cyan-700" />
             <h2 className="text-lg font-bold text-cyan-900">Filter & Search</h2>
           </div>
-       
         </div>
         <p className="text-xs text-cyan-700 mt-1">Narrow down your perfect seat</p>
       </CardHeader>
 
       <CardContent className="p-4 space-y-4">
-        {/* Search Section */}
+        {/* Search */}
         <div className="space-y-2">
-          <Label htmlFor="search-input" className="text-sm font-semibold text-slate-700 flex items-center gap-1">
+          <Label
+            htmlFor="search-input"
+            className="text-sm font-semibold text-slate-700 flex items-center gap-1"
+          >
             <Search className="h-3.5 w-3.5 text-cyan-600" />
             Search Listings
           </Label>
@@ -235,7 +403,6 @@ export default function ListingsFilters({
               </div>
             </form>
 
-            {/* Suggestions dropdown */}
             {showSuggestions && hasSuggestions && (
               <div className="absolute top-full mt-1 w-full bg-white border border-cyan-200 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
                 {suggestions.sections.length > 0 && (
@@ -276,7 +443,6 @@ export default function ListingsFilters({
               </div>
             )}
 
-            {/* Loading indicator */}
             {isLoadingSuggestions && showSuggestions && (
               <div className="absolute top-full mt-1 w-full bg-white border border-cyan-200 rounded-md shadow-lg z-50 p-3 text-center text-xs text-slate-500">
                 Loading suggestions...
@@ -285,10 +451,9 @@ export default function ListingsFilters({
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-orange-200"></div>
+        <div className="border-t border-orange-200" />
 
-        {/* Section Filter */}
+        {/* Section filter */}
         <div className="space-y-2">
           <Label htmlFor="filter-section" className="text-sm font-semibold text-slate-700">
             Section
@@ -302,32 +467,28 @@ export default function ListingsFilters({
           />
         </div>
 
-        {/* Price Range */}
+        {/* Price range */}
         <div className="space-y-2">
           <Label className="text-sm font-semibold text-slate-700">Price Range ($)</Label>
           <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Input
-                type="number"
-                placeholder="Min"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
-                min="0"
-                step="0.01"
-              />
-            </div>
-            <div>
-              <Input
-                type="number"
-                placeholder="Max"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
-                min="0"
-                step="0.01"
-              />
-            </div>
+            <Input
+              type="number"
+              placeholder="Min"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
+              min="0"
+              step="0.01"
+            />
+            <Input
+              type="number"
+              placeholder="Max"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
+              min="0"
+              step="0.01"
+            />
           </div>
         </div>
 
@@ -335,33 +496,146 @@ export default function ListingsFilters({
         <div className="space-y-2">
           <Label className="text-sm font-semibold text-slate-700">Game Date</Label>
           <div className="grid grid-cols-2 gap-2">
+            {/* From */}
             <div className="space-y-1">
-              <Label htmlFor="date-from" className="text-xs text-slate-600">From</Label>
-              <Input
-                id="date-from"
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                min={today}
-                className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
-              />
+              <Label htmlFor="date-from" className="text-xs text-slate-600">
+                From
+              </Label>
+              <div className="flex gap-1">
+                <Input
+                  ref={fromMaskRef}
+                  id="date-from"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="MM/DD/YYYY"
+                  value={fromRaw}
+                  onChange={(e) => {
+                    setFromRaw(e.target.value);
+                    if (fromError) setFromError(null);
+                  }}
+                  onBlur={handleFromBlur}
+                  aria-invalid={fromError ? "true" : "false"}
+                  aria-describedby={fromError ? "date-from-error" : undefined}
+                  className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
+                />
+                 
+
+                <Popover>
+                  <PopoverTrigger
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-md border border-cyan-200 px-2 text-slate-600 hover:bg-cyan-50"
+                    aria-label="Open calendar to pick start date"
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={fromDateObj}
+                      onSelect={(date) => {
+                        if (!date) return;
+                        setFromDateObj(date);
+
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, "0");
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const iso = `${year}-${month}-${day}`;
+                        const display = `${month}/${day}/${year}`;
+
+                        setFromDate(iso);
+                        setFromRaw(display);
+                        setFromError(null);
+                      }}
+                      disabled={(date) => date < new Date()}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {fromError && (
+                <div
+                  id="date-from-error"
+                  role="alert"
+                  className="text-xs text-red-600 mt-0.5"
+                >
+                  {fromError}
+                </div>
+              )}
             </div>
+
+            {/* To */}
             <div className="space-y-1">
-              <Label htmlFor="date-to" className="text-xs text-slate-600">To</Label>
-              <Input
-                id="date-to"
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                disabled={!fromDate}
-                min={fromDate || today}
-                className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+              <Label htmlFor="date-to" className="text-xs text-slate-600">
+                To
+              </Label>
+              <div className="flex gap-1">
+                <Input
+                  ref={toMaskRef}
+                  id="date-to"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="MM/DD/YYYY"
+                  value={toRaw}
+                  onChange={(e) => {
+                    setToRaw(e.target.value);
+                    if (toError) setToError(null);
+                  }}
+                  onBlur={handleToBlur}
+                  disabled={!fromDate}
+                  aria-invalid={toError ? "true" : "false"}
+                  aria-describedby={toError ? "date-to-error" : undefined}
+                  className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                 
+
+                <Popover>
+                  <PopoverTrigger
+                    type="button"
+                    disabled={!fromDate}
+                    className="inline-flex items-center justify-center rounded-md border border-cyan-200 px-2 text-slate-600 hover:bg-cyan-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Open calendar to pick end date"
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={toDateObj}
+                      onSelect={(date) => {
+                        if (!date) return;
+                        if (fromDateObj && date < fromDateObj) return;
+
+                        setToDateObj(date);
+
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, "0");
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const iso = `${year}-${month}-${day}`;
+                        const display = `${month}/${day}/${year}`;
+
+                        setToDate(iso);
+                        setToRaw(display);
+                        setToError(null);
+                      }}
+                      disabled={(date) => !fromDateObj || date < fromDateObj}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {toError && (
+                <div
+                  id="date-to-error"
+                  role="alert"
+                  className="text-xs text-red-600 mt-0.5"
+                >
+                  {toError}
+                </div>
+              )}
             </div>
+
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Actions */}
         <div className="pt-2 space-y-2">
           <Button
             onClick={applyFilters}
