@@ -8,6 +8,7 @@ import { Button } from "../components/ui/button"
 import { isSeatMapEnabled } from "../lib/features"
 import { SocketProvider } from "../contexts/SocketContext"
 import Footer from "../components/Footer"
+import { NotificationBell } from "../components/notification-bell"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -60,6 +61,7 @@ export default async function RootLayout({
                     <Link href="/about">
                       <Button variant="ghost">About the Creator</Button>
                     </Link>
+                    <NotificationBell />
                     <form action="/api/auth/signout" method="post">
                       <Button variant="outline" type="submit">Sign Out</Button>
                     </form>

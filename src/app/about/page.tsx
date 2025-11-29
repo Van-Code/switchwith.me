@@ -9,15 +9,13 @@ import ContactForm from "@/components/contact-form"
 export default function AboutPage() {
   return (
     <div className="max-w-4xl mx-auto py-10 px-4 space-y-8">
-      {/* Top section - portrait + bio */}
       <Card className="bg-muted/30 border-border">
         <CardContent className="pt-6 space-y-4">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            {/* Portrait */}
             <div className="flex-shrink-0 self-center md:self-auto">
               <div className="rounded-full overflow-hidden border shadow-md w-28 h-28 md:w-32 md:h-32 bg-muted">
                 <Image
-                  src="/images/thiswilldo.jpeg" // update to your actual file path
+                  src="/images/thiswilldo.jpeg"
                   alt="Cartoon illustration of Van"
                   width={128}
                   height={128}
@@ -26,7 +24,6 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Text */}
             <div className="space-y-3 text-sm md:text-base leading-relaxed text-muted-foreground">
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
@@ -35,7 +32,6 @@ export default function AboutPage() {
                 <p className="text-xs md:text-sm text-muted-foreground mt-1">
                   The human behind the Valkyries seat swap experiment
                 </p>
-              </div>
 
               <p>
                 Hi, I&apos;m Van. I&apos;m a queer BIPOC developer who built this project
@@ -127,7 +123,6 @@ export default function AboutPage() {
           </div>
         </CardContent>
       </Card>
-       {/* Contact Section */}
        <Card className="bg-muted/30 border-purple-300/20">
         <CardHeader>
           <h2 className="text-2xl font-semibold">Get in Touch</h2>

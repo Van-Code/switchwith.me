@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../lib/auth"
 import { prisma } from "../../../lib/prisma"
+import { findMatches } from "../../../lib/matching"
+import { createMatchNotification } from "../../../lib/notifications"
 
 // GET /api/listings - Browse/filter listings
 export async function GET(req: Request) {
@@ -107,6 +109,71 @@ export async function POST(req: Request) {
                 },
             },
         })
+
+        // Find matches for the new listing and notify users
+        // Run asynchronously to not block the response
+        (async () => {
+            try {
+                // Get all active listings for matching
+                const allListings = await prisma.listing.findMany({
+                    where: {
+                        status: "ACTIVE",
+                    },
+                    include: {
+                        user: {
+                            include: {
+                                profile: true,
+                            },
+                        },
+                    },
+                })
+
+                // Find matches for the new listing
+                const matches = findMatches(listing, allListings)
+
+                // Notify the new listing owner about matches
+                for (const match of matches.slice(0, 3)) { // Notify about top 3 matches
+                    const matchedListing = allListings.find((l) => l.id === match.listingId)
+                    if (matchedListing) {
+                        const matchedUserName = matchedListing.user.profile
+                            ? `${matchedListing.user.profile.firstName} ${matchedListing.user.profile.lastInitial}.`
+                            : "Someone"
+
+                        await createMatchNotification({
+                            userId: session.user.id,
+                            listingId: listing.id,
+                            matchedListingId: matchedListing.id,
+                            matchScore: match.score,
+                            description: `Great news! ${matchedUserName} has a seat that matches your listing. ${match.reason}`,
+                        }).catch((error) => {
+                            console.error("Failed to create match notification:", error)
+                        })
+                    }
+                }
+
+                // Notify existing listing owners about the new match
+                for (const match of matches.slice(0, 3)) { // Notify top 3 matched users
+                    const matchedListing = allListings.find((l) => l.id === match.listingId)
+                    if (matchedListing && matchedListing.userId !== session.user.id) {
+                        const newListingUserName = listing.user.profile
+                            ? `${listing.user.profile.firstName} ${listing.user.profile.lastInitial}.`
+                            : "Someone"
+
+                        await createMatchNotification({
+                            userId: matchedListing.userId,
+                            listingId: matchedListing.id,
+                            matchedListingId: listing.id,
+                            matchScore: match.score,
+                            description: `Great news! ${newListingUserName} just listed a seat that matches what you're looking for. ${match.reason}`,
+                        }).catch((error) => {
+                            console.error("Failed to create match notification:", error)
+                        })
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to find matches and send notifications:", error)
+            }
+        })()
 
         return NextResponse.json({ listing })
     } catch (error) {

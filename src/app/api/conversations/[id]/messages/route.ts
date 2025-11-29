@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../../lib/auth"
 import { prisma } from "../../../../../lib/prisma"
+import { createMessageNotification } from "../../../../../lib/notifications"
 
 export async function POST(
   req: Request,
@@ -88,6 +89,30 @@ export async function POST(
             lastInitial: message.sender.profile.lastInitial,
           } : null,
         },
+      })
+    }
+
+    // Create notification for the recipient (don't notify the sender!)
+    const recipient = conversation.participants.find(
+      (p: {userId: string}) => p.userId !== session.user.id
+    )
+
+    if (recipient) {
+      // Get sender name for notification
+      const senderName = message.sender.profile
+        ? `${message.sender.profile.firstName} ${message.sender.profile.lastInitial}.`
+        : "Someone"
+
+      // Create notification asynchronously - don't block the response
+      createMessageNotification({
+        recipientId: recipient.userId,
+        conversationId: params.id,
+        messageId: message.id,
+        senderName,
+        messagePreview: text.trim(),
+      }).catch((error) => {
+        // Log but don't fail the request if notification fails
+        console.error("Failed to create message notification:", error)
       })
     }
 

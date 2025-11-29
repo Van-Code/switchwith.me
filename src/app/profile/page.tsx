@@ -6,6 +6,7 @@ import { ProfileHeader } from "../../components/ProfileHeader"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
+import { NotificationSettings } from "../../components/notification-settings"
 import Link from "next/link"
 import { Edit, MapPin } from "lucide-react"
 
@@ -86,6 +87,8 @@ export default async function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <NotificationSettings initialEmailNotificationsEnabled={user.emailNotificationsEnabled} />
 
       <MyListingsSection
         activeListings={activeListings}
