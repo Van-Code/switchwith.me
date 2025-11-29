@@ -6,7 +6,6 @@ import { authOptions } from "../lib/auth"
 import Link from "next/link"
 import { Button } from "../components/ui/button"
 import Image from "next/image"
-import { isSeatMapEnabled } from "../lib/features"
 import { SocketProvider } from "../contexts/SocketContext"
 import Footer from "../components/Footer"
 import { NotificationBell } from "../components/notification-bell"
@@ -54,12 +53,6 @@ export default async function RootLayout({
                     <Link href="/listings">
                       <Button variant="ghost">Browse</Button>
                     </Link>
-                    {isSeatMapEnabled() && (
-
-                    <Link href="/listings/map">
-                      <Button variant="ghost">Map View</Button>
-                      </Link>
-                    )}
                     <Link href="/listings/new">
                       <Button variant="ghost">Create Listing</Button>
                     </Link>
@@ -82,6 +75,9 @@ export default async function RootLayout({
                   </>
                 ) : (
                   <>
+                   <Link href="/listings">
+                      <Button variant="ghost">Browse</Button>
+                    </Link>
                     <Link href="/about">
                       <Button variant="ghost">About the Creator</Button>
                     </Link>

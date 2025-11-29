@@ -6,7 +6,7 @@ import { useState } from "react"
 
 interface ListingsClientProps {
   listings: any[]
-  currentUserId: string
+  currentUserId?: string
 }
 
 export function ListingsClient({ listings, currentUserId }: ListingsClientProps) {
@@ -52,8 +52,9 @@ export function ListingsClient({ listings, currentUserId }: ListingsClientProps)
         <ListingCard
           key={listing.id}
           listing={listing}
+          isAuthenticated={!!currentUserId}
           onMessage={
-            listing.user?.id !== currentUserId
+            currentUserId && listing.user?.id !== currentUserId
               ? () => handleMessageOwner(listing)
               : undefined
           }

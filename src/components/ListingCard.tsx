@@ -1,8 +1,8 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
-import { ProfileBadge } from "./ProfileBadge"
 import { Calendar, MapPin, DollarSign } from "lucide-react"
+import Link from "next/link"
 
 interface ListingCardProps {
   listing: {
@@ -18,20 +18,15 @@ interface ListingCardProps {
     status: string
     user?: {
       id: string
-      profile?: {
-        firstName: string
-        lastInitial: string
-        successfulSwapsCount: number
-      } | null
     }
   }
   onMessage?: () => void
-  showOwner?: boolean
+  isAuthenticated?: boolean
 }
 
-export function ListingCard({ listing, onMessage, showOwner = true }: ListingCardProps) {
+export function ListingCard({ listing, onMessage, isAuthenticated = false }: ListingCardProps) {
   const gameDate = new Date(listing.gameDate)
-  
+
   return (
     <Card>
       <CardHeader>
@@ -49,23 +44,23 @@ export function ListingCard({ listing, onMessage, showOwner = true }: ListingCar
           </Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-3">
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span>{gameDate.toLocaleDateString("en-US", { 
-            weekday: "short", 
-            month: "short", 
+          <span>{gameDate.toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
             day: "numeric",
             year: "numeric"
           })}</span>
         </div>
-        
+
         <div className="flex items-center gap-2 text-sm">
           <DollarSign className="h-4 w-4 text-muted-foreground" />
           <span>Face Value: ${listing.faceValue.toFixed(2)}</span>
         </div>
-        
+
         <div className="space-y-1">
           <p className="text-sm font-medium">Wants:</p>
           <div className="flex flex-wrap gap-1">
@@ -90,23 +85,24 @@ export function ListingCard({ listing, onMessage, showOwner = true }: ListingCar
           )}
         </div>
 
-        {showOwner && listing.user?.profile && (
-          <div className="pt-3 border-t">
-            <p className="text-sm font-medium mb-2">
-              {listing.user.profile.firstName} {listing.user.profile.lastInitial}.
-            </p>
-            <ProfileBadge
-              successfulSwapsCount={listing.user.profile.successfulSwapsCount}
-            />
-          </div>
-        )}
+        <div className="pt-3 border-t">
+          <span className="text-sm text-muted-foreground">Listing owner</span>
+        </div>
       </CardContent>
-      
-      {onMessage && listing.status === "ACTIVE" && (
+
+      {listing.status === "ACTIVE" && (
         <CardFooter>
-          <Button onClick={onMessage} className="w-full">
-            Message Owner
-          </Button>
+          {!isAuthenticated ? (
+            <Link href="/auth/signin" className="w-full">
+              <Button variant="outline" size="sm" className="w-full">
+                Sign in to contact
+              </Button>
+            </Link>
+          ) : onMessage ? (
+            <Button onClick={onMessage} className="w-full">
+              Message Owner
+            </Button>
+          ) : null}
         </CardFooter>
       )}
     </Card>
