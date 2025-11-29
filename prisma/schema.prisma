@@ -8,11 +8,13 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?   // Made optional for OAuth users
+  emailVerified DateTime? // For NextAuth
+  image         String?   // For OAuth profile images
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   // Notification settings
   emailNotificationsEnabled Boolean @default(false)
@@ -22,6 +24,49 @@ model User {
   sentMessages  Message[]      @relation("SentMessages")
   conversations ConversationParticipant[]
   notifications Notification[]
+  accounts      Account[]  // For OAuth
+  sessions      Session[]  // For NextAuth sessions
+}
+
+// NextAuth OAuth Account model
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// NextAuth Session model (optional, for database sessions)
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// NextAuth VerificationToken model
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model Profile {
