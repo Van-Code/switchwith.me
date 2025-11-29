@@ -118,7 +118,7 @@ export default function ListingsFilters({
     Object.entries(updates).forEach(([key, value]) => {
       if (value && value.trim() !== "") {
         params.set(key, value);
-      } else {
+      } else {t
         params.delete(key);
       }
     });
@@ -188,11 +188,7 @@ export default function ListingsFilters({
             <SlidersHorizontal className="h-5 w-5 text-cyan-700" />
             <h2 className="text-lg font-bold text-cyan-900">Filter & Search</h2>
           </div>
-          {hasActiveFilters && (
-            <Badge variant="default" className="bg-orange-500 hover:bg-orange-600 text-white">
-              Active
-            </Badge>
-          )}
+       
         </div>
         <p className="text-xs text-cyan-700 mt-1">Narrow down your perfect seat</p>
       </CardHeader>
