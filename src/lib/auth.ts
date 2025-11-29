@@ -1,5 +1,7 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import GoogleProvider from "next-auth/providers/google"
+import FacebookProvider from "next-auth/providers/facebook"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "./prisma"
 import * as bcrypt from "bcryptjs"
@@ -13,6 +15,14 @@ export const authOptions: NextAuthOptions = {
         signIn: "/auth/signin",
     },
     providers: [
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        }),
+        FacebookProvider({
+            clientId: process.env.FACEBOOK_CLIENT_ID!,
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+        }),
         CredentialsProvider({
             name: "credentials",
             credentials: {
@@ -55,7 +65,11 @@ export const authOptions: NextAuthOptions = {
         })
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async signIn({ user, account, profile }) {
+            // Allow OAuth sign-ins and credential sign-ins
+            return true
+        },
+        async jwt({ token, user, account }) {
             if (user) {
                 token.id = user.id
             }
@@ -66,6 +80,16 @@ export const authOptions: NextAuthOptions = {
                 session.user.id = token.id as string
             }
             return session
+        }
+    },
+    events: {
+        async signIn({ user, account, profile, isNewUser }) {
+            // If it's a new OAuth user without a profile, you might want to redirect them
+            // to complete their profile later
+            if (isNewUser && account?.provider !== "credentials") {
+                // New OAuth user - you can add logic here to handle profile creation
+                console.log("New OAuth user signed in:", user.email)
+            }
         }
     }
 }
