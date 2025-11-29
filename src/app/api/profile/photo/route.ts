@@ -5,6 +5,9 @@ import { prisma } from "../../../../lib/prisma"
 import { writeFile, mkdir } from "fs/promises"
 import path from "path"
 
+// Force dynamic rendering - this route needs to access headers for authentication
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)

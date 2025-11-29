@@ -16,6 +16,9 @@ import {
   getUnreadCount,
 } from "@/lib/notifications";
 
+// Force dynamic rendering - this route needs to access headers for authentication
+export const dynamic = 'force-dynamic';
+
 interface ReadNotificationRequest {
   id?: string;
   all?: boolean;

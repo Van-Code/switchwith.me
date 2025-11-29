@@ -12,6 +12,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getUserNotifications, getUnreadCount } from "@/lib/notifications";
 
+// Force dynamic rendering - this route needs to access headers for authentication
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Check authentication

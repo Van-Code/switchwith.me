@@ -4,6 +4,9 @@ import { authOptions } from "../../../../../lib/auth"
 import { prisma } from "../../../../../lib/prisma"
 import { createMessageNotification } from "../../../../../lib/notifications"
 
+// Force dynamic rendering - this route needs to access headers for authentication
+export const dynamic = 'force-dynamic';
+
 export async function POST(
   req: Request,
   { params }: { params: { id: string } }

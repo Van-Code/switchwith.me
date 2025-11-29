@@ -5,6 +5,9 @@ import { prisma } from "../../../lib/prisma"
 import { findMatches } from "../../../lib/matching"
 import { createMatchNotification } from "../../../lib/notifications"
 
+// Force dynamic rendering - this route needs to access headers for authentication
+export const dynamic = 'force-dynamic';
+
 // GET /api/listings - Browse/filter listings
 export async function GET(req: Request) {
     try {

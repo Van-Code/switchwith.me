@@ -9,6 +9,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
+// Force dynamic rendering - this route needs to access headers for authentication
+export const dynamic = 'force-dynamic';
+
 interface UpdateNotificationSettingsRequest {
   emailNotificationsEnabled: boolean;
 }
