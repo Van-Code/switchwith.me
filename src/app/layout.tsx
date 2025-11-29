@@ -6,7 +6,7 @@ import { authOptions } from "../lib/auth"
 import Link from "next/link"
 import { Button } from "../components/ui/button"
 import Image from "next/image"
-import { SocketProvider } from "../contexts/SocketContext"
+import { ClientProviders } from "../components/ClientProviders"
 import Footer from "../components/Footer"
 import { NotificationBell } from "../components/notification-bell"
 
@@ -27,7 +27,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <SocketProvider>
+        <ClientProviders>
           <nav className="border-b">
             <div className="container mx-auto px-4 py-4 flex items-center justify-between">
               <div className="flex">
@@ -98,7 +98,7 @@ export default async function RootLayout({
           </main>
 
           <Footer />
-        </SocketProvider>
+        </ClientProviders>
       </body>
     </html>
   )
