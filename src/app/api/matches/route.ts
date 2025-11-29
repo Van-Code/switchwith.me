@@ -4,6 +4,9 @@ import { authOptions } from "../../../lib/auth"
 import { prisma } from "../../../lib/prisma"
 import { findMatches } from "../../../lib/matching"
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 // GET /api/matches - Get matches for current user's listings
 export async function GET(req: Request) {
   try {
