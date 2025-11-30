@@ -73,11 +73,6 @@ export async function Header() {
                     Browse
                   </Button>
                 </Link>
-                <Link href="/about">
-                  <Button variant="ghost" size="sm">
-                    About
-                  </Button>
-                </Link>
                 <Link href="/auth/signin">
                   <Button variant="ghost" size="sm">
                     Sign In

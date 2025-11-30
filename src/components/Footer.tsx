@@ -12,6 +12,14 @@ export default function Footer() {
             <p className="text-sm text-muted-foreground leading-relaxed">
               Find other fans to swap seats with so everyone gets the view they want.
             </p>
+            <div className="pt-2">
+              <Link
+                href="/about"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                About the Creator
+              </Link>
+            </div>
           </div>
 
           {/* Product Column */}

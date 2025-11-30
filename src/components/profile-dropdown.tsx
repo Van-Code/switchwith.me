@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Settings, Info, LogOut } from "lucide-react";
+import { User, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -77,13 +77,6 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
           <Link href="/settings" className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
-          </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild>
-          <Link href="/about" className="cursor-pointer">
-            <Info className="mr-2 h-4 w-4" />
-            <span>About the Creator</span>
           </Link>
         </DropdownMenuItem>
 
