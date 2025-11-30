@@ -15,7 +15,7 @@ export const TEAM_CONFIG = {
     secondaryColor: '#002D62',
   },
   valkyries: {
-    name: 'Seattle Valkyries',
+    name: 'GS Valkyries',
     slug: 'valkyries',
     logo: '/images/teams/valkyries.svg',
     primaryColor: '#862633',
