@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
@@ -11,8 +11,19 @@ import Link from "next/link"
 
 export default function SignInPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  // Check for OAuth error on mount
+  useEffect(() => {
+    const errorParam = searchParams.get("error")
+    if (errorParam === "no_account_for_oauth") {
+      setError("No account found for that Google email. Try a different Google account or sign up with email and password.")
+    } else if (errorParam === "signout_success") {
+      // Don't show as error, we'll handle this separately
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -45,6 +56,7 @@ export default function SignInPage() {
 
   const handleOAuthSignIn = async (provider: "google" | "facebook") => {
     setLoading(true)
+    setError("") // Clear any existing errors
     try {
       await signIn(provider, { callbackUrl: "/listings" })
     } catch (error) {
@@ -52,6 +64,9 @@ export default function SignInPage() {
       setLoading(false)
     }
   }
+
+  // Check for sign-out success message
+  const signoutSuccess = searchParams.get("error") === "signout_success"
 
   return (
     <div className="max-w-md mx-auto mt-12 px-4">
@@ -61,6 +76,13 @@ export default function SignInPage() {
           <CardDescription className="text-slate-600">Welcome back to Switch With Me</CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Success message for sign-out */}
+          {signoutSuccess && (
+            <div className="bg-green-50 text-green-700 border border-green-200 px-4 py-3 rounded-lg text-sm mb-6">
+              You have been signed out successfully.
+            </div>
+          )}
+
           {/* OAuth Buttons */}
           <div className="space-y-3 mb-6">
             <Button
@@ -122,7 +144,15 @@ export default function SignInPage() {
             </div>
 
             <div>
-              <Label htmlFor="password" className="text-slate-700">Password</Label>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="password" className="text-slate-700">Password</Label>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-xs text-cyan-600 hover:text-cyan-700 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <Input
                 id="password"
                 name="password"

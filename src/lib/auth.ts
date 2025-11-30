@@ -66,7 +66,26 @@ export const authOptions: NextAuthOptions = {
     ],
     callbacks: {
         async signIn({ user, account, profile }) {
-            // Allow OAuth sign-ins and credential sign-ins
+            // For OAuth providers (Google, Facebook), check if user exists
+            if (account && account.provider !== "credentials") {
+                const email = user.email
+                if (!email) {
+                    return false
+                }
+
+                // Check if a user with this email already exists
+                const existingUser = await prisma.user.findUnique({
+                    where: { email }
+                })
+
+                if (!existingUser) {
+                    // No account found for this email
+                    // Redirect to sign-in page with error
+                    return `/auth/signin?error=no_account_for_oauth`
+                }
+            }
+
+            // Allow credential sign-ins and OAuth for existing users
             return true
         },
         async jwt({ token, user, account }) {
