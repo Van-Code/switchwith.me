@@ -90,6 +90,22 @@ model Profile {
 }
 
 
+model Team {
+  id             Int       @id @default(autoincrement())
+  name           String
+  slug           String    @unique
+  logoUrl        String?   @map("logo_url")
+  primaryColor   String?   @map("primary_color")
+  secondaryColor String?   @map("secondary_color")
+
+  listings       Listing[]
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("teams")
+}
+
 enum ListingStatus {
   ACTIVE
   INACTIVE
@@ -106,7 +122,11 @@ model Listing {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  // Team association
+  teamId    Int      @map("team_id")
+  team      Team     @relation(fields: [teamId], references: [id])
+
   // Game info
   gameId    String?
   gameDate  DateTime
@@ -129,9 +149,10 @@ model Listing {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([status, gameDate])
   @@index([userId])
+  @@index([teamId])
 }
 
 model Conversation {

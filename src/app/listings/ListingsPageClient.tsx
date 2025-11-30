@@ -24,7 +24,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
       try {
         const params = new URLSearchParams();
 
-        if (activeFilters.search) params.set("search", activeFilters.search);
+        if (activeFilters.team.length > 0) params.set("team", activeFilters.team.join(","));
         if (activeFilters.section) params.set("section", activeFilters.section);
         if (activeFilters.minPrice) params.set("minPrice", activeFilters.minPrice);
         if (activeFilters.maxPrice) params.set("maxPrice", activeFilters.maxPrice);
@@ -53,7 +53,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
   }, [activeFilters]);
 
   const hasFilters = !!(
-    activeFilters.search ||
+    activeFilters.team.length > 0 ||
     activeFilters.section ||
     activeFilters.minPrice ||
     activeFilters.maxPrice ||
@@ -62,7 +62,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
   );
 
   const filterCount = [
-    activeFilters.search,
+    activeFilters.team.length > 0,
     activeFilters.section,
     activeFilters.minPrice,
     activeFilters.maxPrice,
@@ -111,12 +111,6 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                     <>
                       Found <span className="font-semibold text-slate-900">{listings.length}</span>{" "}
                       {listings.length === 1 ? "listing" : "listings"}
-                      {activeFilters.search && (
-                        <>
-                          {" "}
-                          matching <span className="font-semibold">&ldquo;{activeFilters.search}&rdquo;</span>
-                        </>
-                      )}
                       {filterCount > 0 && (
                         <>
                           {" "}

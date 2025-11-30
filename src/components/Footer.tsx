@@ -102,10 +102,8 @@ export default function Footer() {
 
         {/* Legal Disclaimer */}
         <div className="text-center text-xs text-muted-foreground border-t pt-6 mb-4">
-          This is a fan-created project and is not affiliated with Golden State
-          Valkyries, the WNBA, Ticketmaster, or Chase Center.
+          This is a fan-made project and isn’t affiliated with Bay FC, the Golden State Valkyries, the NWSL, the WNBA, Ticketmaster, or any stadium or venue where these teams play.
         </div>
-
         {/* Copyright */}
         <div className="text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} Switch With Me. Built with care for the

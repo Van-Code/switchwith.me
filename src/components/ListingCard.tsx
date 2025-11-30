@@ -3,6 +3,7 @@ import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Calendar, MapPin, DollarSign } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 interface ListingCardProps {
   listing: {
@@ -16,6 +17,12 @@ interface ListingCardProps {
     wantZones: string[]
     wantSections: string[]
     status: string
+    team?: {
+      id: number
+      name: string
+      slug: string
+      logoUrl: string | null
+    }
     user?: {
       id: string
       profile?: {
@@ -34,6 +41,23 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
   return (
     <Card>
       <CardHeader>
+        {listing.team && (
+          <div className="flex items-center gap-2 mb-3">
+            {listing.team.logoUrl && (
+              <div className="relative w-6 h-6">
+                <Image
+                  src={listing.team.logoUrl}
+                  alt={`${listing.team.name} logo`}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            )}
+            <span className="text-sm font-semibold text-slate-700">
+              {listing.team.name}
+            </span>
+          </div>
+        )}
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-lg">
