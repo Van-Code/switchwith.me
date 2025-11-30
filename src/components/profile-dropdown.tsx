@@ -2,6 +2,7 @@
 
 import { User, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -33,6 +34,13 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
         .slice(0, 2);
     }
     return user.email.charAt(0).toUpperCase();
+  };
+
+  const handleSignOut = async () => {
+    await signOut({
+      callbackUrl: "/auth/signin?error=signout_success",
+      redirect: true
+    });
   };
 
   return (
@@ -82,16 +90,12 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem asChild>
-          <form action="/api/auth/signout" method="post" className="w-full">
-            <button
-              type="submit"
-              className="flex w-full items-center cursor-pointer text-red-600"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Sign Out</span>
-            </button>
-          </form>
+        <DropdownMenuItem
+          onClick={handleSignOut}
+          className="cursor-pointer text-red-600 focus:text-red-600"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -10,7 +10,7 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  password      String?   // Made optional for OAuth users
+  password      String?   // DEPRECATED: App now uses OAuth-only authentication
   emailVerified DateTime? // For NextAuth
   image         String?   // For OAuth profile images
   createdAt     DateTime  @default(now())

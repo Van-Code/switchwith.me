@@ -74,13 +74,11 @@ export async function Header() {
                   </Button>
                 </Link>
                 <Link href="/auth/signin">
-                  <Button variant="ghost" size="sm">
+                  <Button size="sm">
                     Sign In
                   </Button>
                 </Link>
-                <Link href="/auth/signup">
-                  <Button size="sm">Sign Up</Button>
-                </Link>
+             
               </>
             )}
           </div>
