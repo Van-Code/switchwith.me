@@ -97,6 +97,15 @@ export default function SignInPage() {
                     <p>
                       I only store the minimum account details needed to tie your listings to you—no passwords, no password recovery flows, and no extra security burden.
                     </p>
+                    <p className="text-[10px] text-slate-700">
+                      Curious who built this?{" "}
+                      <a
+                        href="/about"
+                        className="underline underline-offset-2 hover:text-slate-700"
+                      >
+                        About the creator
+                      </a>
+                    </p>
                   </DialogDescription>
                 </DialogHeader>
               </DialogContent>
