@@ -16,9 +16,9 @@ CREATE TABLE "teams" (
 CREATE UNIQUE INDEX "teams_slug_key" ON "teams"("slug");
 
 -- Insert initial teams
-INSERT INTO "teams" (name, slug) VALUES
-('Bay FC', 'bayfc'),
-('Seattle Valkyries', 'valkyries');
+INSERT INTO "teams" (name, slug, "updatedAt") VALUES
+('Bay FC', 'bayfc', CURRENT_TIMESTAMP),
+('Seattle Valkyries', 'valkyries', CURRENT_TIMESTAMP);
 
 -- AlterTable
 ALTER TABLE "Listing" ADD COLUMN "team_id" INTEGER NOT NULL DEFAULT 1;
