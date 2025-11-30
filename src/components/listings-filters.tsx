@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,16 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Search, X, SlidersHorizontal, Calendar as CalendarIcon } from "lucide-react";
 import { useMask } from "@react-input/mask";
-
-interface ListingsFiltersProps {
-  currentSearch?: string;
-  currentSort?: string;
-  currentSection?: string;
-  currentMinPrice?: string;
-  currentMaxPrice?: string;
-  currentFrom?: string; // ISO YYYY-MM-DD
-  currentTo?: string;   // ISO YYYY-MM-DD
-}
+import { useListingsFilters } from "@/contexts/listings-filters-context";
 
 interface Suggestions {
   sections: string[];
@@ -36,13 +26,13 @@ function isoToDisplay(iso?: string | null): string {
 
 // MM/DD/YYYY -> ISO YYYY-MM-DD (returns null if invalid)
 function displayToIso(display: string): string | null {
-  const trimmed = display.trim();
-  if (!trimmed) return null;
+  const digits = display.replace(/\D/g, ""); // remove non-digits
+  if (digits.length !== 8) return null;
 
-  const parts = trimmed.split("/");
-  if (parts.length !== 3) return null;
+  const mm = digits.slice(0, 2);
+  const dd = digits.slice(2, 4);
+  const yyyy = digits.slice(4, 8);
 
-  const [mm, dd, yyyy] = parts.map((part) => part.trim());
   const month = Number(mm);
   const day = Number(dd);
   const year = Number(yyyy);
@@ -65,55 +55,48 @@ function displayToIso(display: string): string | null {
   return `${year}-${monthStr}-${dayStr}`;
 }
 
-export default function ListingsFilters({
-  currentSearch,
-  currentSort = "createdDesc",
-  currentSection,
-  currentMinPrice,
-  currentMaxPrice,
-  currentFrom,
-  currentTo,
-}: ListingsFiltersProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export default function ListingsFilters() {
+  const {
+    filters,
+    setSearch: setContextSearch,
+    setSection,
+    setMinPrice,
+    setMaxPrice,
+    setFromDate,
+    setToDate,
+    resetFilters,
+    applyFilters,
+    activeFilters,
+  } = useListingsFilters();
 
-  // Search state
-  const [searchValue, setSearchValue] = useState(currentSearch ?? "");
+  // Local state for search and suggestions
+  const [searchValue, setSearchValue] = useState(filters.search);
   const [suggestions, setSuggestions] = useState<Suggestions>({ sections: [], zones: [] });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Filters
-  const [section, setSection] = useState(currentSection ?? "");
-  const [minPrice, setMinPrice] = useState(currentMinPrice ?? "");
-  const [maxPrice, setMaxPrice] = useState(currentMaxPrice ?? "");
-
-  // Date filter: ISO values for query
-  const [fromDate, setFromDate] = useState(currentFrom ?? "");
-  const [toDate, setToDate] = useState(currentTo ?? "");
-
   // Raw text in inputs (MM/DD/YYYY)
   const [fromRaw, setFromRaw] = useState(() =>
-    currentFrom ? isoToDisplay(currentFrom) : ""
+    filters.from ? isoToDisplay(filters.from) : ""
   );
   const [toRaw, setToRaw] = useState(() =>
-    currentTo ? isoToDisplay(currentTo) : ""
+    filters.to ? isoToDisplay(filters.to) : ""
   );
 
   // Date objects for the calendar
   const [fromDateObj, setFromDateObj] = useState<Date | undefined>(() =>
-    currentFrom ? new Date(currentFrom) : undefined
+    filters.from ? new Date(filters.from) : undefined
   );
   const [toDateObj, setToDateObj] = useState<Date | undefined>(() =>
-    currentTo ? new Date(currentTo) : undefined
+    filters.to ? new Date(filters.to) : undefined
   );
-  
+
   // Errors
   const [fromError, setFromError] = useState<string | null>(null);
   const [toError, setToError] = useState<string | null>(null);
-  
+
   const fromMaskRef = useMask({
     mask: "__/__/____",
     replacement: { _: /\d/ },
@@ -124,20 +107,20 @@ export default function ListingsFilters({
     replacement: { _: /\d/ },
   });
 
-  // Keep search in sync with URL
+  // Sync search value with context
   useEffect(() => {
-    setSearchValue(currentSearch ?? "");
-  }, [currentSearch]);
+    setSearchValue(filters.search);
+  }, [filters.search]);
 
   // If fromDate is set and toDate empty, auto fill toDate to match
   useEffect(() => {
-    if (fromDate && !toDate) {
-      setToDate(fromDate);
-      setToRaw(isoToDisplay(fromDate));
+    if (filters.from && !filters.to) {
+      setToDate(filters.from);
+      setToRaw(isoToDisplay(filters.from));
       setToError(null);
-      setToDateObj(fromDate ? new Date(fromDate) : undefined);
+      setToDateObj(filters.from ? new Date(filters.from) : undefined);
     }
-  }, [fromDate, toDate]);
+  }, [filters.from, filters.to, setToDate]);
 
   // Close suggestions on outside click
   useEffect(() => {
@@ -192,77 +175,23 @@ export default function ListingsFilters({
     };
   }, [searchValue]);
 
-  const updateParams = (updates: Record<string, string | undefined>) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value && value.trim() !== "") {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
-    });
-
-    const query = params.toString();
-    router.push(query ? `/listings?${query}` : "/listings");
-  };
-
   const handleSearchSubmit = (e: FormEvent) => {
     e.preventDefault();
-    updateParams({ search: searchValue.trim() });
+    setContextSearch(searchValue.trim());
     setShowSuggestions(false);
   };
 
   const selectSuggestion = (suggestion: string) => {
     setSearchValue(suggestion);
-    updateParams({ search: suggestion });
+    setContextSearch(suggestion);
     setShowSuggestions(false);
   };
 
   const clearSearch = () => {
     setSearchValue("");
-    updateParams({ search: undefined });
+    setContextSearch("");
     setShowSuggestions(false);
   };
-// ISO YYYY-MM-DD -> MM/DD/YYYY for initial values
-function isoToDisplay(iso?: string | null): string {
-  if (!iso) return "";
-  const [year, month, day] = iso.split("-");
-  if (!year || !month || !day) return "";
-  return `${month.padStart(2, "0")}/${day.padStart(2, "0")}/${year}`;
-}
-
-// Masked MM/DD/YYYY (with underscores, slashes, etc) -> ISO, or null if invalid
-function displayToIso(display: string): string | null {
-  const digits = display.replace(/\D/g, ""); // remove non-digits
-  if (digits.length !== 8) return null;
-
-  const mm = digits.slice(0, 2);
-  const dd = digits.slice(2, 4);
-  const yyyy = digits.slice(4, 8);
-
-  const month = Number(mm);
-  const day = Number(dd);
-  const year = Number(yyyy);
-
-  if (!Number.isInteger(month) || !Number.isInteger(day) || !Number.isInteger(year)) {
-    return null;
-  }
-
-  const date = new Date(year, month - 1, day);
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day
-  ) {
-    return null;
-  }
-
-  const monthStr = String(month).padStart(2, "0");
-  const dayStr = String(day).padStart(2, "0");
-  return `${year}-${monthStr}-${dayStr}`;
-}
-
 
   // Blur parsers
   const handleFromBlur = () => {
@@ -298,7 +227,7 @@ function displayToIso(display: string): string | null {
       return;
     }
 
-    if (fromDate && iso < fromDate) {
+    if (filters.from && iso < filters.from) {
       setToError("End date cannot be before start date.");
       return;
     }
@@ -308,47 +237,28 @@ function displayToIso(display: string): string | null {
     setToError(null);
   };
 
-  const applyFilters = () => {
-    updateParams({
-      section: section,
-      minPrice: minPrice,
-      maxPrice: maxPrice,
-      from: fromDate || undefined,
-      to: toDate || undefined,
-    });
+  const handleApplyFilters = () => {
+    applyFilters();
   };
 
-  const clearAllFilters = () => {
+  const handleClearAllFilters = () => {
     setSearchValue("");
-    setSection("");
-    setMinPrice("");
-    setMaxPrice("");
-    setFromDate("");
-    setToDate("");
     setFromRaw("");
     setToRaw("");
     setFromDateObj(undefined);
     setToDateObj(undefined);
     setFromError(null);
     setToError(null);
-
-    updateParams({
-      search: undefined,
-      section: undefined,
-      minPrice: undefined,
-      maxPrice: undefined,
-      from: undefined,
-      to: undefined,
-    });
+    resetFilters();
   };
 
   const hasActiveFilters = !!(
-    currentSearch ||
-    currentSection ||
-    currentMinPrice ||
-    currentMaxPrice ||
-    currentFrom ||
-    currentTo
+    activeFilters.search ||
+    activeFilters.section ||
+    activeFilters.minPrice ||
+    activeFilters.maxPrice ||
+    activeFilters.from ||
+    activeFilters.to
   );
   const hasSuggestions =
     suggestions.sections.length > 0 || suggestions.zones.length > 0;
@@ -390,7 +300,7 @@ function displayToIso(display: string): string | null {
                   }}
                   className="pr-8 text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
                 />
-                {currentSearch && (
+                {activeFilters.search && (
                   <button
                     type="button"
                     onClick={clearSearch}
@@ -461,7 +371,7 @@ function displayToIso(display: string): string | null {
           <Input
             id="filter-section"
             placeholder="e.g., 115, 118"
-            value={section}
+            value={filters.section}
             onChange={(e) => setSection(e.target.value)}
             className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
           />
@@ -474,7 +384,7 @@ function displayToIso(display: string): string | null {
             <Input
               type="number"
               placeholder="Min"
-              value={minPrice}
+              value={filters.minPrice}
               onChange={(e) => setMinPrice(e.target.value)}
               className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
               min="0"
@@ -483,7 +393,7 @@ function displayToIso(display: string): string | null {
             <Input
               type="number"
               placeholder="Max"
-              value={maxPrice}
+              value={filters.maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
               className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
               min="0"
@@ -518,7 +428,6 @@ function displayToIso(display: string): string | null {
                   aria-describedby={fromError ? "date-from-error" : undefined}
                   className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
                 />
-                 
 
                 <Popover>
                   <PopoverTrigger
@@ -580,17 +489,16 @@ function displayToIso(display: string): string | null {
                     if (toError) setToError(null);
                   }}
                   onBlur={handleToBlur}
-                  disabled={!fromDate}
+                  disabled={!filters.from}
                   aria-invalid={toError ? "true" : "false"}
                   aria-describedby={toError ? "date-to-error" : undefined}
                   className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                 
 
                 <Popover>
                   <PopoverTrigger
                     type="button"
-                    disabled={!fromDate}
+                    disabled={!filters.from}
                     className="inline-flex items-center justify-center rounded-md border border-cyan-200 px-2 text-slate-600 hover:bg-cyan-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Open calendar to pick end date"
                   >
@@ -631,14 +539,13 @@ function displayToIso(display: string): string | null {
                 </div>
               )}
             </div>
-
           </div>
         </div>
 
         {/* Actions */}
         <div className="pt-2 space-y-2">
           <Button
-            onClick={applyFilters}
+            onClick={handleApplyFilters}
             className="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-md text-sm"
           >
             Apply Filters
@@ -646,7 +553,7 @@ function displayToIso(display: string): string | null {
           {hasActiveFilters && (
             <Button
               variant="outline"
-              onClick={clearAllFilters}
+              onClick={handleClearAllFilters}
               className="w-full border-orange-300 text-orange-700 hover:bg-orange-50 text-sm"
             >
               <X className="h-3.5 w-3.5 mr-1" />

@@ -12,42 +12,126 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url)
-        const gameDate = searchParams.get("gameDate")
-        const zone = searchParams.get("zone")
-        const section = searchParams.get("section")
-        const status = searchParams.get("status") || "ACTIVE"
+
+        // Get all filter parameters
+        const search = (searchParams.get("search") ?? "").trim()
+        const sort = searchParams.get("sort") ?? "createdDesc"
+        const section = (searchParams.get("section") ?? "").trim()
+        const minPrice = searchParams.get("minPrice")
+        const maxPrice = searchParams.get("maxPrice")
+        const from = searchParams.get("from")
+        const to = searchParams.get("to")
 
         const where: any = {
-            status: status as any,
+            status: "ACTIVE",
         }
 
-        if (gameDate) {
-            where.gameDate = new Date(gameDate)
+        // Text search across multiple fields
+        if (search) {
+            where.OR = [
+                { haveSection: { contains: search, mode: "insensitive" } },
+                { haveRow: { contains: search, mode: "insensitive" } },
+                { haveSeat: { contains: search, mode: "insensitive" } },
+                { haveZone: { contains: search, mode: "insensitive" } },
+            ]
         }
 
-        if (zone) {
-            where.haveZone = zone
-        }
-
+        // Section filter
         if (section) {
-            where.haveSection = section
+            where.haveSection = { contains: section, mode: "insensitive" }
+        }
+
+        // Price range filter
+        if (minPrice || maxPrice) {
+            where.faceValue = {}
+            if (minPrice) {
+                const min = parseFloat(minPrice)
+                if (!isNaN(min)) {
+                    where.faceValue.gte = min
+                }
+            }
+            if (maxPrice) {
+                const max = parseFloat(maxPrice)
+                if (!isNaN(max)) {
+                    where.faceValue.lte = max
+                }
+            }
+        }
+
+        // Date range filter
+        if (from || to) {
+            where.gameDate = {}
+            if (from) {
+                const fromDate = new Date(from)
+                if (!isNaN(fromDate.getTime())) {
+                    fromDate.setHours(0, 0, 0, 0)
+                    where.gameDate.gte = fromDate
+                }
+            }
+            if (to) {
+                const toDate = new Date(to)
+                if (!isNaN(toDate.getTime())) {
+                    toDate.setHours(23, 59, 59, 999)
+                    where.gameDate.lte = toDate
+                }
+            }
+        }
+
+        // Build orderBy based on sort param
+        let orderBy: any = { createdAt: "desc" }
+
+        switch (sort) {
+            case "createdAsc":
+                orderBy = { createdAt: "asc" }
+                break
+            case "createdDesc":
+                orderBy = { createdAt: "desc" }
+                break
+            case "sectionAsc":
+                orderBy = { haveSection: "asc" }
+                break
+            case "gameSoonest":
+                orderBy = { gameDate: "asc" }
+                break
+            case "gameFarthest":
+                orderBy = { gameDate: "desc" }
+                break
+            default:
+                orderBy = { createdAt: "desc" }
         }
 
         const listings = await prisma.listing.findMany({
             where,
+            orderBy,
             include: {
                 user: {
-                    include: {
-                        profile: true,
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                firstName: true,
+                                lastInitial: true,
+                            },
+                        },
                     },
                 },
             },
-            orderBy: {
-                createdAt: "desc",
-            },
         })
 
-        return NextResponse.json({ listings })
+        // Serialize dates to strings
+        const serializedListings = listings.map((listing: any) => ({
+            ...listing,
+            gameDate: listing.gameDate.toISOString(),
+            createdAt: listing.createdAt.toISOString(),
+            updatedAt: listing.updatedAt.toISOString(),
+            user: listing.user
+                ? {
+                      ...listing.user,
+                  }
+                : undefined,
+        }))
+
+        return NextResponse.json({ listings: serializedListings })
     } catch (error) {
         console.error("Error fetching listings:", error)
         return NextResponse.json(

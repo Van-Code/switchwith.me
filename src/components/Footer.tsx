@@ -1,53 +1,109 @@
-import  Link  from 'next/link';
+import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="border-t mt-16 py-8 bg-gradient-to-b from-transparent to-purple-950/20">
+    <footer className="border-t mt-auto py-8 bg-gradient-to-b from-transparent to-slate-50">
       <div className="container mx-auto px-4">
-
-        {/* Footer Links & Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
-          <div>
-            <h4 className="font-semibold mb-3">About</h4>
-            <p className="text-sm text-muted-foreground">
-              A community-driven platform for Golden State Valkyries fans 
-              to swap seats easily and safely — especially those wanting to 
-              sit near queer and sapphic friends in the arena.
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          {/* Brand Column */}
+          <div className="space-y-3">
+            <h4 className="font-semibold text-base">Switch With Me</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Find other fans to swap seats with so everyone gets the view they want.
             </p>
           </div>
 
-          <div>
-            <h4 className="font-semibold mb-3">Mission</h4>
-            <p className="text-sm text-muted-foreground">
-              Keep seat-swapping free, accessible, and community-focused. 
-              No hidden fees — just fans helping fans connect.
-            </p>
+          {/* Product Column */}
+          <div className="space-y-3">
+            <h4 className="font-semibold text-sm">Product</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/listings"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Browse Listings
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/listings/new"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Create Listing
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/how-it-works"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  How It Works
+                </Link>
+              </li>
+            </ul>
           </div>
 
-          <div>
-            <h4 className="font-semibold mb-3">Get Involved</h4>
-            <p className="text-sm text-muted-foreground">
-              Have ideas or want to help the project grow? I&apos;d love to hear from you.
-            </p>
+          {/* Support Column */}
+          <div className="space-y-3">
+            <h4 className="font-semibold text-sm">Support</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/faq"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Contact
+                </Link>
+              </li>
+            </ul>
           </div>
 
+          {/* Legal Column */}
+          <div className="space-y-3">
+            <h4 className="font-semibold text-sm">Legal</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/terms-and-conditions"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* Legal Disclaimer */}
-        <div className="text-center text-xs text-muted-foreground mb-4">
-        This is a fan-created project and is not affiliated with Golden State Valkyries,
-          the WNBA, Ticketmaster, or Chase Center. <Link href="/terms-and-conditions" className="hover:text-foreground underline">
-              Terms & Safety
-            </Link>
+        <div className="text-center text-xs text-muted-foreground border-t pt-6 mb-4">
+          This is a fan-created project and is not affiliated with Golden State
+          Valkyries, the WNBA, Ticketmaster, or Chase Center.
         </div>
 
         {/* Copyright */}
-        <div className="text-center pt-6 border-t border-border">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Switch With Me. Built with ❤️ for the community.
-          </p>
+        <div className="text-center text-sm text-muted-foreground">
+          © {new Date().getFullYear()} Switch With Me. Built with care for the
+          community.
         </div>
       </div>
     </footer>
-  )
+  );
 }

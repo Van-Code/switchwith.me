@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -9,28 +8,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useListingsFilters } from "@/contexts/listings-filters-context";
 
-interface ListingsSortSelectProps {
-  currentSort?: string;
-}
-
-export default function ListingsSortSelect({
-  currentSort = "createdDesc",
-}: ListingsSortSelectProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export default function ListingsSortSelect() {
+  const { activeFilters, setSort } = useListingsFilters();
 
   const handleSortChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (value && value !== "createdDesc") {
-      params.set("sort", value);
-    } else {
-      params.delete("sort");
-    }
-
-    const query = params.toString();
-    router.push(query ? `/listings?${query}` : "/listings");
+    setSort(value);
   };
 
   return (
@@ -38,7 +22,7 @@ export default function ListingsSortSelect({
       <Label htmlFor="sort-select" className="text-sm font-medium text-slate-700 whitespace-nowrap">
         Sort by:
       </Label>
-      <Select value={currentSort} onValueChange={handleSortChange}>
+      <Select value={activeFilters.sort} onValueChange={handleSortChange}>
         <SelectTrigger id="sort-select" className="w-[180px] border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400">
           <SelectValue />
         </SelectTrigger>
