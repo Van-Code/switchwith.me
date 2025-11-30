@@ -148,43 +148,48 @@ export default async function Home() {
 
       {/* Support Card */}
       <section className="max-w-xl mx-auto">
-  <div className="text-center space-y-3 p-6 rounded-lg bg-gradient-to-br from-purple-600/10 to-pink-600/10 border border-purple-500/20">
-    <h3 className="text-xl font-semibold flex items-center justify-center gap-2">
-      <Heart className="h-5 w-5 text-pink-500" />
-      Support the Project
-    </h3>
+        <div className="text-center space-y-3 p-6 rounded-lg 
+            bg-gradient-to-br from-amber-50/40 to-rose-50/40
+            border border-amber-200/40">
 
-    <p className="text-sm text-muted-foreground">
-      This site is a community project built and maintained by one fan.  
-      If you'd like to help keep it running, you can chip in below.
-    </p>
+            <h3 className="text-xl font-semibold flex items-center justify-center gap-2">
+              <Heart className="h-5 w-5 text-rose-500" />
+              Support the Project
+            </h3>
 
-    <form
-      action="https://www.paypal.com/donate"
-      method="post"
-      target="_top"
-      className="flex justify-center"
-    >
-      <input type="hidden" name="business" value="YOUR_PAYPAL_EMAIL" />
-      <input type="hidden" name="no_recurring" value="0" />
-      <input type="hidden" name="item_name" value="Support Golden State Valkyries Ticket Swap" />
-      <input type="hidden" name="currency_code" value="USD" />
+            <p className="text-sm text-muted-foreground">
+              This site is a community project built and maintained by one fan.
+              If you'd like to help keep it running, you can chip in below.
+            </p>
 
-      <Button
-        type="submit"
-        size="sm"
-        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-      >
-        <Heart className="mr-2 h-4 w-4" />
-        Donate
-      </Button>
-    </form>
+            <form
+              action="https://www.paypal.com/donate"
+              method="post"
+              target="_top"
+              className="flex justify-center"
+            >
+              <input type="hidden" name="business" value="YOUR_PAYPAL_EMAIL" />
+              <input type="hidden" name="no_recurring" value="0" />
+              <input type="hidden" name="item_name" value="Support Golden State Valkyries Ticket Swap" />
+              <input type="hidden" name="currency_code" value="USD" />
 
-    <p className="text-xs text-muted-foreground">
-      Optional, appreciated, never expected.
-    </p>
-  </div>
-</section>
+              <Button
+                type="submit"
+                size="sm"
+                className="bg-rose-500 hover:bg-rose-600 text-white
+                text-white"
+              >
+                <Heart className="mr-2 h-4 w-4" />
+                Donate
+              </Button>
+            </form>
+
+            <p className="text-xs text-muted-foreground">
+              Optional, appreciated, never expected.
+            </p>
+          </div>
+
+      </section>
 
     </div>
   )
