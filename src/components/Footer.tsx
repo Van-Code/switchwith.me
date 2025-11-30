@@ -57,17 +57,17 @@ export default function Footer() {
           <div className="space-y-3">
             <h4 className="font-semibold text-sm">Support</h4>
             <ul className="space-y-2 text-sm">
-              <li>
+              {/* <li>
                 <Link
                   href="/faq"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   FAQ
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
-                  href="/contact"
+                  href="/about#contact"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Contact
@@ -88,14 +88,14 @@ export default function Footer() {
                   Terms of Service
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/privacy"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Privacy Policy
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>

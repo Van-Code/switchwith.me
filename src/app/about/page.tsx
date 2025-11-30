@@ -39,16 +39,13 @@ export default function AboutPage() {
                     plays, and sitting in a sea of queer joy.
                   </p>
                   <p>
-                    I like making small, community-centered tools that reduce friction for real
-                    people. A lot of my time goes into helping nonprofits and community spaces
-                    keep their sites running, updating content, and fixing all the little
-                    technical things that pile up.
+                    I enjoy making small, community-centered tools that reduce friction for real people. I give some of my free time to various local nonprofits and community spaces to help keep their sites running, updating content, and fixing all the little technical things that pile up.
                   </p>
                   <p>
                     Offline, I&apos;m usually hanging out with my dogs, playing board games,
                     cooking for friends, or planning a trip I probably haven&apos;t fully
                     thought through yet. I like slow nights with good conversation just as much
-                    as I like a loud fourth quarter.
+                    as I like a loud queer social event.
                   </p>
                   <p>
                     I am currently between jobs, so this project is part passion, part
@@ -76,7 +73,6 @@ export default function AboutPage() {
           </div>
         </CardContent>
       </Card>
-
       <Card className="bg-gradient-to-br from-rose-50/50 to-purple-50/50 border-rose-200/30">
         <CardHeader>
           <h2 className="text-2xl font-semibold text-center">Support the Project</h2>
@@ -117,7 +113,7 @@ export default function AboutPage() {
           </div>
         </CardContent>
       </Card>
-      <Card className="bg-muted/30 border-purple-300/20">
+      <Card className="bg-muted/30 border-purple-300/20" id="contact">
         <CardHeader>
           <h2 className="text-2xl font-semibold">Get in Touch</h2>
         </CardHeader>
