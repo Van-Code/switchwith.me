@@ -5,6 +5,7 @@ import Link from "next/link"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { ArrowRight, Shield, MessageSquare, Search, Heart, Users } from "lucide-react"
+import { AccountDeletedMessage } from "@/components/AccountDeletedMessage"
 
 
 export default async function Home() {
@@ -12,6 +13,7 @@ export default async function Home() {
 
   return (
   <div className="space-y-16 pb-8">
+    <AccountDeletedMessage />
 
     <section className="text-center space-y-6 py-16 px-4 bg-gradient-to-b from-amber-50/50 via-white to-transparent">
       <div className="max-w-3xl mx-auto space-y-5">
