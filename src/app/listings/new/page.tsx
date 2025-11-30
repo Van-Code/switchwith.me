@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth"
-import { authOptions } from "../../../lib/auth"
+import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import { ListingForm } from "../../../components/ListingForm"
+import { ListingForm } from "@/components/ListingForm"
 
 export default async function NewListingPage() {
   const session = await getServerSession(authOptions)

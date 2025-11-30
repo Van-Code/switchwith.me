@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { MessageThread } from "../../../components/MessageThread"
-import { Alert, AlertDescription, AlertTitle } from "../../../components/ui/alert"
-import { Button } from "../../../components/ui/button"
+import { MessageThread } from "@/components/MessageThread"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { CheckCircle2, X } from "lucide-react"
 

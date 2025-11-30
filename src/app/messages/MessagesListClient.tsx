@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { ConversationListItem } from "../../components/ConversationListItem"
-import { Button } from "../../components/ui/button"
+import { ConversationListItem } from "@/components/ConversationListItem"
+import { Button } from "@/components/ui/button"
 
 interface Conversation {
   id: string

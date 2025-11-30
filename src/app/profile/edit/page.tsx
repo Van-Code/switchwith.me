@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth"
-import { authOptions } from "../../../lib/auth"
+import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import { prisma } from "../../../lib/prisma"
+import { prisma } from "@/lib/prisma"
 import { EditProfileForm } from "./EditProfileForm"
-import { Button } from "../../../components/ui/button"
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 

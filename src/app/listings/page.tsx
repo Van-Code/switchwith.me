@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../lib/auth";
+import { authOptions } from "@/lib/auth";
 import { ListingsPageClient } from "./ListingsPageClient";
 
 export default async function ListingsPage() {

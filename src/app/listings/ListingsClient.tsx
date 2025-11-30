@@ -1,6 +1,6 @@
 "use client"
 
-import { ListingCard } from "../../components/ListingCard"
+import { ListingCard } from "@/components/ListingCard"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
