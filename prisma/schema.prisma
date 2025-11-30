@@ -10,7 +10,7 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  password      String?   // Made optional for OAuth users
+  password      String?   // DEPRECATED: App now uses OAuth-only authentication
   emailVerified DateTime? // For NextAuth
   image         String?   // For OAuth profile images
   createdAt     DateTime  @default(now())
@@ -26,7 +26,6 @@ model User {
   notifications Notification[]
   accounts      Account[]  // For OAuth
   sessions      Session[]  // For NextAuth sessions
-  passwordResetTokens PasswordResetToken[]
 }
 
 // NextAuth OAuth Account model
@@ -68,21 +67,6 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-}
-
-// Password Reset Tokens
-model PasswordResetToken {
-  id         String   @id @default(cuid())
-  userId     String
-  tokenHash  String   @unique
-  expiresAt  DateTime
-  usedAt     DateTime?
-  createdAt  DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([tokenHash])
 }
 
 model Profile {
