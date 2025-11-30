@@ -1,20 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef, FormEvent } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Search, X, SlidersHorizontal, Calendar as CalendarIcon } from "lucide-react";
+import { X, SlidersHorizontal, Calendar as CalendarIcon } from "lucide-react";
 import { useMask } from "@react-input/mask";
 import { useListingsFilters } from "@/contexts/listings-filters-context";
-
-interface Suggestions {
-  sections: string[];
-  zones: string[];
-}
+import { TEAMS } from "@/config/teams";
 
 // ISO YYYY-MM-DD -> MM/DD/YYYY
 function isoToDisplay(iso?: string | null): string {
@@ -58,7 +54,7 @@ function displayToIso(display: string): string | null {
 export default function ListingsFilters() {
   const {
     filters,
-    setSearch: setContextSearch,
+    setTeam,
     setSection,
     setMinPrice,
     setMaxPrice,
@@ -68,14 +64,6 @@ export default function ListingsFilters() {
     applyFilters,
     activeFilters,
   } = useListingsFilters();
-
-  // Local state for search and suggestions
-  const [searchValue, setSearchValue] = useState(filters.search);
-  const [suggestions, setSuggestions] = useState<Suggestions>({ sections: [], zones: [] });
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-  const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   // Raw text in inputs (MM/DD/YYYY)
   const [fromRaw, setFromRaw] = useState(() =>
@@ -107,11 +95,6 @@ export default function ListingsFilters() {
     replacement: { _: /\d/ },
   });
 
-  // Sync search value with context
-  useEffect(() => {
-    setSearchValue(filters.search);
-  }, [filters.search]);
-
   // If fromDate is set and toDate empty, auto fill toDate to match
   useEffect(() => {
     if (filters.from && !filters.to) {
@@ -122,75 +105,11 @@ export default function ListingsFilters() {
     }
   }, [filters.from, filters.to, setToDate]);
 
-  // Close suggestions on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchWrapperRef.current &&
-        !searchWrapperRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Suggestions fetch with debounce
-  useEffect(() => {
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-
-    const query = searchValue.trim();
-    if (query.length < 2) {
-      setSuggestions({ sections: [], zones: [] });
-      setShowSuggestions(false);
-      return;
-    }
-
-    debounceTimer.current = setTimeout(async () => {
-      setIsLoadingSuggestions(true);
-      try {
-        const response = await fetch(
-          `/api/listings/suggestions?query=${encodeURIComponent(query)}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setSuggestions(data);
-          setShowSuggestions(true);
-        }
-      } catch (error) {
-        console.error("Failed to fetch suggestions:", error);
-      } finally {
-        setIsLoadingSuggestions(false);
-      }
-    }, 300);
-
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
-  }, [searchValue]);
-
-  const handleSearchSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setContextSearch(searchValue.trim());
-    setShowSuggestions(false);
-  };
-
-  const selectSuggestion = (suggestion: string) => {
-    setSearchValue(suggestion);
-    setContextSearch(suggestion);
-    setShowSuggestions(false);
-  };
-
-  const clearSearch = () => {
-    setSearchValue("");
-    setContextSearch("");
-    setShowSuggestions(false);
+  const handleTeamToggle = (teamSlug: string) => {
+    const newTeams = filters.team.includes(teamSlug)
+      ? filters.team.filter((t) => t !== teamSlug)
+      : [...filters.team, teamSlug];
+    setTeam(newTeams);
   };
 
   // Blur parsers
@@ -242,7 +161,6 @@ export default function ListingsFilters() {
   };
 
   const handleClearAllFilters = () => {
-    setSearchValue("");
     setFromRaw("");
     setToRaw("");
     setFromDateObj(undefined);
@@ -253,15 +171,13 @@ export default function ListingsFilters() {
   };
 
   const hasActiveFilters = !!(
-    activeFilters.search ||
+    activeFilters.team.length > 0 ||
     activeFilters.section ||
     activeFilters.minPrice ||
     activeFilters.maxPrice ||
     activeFilters.from ||
     activeFilters.to
   );
-  const hasSuggestions =
-    suggestions.sections.length > 0 || suggestions.zones.length > 0;
 
   return (
     <Card className="overflow-hidden border-2 border-cyan-200 shadow-lg bg-gradient-to-br from-cyan-50 via-white to-orange-50">
@@ -269,95 +185,34 @@ export default function ListingsFilters() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="h-5 w-5 text-cyan-700" />
-            <h2 className="text-lg font-bold text-cyan-900">Filter & Search</h2>
+            <h2 className="text-lg font-bold text-cyan-900">Filter Listings</h2>
           </div>
         </div>
         <p className="text-xs text-cyan-700 mt-1">Narrow down your perfect seat</p>
       </CardHeader>
 
       <CardContent className="p-4 space-y-4">
-        {/* Search */}
+        {/* Team filter */}
         <div className="space-y-2">
-          <Label
-            htmlFor="search-input"
-            className="text-sm font-semibold text-slate-700 flex items-center gap-1"
-          >
-            <Search className="h-3.5 w-3.5 text-cyan-600" />
-            Search Listings
-          </Label>
-          <div ref={searchWrapperRef} className="relative">
-            <form onSubmit={handleSearchSubmit}>
-              <div className="relative">
-                <Input
-                  id="search-input"
-                  placeholder="Section, row, seat, zone..."
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  onFocus={() => {
-                    if (hasSuggestions && searchValue.trim().length >= 2) {
-                      setShowSuggestions(true);
-                    }
-                  }}
-                  className="pr-8 text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
+          <Label className="text-sm font-semibold text-slate-700">Teams</Label>
+          <div className="space-y-2">
+            {TEAMS.map((team) => (
+              <div key={team.slug} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id={`team-${team.slug}`}
+                  checked={filters.team.includes(team.slug)}
+                  onChange={() => handleTeamToggle(team.slug)}
+                  className="h-4 w-4 rounded border-cyan-300 text-cyan-600 focus:ring-cyan-500"
                 />
-                {activeFilters.search && (
-                  <button
-                    type="button"
-                    onClick={clearSearch}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    aria-label="Clear search"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
+                <Label
+                  htmlFor={`team-${team.slug}`}
+                  className="font-normal text-sm cursor-pointer"
+                >
+                  {team.name}
+                </Label>
               </div>
-            </form>
-
-            {showSuggestions && hasSuggestions && (
-              <div className="absolute top-full mt-1 w-full bg-white border border-cyan-200 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
-                {suggestions.sections.length > 0 && (
-                  <div className="p-1.5">
-                    <div className="text-xs font-semibold text-cyan-700 px-2 py-1 uppercase">
-                      Sections
-                    </div>
-                    {suggestions.sections.map((sec, index) => (
-                      <button
-                        key={`section-${index}`}
-                        type="button"
-                        onClick={() => selectSuggestion(sec)}
-                        className="w-full text-left px-2 py-1.5 hover:bg-cyan-50 rounded text-slate-900 text-sm"
-                      >
-                        Section {sec}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {suggestions.zones.length > 0 && (
-                  <div className="p-1.5 border-t border-slate-100">
-                    <div className="text-xs font-semibold text-cyan-700 px-2 py-1 uppercase">
-                      Zones
-                    </div>
-                    {suggestions.zones.map((zone, index) => (
-                      <button
-                        key={`zone-${index}`}
-                        type="button"
-                        onClick={() => selectSuggestion(zone)}
-                        className="w-full text-left px-2 py-1.5 hover:bg-cyan-50 rounded text-slate-900 text-sm"
-                      >
-                        {zone}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {isLoadingSuggestions && showSuggestions && (
-              <div className="absolute top-full mt-1 w-full bg-white border border-cyan-200 rounded-md shadow-lg z-50 p-3 text-center text-xs text-slate-500">
-                Loading suggestions...
-              </div>
-            )}
+            ))}
           </div>
         </div>
 

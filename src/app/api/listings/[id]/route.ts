@@ -20,6 +20,16 @@ export async function GET(
                         profile: true,
                     },
                 },
+                team: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        logoUrl: true,
+                        primaryColor: true,
+                        secondaryColor: true,
+                    },
+                },
             },
         })
 
@@ -82,6 +92,16 @@ export async function PATCH(
                 user: {
                     include: {
                         profile: true,
+                    },
+                },
+                team: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        logoUrl: true,
+                        primaryColor: true,
+                        secondaryColor: true,
                     },
                 },
             },

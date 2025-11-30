@@ -1,16 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { useRouter } from "next/navigation"
 
+interface Team {
+  id: number
+  name: string
+  slug: string
+  logoUrl: string | null
+}
+
 export function ListingForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [teams, setTeams] = useState<Team[]>([])
   const [formData, setFormData] = useState({
+    teamId: "",
     gameDate: "",
     haveSection: "",
     haveRow: "",
@@ -22,6 +31,13 @@ export function ListingForm() {
     willingToAddCash: false,
   })
 
+  useEffect(() => {
+    fetch("/api/teams")
+      .then((res) => res.json())
+      .then((data) => setTeams(data.teams))
+      .catch((err) => console.error("Failed to fetch teams:", err))
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -32,6 +48,7 @@ export function ListingForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          teamId: parseInt(formData.teamId),
           gameDate: new Date(formData.gameDate).toISOString(),
           faceValue: parseFloat(formData.faceValue),
           wantZones: formData.wantZones.split(",").map(z => z.trim()).filter(Boolean),
@@ -59,6 +76,24 @@ export function ListingForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="teamId">Team</Label>
+            <select
+              id="teamId"
+              required
+              value={formData.teamId}
+              onChange={(e) => setFormData({ ...formData, teamId: e.target.value })}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="">Select a team</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <Label htmlFor="gameDate">Game Date</Label>
             <Input

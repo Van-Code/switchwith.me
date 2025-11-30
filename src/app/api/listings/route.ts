@@ -21,6 +21,7 @@ export async function GET(req: Request) {
         const maxPrice = searchParams.get("maxPrice")
         const from = searchParams.get("from")
         const to = searchParams.get("to")
+        const teamFilter = searchParams.get("team") // comma-separated team slugs
 
         const where: any = {
             status: "ACTIVE",
@@ -77,6 +78,18 @@ export async function GET(req: Request) {
             }
         }
 
+        // Team filter
+        if (teamFilter) {
+            const teamSlugs = teamFilter.split(",").map((s) => s.trim()).filter(Boolean)
+            if (teamSlugs.length > 0) {
+                where.team = {
+                    slug: {
+                        in: teamSlugs,
+                    },
+                }
+            }
+        }
+
         // Build orderBy based on sort param
         let orderBy: any = { createdAt: "desc" }
 
@@ -113,6 +126,16 @@ export async function GET(req: Request) {
                                 lastInitial: true,
                             },
                         },
+                    },
+                },
+                team: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        logoUrl: true,
+                        primaryColor: true,
+                        secondaryColor: true,
                     },
                 },
             },
@@ -155,6 +178,7 @@ export async function POST(req: Request) {
 
         const body = await req.json()
         const {
+            teamId,
             gameId,
             gameDate,
             haveSection,
@@ -167,9 +191,21 @@ export async function POST(req: Request) {
             willingToAddCash,
         } = body
 
-        if (!gameDate || !haveSection || !haveRow || !haveSeat || !haveZone || faceValue === undefined) {
+        if (!teamId || !gameDate || !haveSection || !haveRow || !haveSeat || !haveZone || faceValue === undefined) {
             return NextResponse.json(
                 { error: "Missing required fields" },
+                { status: 400 }
+            )
+        }
+
+        // Validate that team exists
+        const team = await prisma.team.findUnique({
+            where: { id: parseInt(teamId) },
+        })
+
+        if (!team) {
+            return NextResponse.json(
+                { error: "Invalid team ID" },
                 { status: 400 }
             )
         }
@@ -177,6 +213,7 @@ export async function POST(req: Request) {
         const listing = await prisma.listing.create({
             data: {
                 userId: session.user.id,
+                teamId: parseInt(teamId),
                 gameId,
                 gameDate: new Date(gameDate),
                 haveSection,
@@ -194,6 +231,16 @@ export async function POST(req: Request) {
                         profile: true,
                     },
                 },
+                team: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        logoUrl: true,
+                        primaryColor: true,
+                        secondaryColor: true,
+                    },
+                },
             },
         });
 
@@ -201,10 +248,11 @@ export async function POST(req: Request) {
         // Run asynchronously to not block the response
         (async () => {
             try {
-                // Get all active listings for matching
+                // Get all active listings for matching (same team only)
                 const allListings = await prisma.listing.findMany({
                     where: {
                         status: "ACTIVE",
+                        teamId: parseInt(teamId),
                     },
                     include: {
                         user: {

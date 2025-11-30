@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export interface ListingsFilters {
-  search: string;
+  team: string[];
   section: string;
   minPrice: string;
   maxPrice: string;
@@ -14,7 +14,7 @@ export interface ListingsFilters {
 
 interface ListingsFiltersContextType {
   filters: ListingsFilters;
-  setSearch: (value: string) => void;
+  setTeam: (value: string[]) => void;
   setSection: (value: string) => void;
   setMinPrice: (value: string) => void;
   setMaxPrice: (value: string) => void;
@@ -27,7 +27,7 @@ interface ListingsFiltersContextType {
 }
 
 const defaultFilters: ListingsFilters = {
-  search: "",
+  team: [],
   section: "",
   minPrice: "",
   maxPrice: "",
@@ -47,11 +47,8 @@ export function ListingsFiltersProvider({ children }: { children: ReactNode }) {
   // Active filters (applied and used for fetching)
   const [activeFilters, setActiveFilters] = useState<ListingsFilters>(defaultFilters);
 
-  const setSearch = (value: string) => {
-    const newFilters = { ...filters, search: value };
-    setFilters(newFilters);
-    // Search applies immediately
-    setActiveFilters(newFilters);
+  const setTeam = (value: string[]) => {
+    setFilters((prev) => ({ ...prev, team: value }));
   };
 
   const setSection = (value: string) => {
@@ -94,7 +91,7 @@ export function ListingsFiltersProvider({ children }: { children: ReactNode }) {
     <ListingsFiltersContext.Provider
       value={{
         filters,
-        setSearch,
+        setTeam,
         setSection,
         setMinPrice,
         setMaxPrice,
