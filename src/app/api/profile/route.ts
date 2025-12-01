@@ -24,7 +24,7 @@ export async function PATCH(req: Request) {
       where: { userId: session.user.id },
       data: {
         ...(firstName && { firstName }),
-        ...(lastInitial && { lastInitial }),
+        ...(lastInitial !== undefined && { lastInitial }),
         ...(bio !== undefined && { bio }),
         ...(favoritePlayer !== undefined && { favoritePlayer }),
       },

@@ -13,7 +13,7 @@ import { Upload } from "lucide-react"
 interface EditProfileFormProps {
   profile: {
     firstName: string
-    lastInitial: string
+    lastInitial: string | null
     avatarUrl: string | null
     bio: string | null
     favoritePlayer: string | null
@@ -26,7 +26,7 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
   const [photoLoading, setPhotoLoading] = useState(false)
   const [formData, setFormData] = useState({
     firstName: profile.firstName,
-    lastInitial: profile.lastInitial,
+    lastInitial: profile.lastInitial || "",
     bio: profile.bio || "",
     favoritePlayer: profile.favoritePlayer || "",
   })
@@ -106,7 +106,8 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
             <Avatar className="h-24 w-24">
               <AvatarImage src={previewUrl || undefined} />
               <AvatarFallback className="text-2xl">
-                {formData.firstName[0]}{formData.lastInitial}
+                {formData.firstName[0]}
+                {formData.lastInitial}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
@@ -137,7 +138,9 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
               <Input
                 id="firstName"
                 value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
                 required
               />
             </div>
@@ -146,9 +149,13 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
               <Input
                 id="lastInitial"
                 value={formData.lastInitial}
-                onChange={(e) => setFormData({ ...formData, lastInitial: e.target.value.toUpperCase() })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    lastInitial: e.target.value.toUpperCase(),
+                  })
+                }
                 maxLength={1}
-                required
               />
             </div>
           </div>
@@ -159,7 +166,9 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
             <Input
               id="favoritePlayer"
               value={formData.favoritePlayer}
-              onChange={(e) => setFormData({ ...formData, favoritePlayer: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, favoritePlayer: e.target.value })
+              }
               placeholder="e.g., Satou Sabally"
             />
           </div>
@@ -170,7 +179,9 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
             <Textarea
               id="bio"
               value={formData.bio}
-              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, bio: e.target.value })
+              }
               placeholder="Tell us a bit about yourself..."
               rows={4}
             />

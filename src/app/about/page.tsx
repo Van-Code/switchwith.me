@@ -1,10 +1,9 @@
-import React from 'react'
+import React from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Heart } from "lucide-react"
 import ContactForm from "@/components/contact-form"
-
 
 export default function AboutPage() {
   return (
@@ -13,62 +12,66 @@ export default function AboutPage() {
         <CardContent className="pt-6 space-y-4">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             <div className="flex-shrink-0 self-center md:self-auto">
-                <Image
-                  src="/images/thiswilldo.jpeg"
-                  alt="Cartoon illustration of Van"
-                  width={128}
-                  height={128}
-                  className="object-cover"
-                />
+              <Image
+                src="/images/thiswilldo.jpeg"
+                alt="Cartoon illustration of Van"
+                width={128}
+                height={128}
+                className="object-cover"
+              />
             </div>
 
-              <div className="space-y-3 text-sm md:text-base leading-relaxed text-muted-foreground">
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-                  About the Creator
-                </h1>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1 mb-2">
-                  The human behind the Switch With Me experiment
-                </p>
-                <p>
-                  Hi, I&apos;m Van. I&apos;m a queer Viet American developer who built 
-                  this project after hearing how chaotic it was to renew season tickets 
-                  and still end up scattered away from other queer fans. I made Switch 
-                  With Me because I wanted a simple, safe, community-powered way for Valkyries fans (and the broader women&apos;s + gender-expansive sports crowd) to trade seats with each otherm — without fees, markups, or weirdness. Just fans helping fans.
-                </p>
-                <p>
-                  Offline, I&apos;m usually hanging out with my dogs, playing board games,
-                  cooking for friends, or planning a trip I probably haven&apos;t fully
-                  thought through yet. I like slow nights with good conversation just as much
-                  as I like a loud queer social event.
-                </p>
-                <p>
-                  If you would like to reach out about work, collaboration, or feedback on
-                  the project, you can email me at <strong>bonsaitrees@gmail.com</strong>.
-                </p>
+            <div className="space-y-3 text-sm md:text-base leading-relaxed text-muted-foreground">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                About the Creator
+              </h1>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1 mb-2">
+                The human behind the Switch With Me experiment
+              </p>
+              <p>
+                Hi, I&apos;m Van. I&apos;m a queer Viet American developer who built this
+                project after hearing how chaotic it was to renew season tickets and still
+                end up scattered away from other queer fans. I made Switch With Me because
+                I wanted a simple, safe, community-powered way for Valkyries fans (and the
+                broader women&apos;s + gender-expansive sports crowd) to trade seats with
+                each otherm — without fees, markups, or weirdness. Just fans helping fans.
+              </p>
+              <p>
+                Offline, I&apos;m usually hanging out with my dogs, playing board games,
+                cooking for friends, or planning a trip I probably haven&apos;t fully
+                thought through yet. I like slow nights with good conversation just as
+                much as I like a loud queer social event.
+              </p>
+              <p>
+                If you would like to reach out about work, collaboration, or feedback on
+                the project, you can email me at <strong>bonsaitrees@gmail.com</strong>.
+              </p>
             </div>
           </div>
-            
+
           <div className="mt-2 p-3 rounded-md bg-muted/60 text-xs md:text-sm text-muted-foreground border border-border/40">
             <p>
               <strong>Quick note:</strong> this is a one-person project. I can&apos;t
-              moderate every message or swap. If someone gives you a weird vibe, that&apos;s
-              on them — not a reason to cancel the creator of the platform, and definitely not
-              the platform. Community projects take real energy, so thanks for keeping
-              things human and kind.
+              moderate every message or swap. If someone gives you a weird vibe,
+              that&apos;s on them — not a reason to cancel the creator of the platform,
+              and definitely not the platform. Community projects take real energy, so
+              thanks for keeping things human and kind.
             </p>
           </div>
         </CardContent>
       </Card>
       <Card className="mt-12 rounded-2xl bg-gradient-to-b from-white to-amber-50/60 border border-amber-100 px-6 py-8 text-center">
         <CardHeader>
-          <h2 className="text-2xl font-semibold mb-3 text-slate-900">Support the Project</h2>
+          <h2 className="text-2xl font-semibold mb-3 text-slate-900">
+            Support the Project
+          </h2>
         </CardHeader>
         <CardContent className="space-y-6">
-         
-        <p className="text-sm sm:text-base text-slate-700 max-w-2xl mx-auto mb-6">
-            I am currently between jobs, and this is a one person project that takes real time,
-            hosting costs, and energy to keep going. If the site makes your game day better
-            and you want to help me keep it online, you can chip in with a small donation.
+          <p className="text-sm sm:text-base text-slate-700 max-w-2xl mx-auto mb-6">
+            I am currently between jobs, and this is a one person project that takes real
+            time, hosting costs, and energy to keep going. If the site makes your game day
+            better and you want to help me keep it online, you can chip in with a small
+            donation.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -102,8 +105,8 @@ export default function AboutPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Have feedback, questions, or ideas for collaboration? Want to discuss sponsorship
-            opportunities or just say hi? I'd love to hear from you!
+            Have feedback, questions, or ideas for collaboration? Want to discuss
+            sponsorship opportunities or just say hi? I'd love to hear from you!
           </p>
           <ContactForm />
         </CardContent>

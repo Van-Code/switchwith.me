@@ -2,10 +2,10 @@ import { ProfileBadge } from "./ProfileBadge"
 
 interface ProfileHeaderProps {
   firstName: string
-  lastInitial: string
+  lastInitial?: string | null
   avatarUrl?: string | null
   bio?: string | null
-  successfulSwapsCount?: number,
+  successfulSwapsCount?: number
   favoritePlayer:string | null
 }
 
@@ -27,7 +27,7 @@ export function ProfileHeader({
       </div>
       <div className="flex-1">
         <h2 className="text-2xl font-bold">
-          {firstName} {lastInitial}.
+          {firstName} {lastInitial}
         </h2>
         {bio && <p className="text-muted-foreground mt-1">{bio}</p>}
         <div className="mt-2">

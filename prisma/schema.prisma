@@ -75,7 +75,7 @@ model Profile {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   firstName String
-  lastInitial String
+  lastInitial String?
   avatarUrl String?   // This already exists, we'll use it for photo
   bio       String?
   favoritePlayer String? 

@@ -23,7 +23,7 @@ interface Message {
     id: string
     profile: {
       firstName: string
-      lastInitial: string
+      lastInitial: string | null
     } | null
   }
 }
