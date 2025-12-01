@@ -23,42 +23,28 @@ export default function AboutPage() {
             </div>
 
               <div className="space-y-3 text-sm md:text-base leading-relaxed text-muted-foreground">
-               
-                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-                    About the Creator
-                  </h1>
-                  <p className="text-xs md:text-sm text-muted-foreground mt-1 mb-2">
-                    The human behind the Switch With Me experiment
-                  </p>
-
-                  <p>
-                    Hi, I&apos;m Van. I&apos;m a queer BIPOC developer who built this project
-                    after hearing how chaotic it was to renew season tickets and still end up
-                    scattered away from other queer fans. I&apos;m not the loudest Valkyries
-                    superfan in the arena, but I love being in the building, yelling for good
-                    plays, and sitting in a sea of queer joy.
-                  </p>
-                  <p>
-                    I enjoy making small, community-centered tools that reduce friction for real people. I give some of my free time to various local nonprofits and community spaces to help keep their sites running, updating content, and fixing all the little technical things that pile up.
-                  </p>
-                  <p>
-                    Offline, I&apos;m usually hanging out with my dogs, playing board games,
-                    cooking for friends, or planning a trip I probably haven&apos;t fully
-                    thought through yet. I like slow nights with good conversation just as much
-                    as I like a loud queer social event.
-                  </p>
-                  <p>
-                    I am currently between jobs, so this project is part passion, part
-                    portfolio, and part love letter to queer sports fans who just want to
-                    sit near their people. If this site helps you move around the arena in a
-                    way that feels better, that is a win.
-                  </p>
-
-                  <p>
-                    If you would like to reach out about work, collaboration, or feedback on
-                    the project, you can email me at <strong>bonsaitrees@gmail.com</strong>.
-                  </p>
-              
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                  About the Creator
+                </h1>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1 mb-2">
+                  The human behind the Switch With Me experiment
+                </p>
+                <p>
+                  Hi, I&apos;m Van. I&apos;m a queer Viet American developer who built 
+                  this project after hearing how chaotic it was to renew season tickets 
+                  and still end up scattered away from other queer fans. I made Switch 
+                  With Me because I wanted a simple, safe, community-powered way for Valkyries fans (and the broader women&apos;s + gender-expansive sports crowd) to trade seats with each otherm — without fees, markups, or weirdness. Just fans helping fans.
+                </p>
+                <p>
+                  Offline, I&apos;m usually hanging out with my dogs, playing board games,
+                  cooking for friends, or planning a trip I probably haven&apos;t fully
+                  thought through yet. I like slow nights with good conversation just as much
+                  as I like a loud queer social event.
+                </p>
+                <p>
+                  If you would like to reach out about work, collaboration, or feedback on
+                  the project, you can email me at <strong>bonsaitrees@gmail.com</strong>.
+                </p>
             </div>
           </div>
             
@@ -73,44 +59,41 @@ export default function AboutPage() {
           </div>
         </CardContent>
       </Card>
-      <Card className="bg-gradient-to-br from-rose-50/50 to-purple-50/50 border-rose-200/30">
+      <Card className="mt-12 rounded-2xl bg-gradient-to-b from-white to-amber-50/60 border border-amber-100 px-6 py-8 text-center">
         <CardHeader>
-          <h2 className="text-2xl font-semibold text-center">Support the Project</h2>
+          <h2 className="text-2xl font-semibold mb-3 text-slate-900">Support the Project</h2>
         </CardHeader>
         <CardContent className="space-y-6">
-          <form
-            action="https://www.paypal.com/donate"
-            method="post"
-            target="_top"
-            className="flex justify-center"
-          >
-            <input type="hidden" name="business" value="this.props@gmail.com" />
-            <input type="hidden" name="no_recurring" value="0" />
-            <input
-              type="hidden"
-              name="item_name"
-              value="Support Golden State Valkyries Ticket Swap"
-            />
-            <input type="hidden" name="currency_code" value="USD" />
-            <Button
-              type="submit"
-              size="lg"
-              className="bg-rose-600 hover:bg-rose-700 text-white shadow-md"
+         
+        <p className="text-sm sm:text-base text-slate-700 max-w-2xl mx-auto mb-6">
+            I am currently between jobs, and this is a one person project that takes real time,
+            hosting costs, and energy to keep going. If the site makes your game day better
+            and you want to help me keep it online, you can chip in with a small donation.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            {/* Ko-fi primary */}
+            <a
+              href="https://ko-fi.com/van889926"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium rounded-full bg-amber-500 hover:bg-amber-600 text-white transition"
             >
-              <Heart className="mr-2 h-5 w-5" />
-              Donate via PayPal
-            </Button>
-          </form>
-          <div className="text-center">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-amber-700 border-amber-300 hover:bg-amber-50"
-              asChild
+              Support with a small donation
+            </a>
+
+            {/* Sponsor / partner secondary */}
+            <a
+              href="mailto:bonsaitrees@gmail.com?subject=Sponsorship%20or%20partnership%20for%20Switch%20With%20Me"
+              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium rounded-full border border-teal-400 text-teal-700 bg-white hover:bg-teal-50 transition"
             >
-              <a href="mailto:bonsaitrees@gmail.com">Sponsor or Partner</a>
-            </Button>
+              Sponsor or partner
+            </a>
           </div>
+
+          <p className="mt-3 text-xs text-slate-500">
+            Ko-fi is a secure, one time tip jar for creators. No account needed.
+          </p>
         </CardContent>
       </Card>
       <Card className="bg-muted/30 border-purple-300/20" id="contact">

@@ -20,11 +20,10 @@ export default async function Home() {
         </h1>
         <div className="h-1 w-24 mx-auto bg-gradient-to-r from-cyan-500 to-amber-500 rounded-full"></div>
         <p className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
-        A seat-swap hub for Valkyries fans
-
+        A community-powered seat swap for W+ sports fans
         </p>
         <p className="text-l text-slate-600 leading-relaxed max-w-2xl mx-auto">
-        List a single seat, a few games, or your whole season. Browse open tickets from other fans, find a great seat for a night out, or try out a new section before committing. Trade with folks who share your vibe, or let someone awesome take that extra ticket off your hands. Simple, safe, community-run. </p>
+        Trade single seats, a few games, or your whole season with fans who actually care about the culture. Browse open tickets, try new sections, or let someone awesome take that extra seat off your hands. Simple, safe, and built by the community that shows up. </p>
         <p className="text-sm text-amber-700 italic">
           Because we're better when we sit together
         </p>
@@ -45,13 +44,8 @@ export default async function Home() {
             </>
           ) : (
             <>
-              <Link href="/auth/signup">
-                <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-md">
-                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
               <Link href="/auth/signin">
-                <Button size="lg" variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-50">
+                <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-md">
                   Sign In
                 </Button>
               </Link>
@@ -114,7 +108,7 @@ export default async function Home() {
             <span className="flex-shrink-0 h-8 w-8 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-sm">
               1
             </span>
-            <span className="text-slate-700 pt-1">Create an account and list the seats you have.</span>
+            <span className="text-slate-700 pt-1">Sign in with Google and list the seats you have.</span>
           </li>
           <li className="flex gap-4 items-start">
             <span className="flex-shrink-0 h-8 w-8 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-sm">
@@ -148,49 +142,31 @@ export default async function Home() {
 
       {/* Support Card */}
       <section className="max-w-xl mx-auto">
-        <div className="text-center space-y-3 p-6 rounded-lg 
-            bg-gradient-to-br from-amber-50/40 to-rose-50/40
-            border border-amber-200/40">
-
-            <h3 className="text-xl font-semibold flex items-center justify-center gap-2">
-              <Heart className="h-5 w-5 text-rose-500" />
+        <div className="text-center space-y-3 p-6 rounded-2xl bg-gradient-to-b from-white to-amber-50/60 border border-amber-100 shadow-sm">
+            <h3 className="text-xl font-semibold flex items-center justify-center gap-2 text-slate-800">
+              <Heart className="h-5 w-5 text-teal-500" />
               Support the Project
             </h3>
 
-            <p className="text-sm text-muted-foreground">
-              This site is a community project built and maintained by one fan.
-              If you'd like to help keep it running, you can chip in below.
+            <p className="text-sm text-slate-700 max-w-xl mx-auto">
+              This site is built and run by one person. If it helps you find better seats,
+              you can support the work with a small donation.
             </p>
 
-            <form
-              action="https://www.paypal.com/donate"
-              method="post"
-              target="_top"
-              className="flex justify-center"
+            <a
+              href="https://ko-fi.com/van889926"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium rounded-full bg-amber-500 hover:bg-amber-600 text-white transition"
             >
-              <input type="hidden" name="business" value="YOUR_PAYPAL_EMAIL" />
-              <input type="hidden" name="no_recurring" value="0" />
-              <input type="hidden" name="item_name" value="Support Golden State Valkyries Ticket Swap" />
-              <input type="hidden" name="currency_code" value="USD" />
+              Support with a small donation
+            </a>
 
-              <Button
-                type="submit"
-                size="sm"
-                className="bg-rose-500 hover:bg-rose-600 text-white
-                text-white"
-              >
-                <Heart className="mr-2 h-4 w-4" />
-                Donate
-              </Button>
-            </form>
-
-            <p className="text-xs text-muted-foreground">
-              Optional, appreciated, never expected.
+            <p className="text-xs text-slate-500">
+              Powered by Ko-fi, a simple tip jar for creators.
             </p>
           </div>
-
       </section>
-
     </div>
   )
 }
