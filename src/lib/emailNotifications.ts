@@ -4,23 +4,23 @@
  * Sends notification emails via SpaceMail
  */
 
-import { NotificationType } from "@prisma/client";
-import type { MessageNotificationData, MatchNotificationData } from "./notifications";
+import { NotificationType } from "@prisma/client"
+import type { MessageNotificationData, MatchNotificationData } from "./notifications"
 
-const SPACEMAIL_API_KEY = process.env.SPACEMAIL_API_KEY;
-const SPACEMAIL_FROM = process.env.SPACEMAIL_FROM || "notifications@valkyriesswap.com";
-const SPACEMAIL_NOTIFICATION_TO_OVERRIDE = process.env.SPACEMAIL_NOTIFICATION_TO_OVERRIDE;
-const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://valkyriesswap.com";
+const SPACEMAIL_API_KEY = process.env.SPACEMAIL_API_KEY
+const SPACEMAIL_FROM = process.env.SPACEMAIL_FROM || "notifications@switchwith.me"
+const SPACEMAIL_NOTIFICATION_TO_OVERRIDE = process.env.SPACEMAIL_NOTIFICATION_TO_OVERRIDE
+const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://switchwith.me"
 
 // SpaceMail API endpoint - adjust this to match SpaceMail's actual API
 // Check SpaceMail docs at https://spacemail.com/docs for the correct endpoint
-const SPACEMAIL_API_URL = "https://api.spacemail.com/v1/send";
+const SPACEMAIL_API_URL = "https://api.spacemail.com/v1/send"
 
 interface EmailPayload {
-  to: string;
-  userName: string;
-  type: NotificationType;
-  data: MessageNotificationData | MatchNotificationData;
+  to: string
+  userName: string
+  type: NotificationType
+  data: MessageNotificationData | MatchNotificationData
 }
 
 /**
@@ -30,47 +30,47 @@ export async function sendNotificationEmail({
   to,
   userName,
   type,
-  data,
+  data
 }: EmailPayload): Promise<void> {
   if (!SPACEMAIL_API_KEY) {
-    console.warn("SPACEMAIL_API_KEY not configured, skipping email notification");
-    return;
+    console.warn("SPACEMAIL_API_KEY not configured, skipping email notification")
+    return
   }
 
   // Use override email for development/testing if configured
-  const recipientEmail = SPACEMAIL_NOTIFICATION_TO_OVERRIDE || to;
+  const recipientEmail = SPACEMAIL_NOTIFICATION_TO_OVERRIDE || to
 
-  const { subject, text } = buildEmailContent({ userName, type, data });
+  const { subject, text } = buildEmailContent({ userName, type, data })
 
   try {
     const response = await fetch(SPACEMAIL_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${SPACEMAIL_API_KEY}`,
+        Authorization: `Bearer ${SPACEMAIL_API_KEY}`
         // Adjust headers based on SpaceMail's actual API requirements
       },
       body: JSON.stringify({
         from: SPACEMAIL_FROM,
         to: recipientEmail,
         subject,
-        text,
+        text
         // If SpaceMail supports HTML emails, you can add:
         // html: buildHtmlEmail({ userName, type, data }),
-      }),
-    });
+      })
+    })
 
     if (!response.ok) {
-      const errorText = await response.text();
+      const errorText = await response.text()
       throw new Error(
         `SpaceMail API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
+      )
     }
 
-    console.log(`Notification email sent to ${recipientEmail} (type: ${type})`);
+    console.log(`Notification email sent to ${recipientEmail} (type: ${type})`)
   } catch (error) {
-    console.error("Failed to send notification email:", error);
-    throw error;
+    console.error("Failed to send notification email:", error)
+    throw error
   }
 }
 
@@ -80,22 +80,22 @@ export async function sendNotificationEmail({
 function buildEmailContent({
   userName,
   type,
-  data,
+  data
 }: {
-  userName: string;
-  type: NotificationType;
-  data: MessageNotificationData | MatchNotificationData;
+  userName: string
+  type: NotificationType
+  data: MessageNotificationData | MatchNotificationData
 }): { subject: string; text: string } {
   switch (type) {
     case "MESSAGE":
-      return buildMessageEmail(userName, data as MessageNotificationData);
+      return buildMessageEmail(userName, data as MessageNotificationData)
     case "MATCH":
-      return buildMatchEmail(userName, data as MatchNotificationData);
+      return buildMatchEmail(userName, data as MatchNotificationData)
     default:
       return {
         subject: "New notification on Switch With Me",
-        text: `Hi ${userName},\n\nYou have a new notification on Switch With Me.\n\nView it here: ${APP_BASE_URL}\n\nThanks,\nThe Switch With Me Team`,
-      };
+        text: `Hi ${userName},\n\nYou have a new notification on Switch With Me.\n\nView it here: ${APP_BASE_URL}\n\nThanks,\nThe Switch With Me Team`
+      }
   }
 }
 
@@ -106,9 +106,9 @@ function buildMessageEmail(
   userName: string,
   data: MessageNotificationData
 ): { subject: string; text: string } {
-  const conversationUrl = `${APP_BASE_URL}/conversations/${data.conversationId}`;
+  const conversationUrl = `${APP_BASE_URL}/conversations/${data.conversationId}`
 
-  const subject = "New message on Switch With Me";
+  const subject = "New message on Switch With Me"
 
   const text = `Hi ${userName},
 
@@ -122,9 +122,9 @@ Thanks,
 The Switch With Me Team
 
 ---
-To turn off email notifications, visit ${APP_BASE_URL}/profile`;
+To turn off email notifications, visit ${APP_BASE_URL}/profile`
 
-  return { subject, text };
+  return { subject, text }
 }
 
 /**
@@ -134,9 +134,9 @@ function buildMatchEmail(
   userName: string,
   data: MatchNotificationData
 ): { subject: string; text: string } {
-  const matchesUrl = `${APP_BASE_URL}/matches`;
+  const matchesUrl = `${APP_BASE_URL}/matches`
 
-  const subject = "You have a new seat match suggestion!";
+  const subject = "You have a new seat match suggestion!"
 
   const text = `Hi ${userName},
 
@@ -152,9 +152,9 @@ Thanks,
 The Switch With Me Team
 
 ---
-To turn off email notifications, visit ${APP_BASE_URL}/profile`;
+To turn off email notifications, visit ${APP_BASE_URL}/profile`
 
-  return { subject, text };
+  return { subject, text }
 }
 
 /**

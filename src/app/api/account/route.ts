@@ -24,7 +24,7 @@ export async function DELETE(req: Request) {
     const userId = session.user.id
 
     // Use a transaction to ensure all deletions happen atomically
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       // Verify user exists
       const user = await tx.user.findUnique({
         where: { id: userId },
@@ -55,7 +55,7 @@ export async function DELETE(req: Request) {
 
       // However, we need to handle orphaned Conversations
       // If a conversation has no participants after this user is deleted, delete it
-      const conversationIds = user.conversations.map((cp) => cp.conversationId)
+      const conversationIds = user.conversations.map((cp: any) => cp.conversationId)
 
       // Delete the user (this cascades to all related records)
       await tx.user.delete({
@@ -78,7 +78,7 @@ export async function DELETE(req: Request) {
         if (orphanedConversations.length > 0) {
           await tx.conversation.deleteMany({
             where: {
-              id: { in: orphanedConversations.map((c) => c.id) }
+              id: { in: orphanedConversations.map((c: any) => c.id) }
             }
           })
         }
