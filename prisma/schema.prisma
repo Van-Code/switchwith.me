@@ -19,13 +19,17 @@ model User {
   // Notification settings
   emailNotificationsEnabled Boolean @default(false)
 
-  profile       Profile?
-  listings      Listing[]
-  sentMessages  Message[]      @relation("SentMessages")
-  conversations ConversationParticipant[]
-  notifications Notification[]
-  accounts      Account[]  // For OAuth
-  sessions      Session[]  // For NextAuth sessions
+  // Pay-to-chat credits
+  credits Int @default(5)
+
+  profile            Profile?
+  listings           Listing[]
+  sentMessages       Message[]      @relation("SentMessages")
+  conversations      ConversationParticipant[]
+  notifications      Notification[]
+  accounts           Account[]  // For OAuth
+  sessions           Session[]  // For NextAuth sessions
+  creditTransactions CreditTransaction[]
 }
 
 // NextAuth OAuth Account model
@@ -142,11 +146,15 @@ model Listing {
   wantZones         String[]
   wantSections      String[]
   willingToAddCash  Boolean  @default(false)
-  
+
   status    ListingStatus @default(ACTIVE)
-  
+
+  // Boosted listings (paid feature)
+  boosted   Boolean   @default(false)
+  boostedAt DateTime?
+
   conversations Conversation[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -225,5 +233,19 @@ model Notification {
 
   // Indexes for performance
   @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+// Credit transaction system for pay-to-chat
+model CreditTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount    Int      // Positive for credits added, negative for credits spent
+  note      String?  // e.g., "Purchase", "Start conversation with User X"
+
+  createdAt DateTime @default(now())
+
   @@index([userId, createdAt])
 }

@@ -94,28 +94,31 @@ export async function GET(req: Request) {
       }
     }
 
-    // Build orderBy based on sort param
-    let orderBy: any = { createdAt: "desc" }
+        // Build orderBy based on sort param
+        // Boosted listings always appear first, then apply secondary sort
+        let orderBy: any[] = [
+            { boosted: "desc" }, // Boosted listings first
+        ]
 
-    switch (sort) {
-      case "createdAsc":
-        orderBy = { createdAt: "asc" }
-        break
-      case "createdDesc":
-        orderBy = { createdAt: "desc" }
-        break
-      case "sectionAsc":
-        orderBy = { haveSection: "asc" }
-        break
-      case "gameSoonest":
-        orderBy = { gameDate: "asc" }
-        break
-      case "gameFarthest":
-        orderBy = { gameDate: "desc" }
-        break
-      default:
-        orderBy = { createdAt: "desc" }
-    }
+        switch (sort) {
+            case "createdAsc":
+                orderBy.push({ boostedAt: "desc" }, { createdAt: "asc" })
+                break
+            case "createdDesc":
+                orderBy.push({ boostedAt: "desc" }, { createdAt: "desc" })
+                break
+            case "sectionAsc":
+                orderBy.push({ boostedAt: "desc" }, { haveSection: "asc" })
+                break
+            case "gameSoonest":
+                orderBy.push({ boostedAt: "desc" }, { gameDate: "asc" })
+                break
+            case "gameFarthest":
+                orderBy.push({ boostedAt: "desc" }, { gameDate: "desc" })
+                break
+            default:
+                orderBy.push({ boostedAt: "desc" }, { createdAt: "desc" })
+        }
 
     const listings = await prisma.listing.findMany({
       where,
@@ -145,18 +148,19 @@ export async function GET(req: Request) {
       }
     })
 
-    // Serialize dates to strings
-    const serializedListings = listings.map((listing: any) => ({
-      ...listing,
-      gameDate: listing.gameDate.toISOString(),
-      createdAt: listing.createdAt.toISOString(),
-      updatedAt: listing.updatedAt.toISOString(),
-      user: listing.user
-        ? {
-            ...listing.user
-          }
-        : undefined
-    }))
+        // Serialize dates to strings
+        const serializedListings = listings.map((listing: any) => ({
+            ...listing,
+            gameDate: listing.gameDate.toISOString(),
+            createdAt: listing.createdAt.toISOString(),
+            updatedAt: listing.updatedAt.toISOString(),
+            boostedAt: listing.boostedAt ? listing.boostedAt.toISOString() : null,
+            user: listing.user
+                ? {
+                      ...listing.user,
+                  }
+                : undefined,
+        }))
 
     return NextResponse.json({ listings: serializedListings })
   } catch (error) {

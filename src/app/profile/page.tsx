@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { NotificationSettings } from "@/components/notification-settings"
 import { DeleteAccountSection } from "@/components/DeleteAccountSection"
 import Link from "next/link"
-import { Edit, MapPin } from "lucide-react"
+import { Edit, MapPin, Sparkles } from "lucide-react"
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions)
@@ -172,7 +172,9 @@ function MyListingsSection({
 
 function MyListingCard({ listing }: { listing: any }) {
   return (
-    <Card className="border-slate-200 hover:shadow-md transition-shadow">
+    <Card className={`border-slate-200 hover:shadow-md transition-shadow ${
+      listing.boosted ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent" : ""
+    }`}>
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
@@ -181,7 +183,15 @@ function MyListingCard({ listing }: { listing: any }) {
             </CardTitle>
             <p className="text-xs text-slate-500 mt-1">{listing.haveZone}</p>
           </div>
-          <ListingStatusBadge status={listing.status} />
+          <div className="flex flex-col gap-1.5 items-end">
+            {listing.boosted && (
+              <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Boosted
+              </Badge>
+            )}
+            <ListingStatusBadge status={listing.status} />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -190,6 +200,9 @@ function MyListingCard({ listing }: { listing: any }) {
           {new Date(listing.gameDate).toLocaleDateString()}
         </div>
         <ListingStatusToggle listingId={listing.id} currentStatus={listing.status} />
+        {listing.status === "ACTIVE" && !listing.boosted && (
+          <BoostListingButton listingId={listing.id} />
+        )}
       </CardContent>
     </Card>
   )
@@ -226,3 +239,4 @@ function ListingStatusToggle({
 
 // Client component for the toggle button
 import { ListingStatusToggleClient } from "@/components/ListingStatusToggleClient"
+import { BoostListingButton } from "@/components/BoostListingButton"

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { isPayToChatEnabled } from "@/lib/features"
 
 // Force dynamic rendering - this route needs to access headers for authentication
 export const dynamic = 'force-dynamic';
@@ -149,7 +150,94 @@ export async function POST(req: Request) {
       return NextResponse.json({ conversation: existingConversation })
     }
 
-    // Create new conversation
+    // Credit system for pay-to-chat (if enabled)
+    if (isPayToChatEnabled()) {
+      // Get current user with credits
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { credits: true },
+      })
+
+      if (!currentUser) {
+        return NextResponse.json(
+          { error: "User not found" },
+          { status: 404 }
+        )
+      }
+
+      // Check if user has enough credits
+      if (currentUser.credits < 1) {
+        return NextResponse.json(
+          {
+            error: "Insufficient credits",
+            creditsRequired: 1,
+            currentCredits: currentUser.credits,
+          },
+          { status: 402 } // Payment Required
+        )
+      }
+
+      // Use transaction to deduct credit and create conversation atomically
+      const result = await prisma.$transaction(async (tx) => {
+        // Deduct 1 credit from user
+        await tx.user.update({
+          where: { id: session.user.id },
+          data: {
+            credits: {
+              decrement: 1,
+            },
+          },
+        })
+
+        // Get other user's name for transaction note
+        const otherUser = await tx.user.findUnique({
+          where: { id: otherUserId },
+          include: { profile: true },
+        })
+
+        // Create credit transaction record
+        await tx.creditTransaction.create({
+          data: {
+            userId: session.user.id,
+            amount: -1,
+            note: `Start conversation with ${otherUser?.profile?.firstName || 'user'}`,
+          },
+        })
+
+        // Create new conversation
+        const conversation = await tx.conversation.create({
+          data: {
+            ...(listingId && { listingId }),
+            participants: {
+              create: [
+                { userId: session.user.id },
+                { userId: otherUserId },
+              ],
+            },
+          },
+          include: {
+            participants: {
+              include: {
+                user: {
+                  include: {
+                    profile: true,
+                  },
+                },
+              },
+            },
+            messages: true,
+            listing: true,
+          },
+        })
+
+        return conversation
+      })
+
+      return NextResponse.json({ conversation: result })
+    }
+
+    // Early launch mode (free conversations)
+    // Create new conversation without credit deduction
     const conversation = await prisma.conversation.create({
       data: {
         ...(listingId && { listingId }), // Only include if listingId exists
@@ -173,6 +261,17 @@ export async function POST(req: Request) {
         messages: true,
         listing: true,
       },
+    })
+
+    // Optionally log a free transaction for analytics
+    await prisma.creditTransaction.create({
+      data: {
+        userId: session.user.id,
+        amount: 0,
+        note: "Free conversation (early launch)",
+      },
+    }).catch(() => {
+      // Silently fail if transaction logging fails
     })
 
     return NextResponse.json({ conversation })
