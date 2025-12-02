@@ -284,8 +284,8 @@ function getNotificationContent(type: string, data: NotificationData) {
     case "MESSAGE":
       return {
         icon: <Bell className="h-4 w-4" />,
-        title: "New message",
-        description: data.preview || `${data.senderName} sent you a message`,
+        title: data.senderName ? `New message from ${data.senderName}` : "New message",
+        description: data.preview || "Sent you a message",
         linkHref: `/conversations/${data.conversationId}`,
       };
 
