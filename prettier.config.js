@@ -1,7 +1,5 @@
-module.exports = {
-  semi: false,
+module.exports = {\
   printWidth: 90,
   arrowParens: "always",
-  trailingComma: "none",
-  semi: false
+  trailingComma: "none"
 }
