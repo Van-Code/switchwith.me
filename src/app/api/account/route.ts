@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 // Force dynamic rendering - this route needs to access headers for authentication
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
 
 /**
  * DELETE /api/account
@@ -35,7 +35,7 @@ export async function DELETE(req: Request) {
           sentMessages: true,
           profile: true,
           accounts: true,
-          sessions: true,
+          sessions: true
         }
       })
 
@@ -55,7 +55,7 @@ export async function DELETE(req: Request) {
 
       // However, we need to handle orphaned Conversations
       // If a conversation has no participants after this user is deleted, delete it
-      const conversationIds = user.conversations.map(cp => cp.conversationId)
+      const conversationIds = user.conversations.map((cp) => cp.conversationId)
 
       // Delete the user (this cascades to all related records)
       await tx.user.delete({
@@ -78,7 +78,7 @@ export async function DELETE(req: Request) {
         if (orphanedConversations.length > 0) {
           await tx.conversation.deleteMany({
             where: {
-              id: { in: orphanedConversations.map(c => c.id) }
+              id: { in: orphanedConversations.map((c) => c.id) }
             }
           })
         }
@@ -98,10 +98,7 @@ export async function DELETE(req: Request) {
 
     // Check if it's a user not found error
     if (error instanceof Error && error.message === "User not found") {
-      return NextResponse.json(
-        { error: "Account not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Account not found" }, { status: 404 })
     }
 
     return NextResponse.json(

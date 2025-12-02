@@ -12,7 +12,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -40,8 +46,10 @@ export function DeleteAccountSection() {
       })
 
       const data = await response.json()
-
-      if (!response.ok) {
+      if (response.ok) {
+        // kill session and redirect
+        await signOut({ callbackUrl: "/" })
+      } else {
         throw new Error(data.error || "Failed to delete account")
       }
 
@@ -53,7 +61,11 @@ export function DeleteAccountSection() {
       router.push("/?deleted=true")
     } catch (error) {
       console.error("Error deleting account:", error)
-      setError(error instanceof Error ? error.message : "An error occurred while deleting your account")
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while deleting your account"
+      )
       setLoading(false)
     }
   }
@@ -97,9 +109,7 @@ export function DeleteAccountSection() {
                 <p className="font-semibold text-foreground">
                   This action cannot be undone.
                 </p>
-                <p>
-                  Deleting your account will permanently remove:
-                </p>
+                <p>Deleting your account will permanently remove:</p>
                 <ul className="list-disc list-inside space-y-1 text-sm pl-2">
                   <li>Your profile and account information</li>
                   <li>All your active and inactive listings</li>
@@ -108,7 +118,8 @@ export function DeleteAccountSection() {
                   <li>Your authentication credentials</li>
                 </ul>
                 <p className="text-sm pt-2">
-                  You will need to create a new account if you want to use Switch With Me again.
+                  You will need to create a new account if you want to use Switch With Me
+                  again.
                 </p>
               </DialogDescription>
             </DialogHeader>

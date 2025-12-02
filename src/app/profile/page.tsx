@@ -13,7 +13,7 @@ import { Edit, MapPin } from "lucide-react"
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions)
-  
+
   if (!session?.user?.id) {
     redirect("/auth/signin")
   }
@@ -34,9 +34,15 @@ export default async function ProfilePage() {
     redirect("/auth/signin")
   }
 
-  const activeListings = user.listings.filter((l:{status:string}) => l.status === "ACTIVE")
-  const inactiveListings = user.listings.filter((l:{status:string}) => l.status === "INACTIVE")
-  const matchedListings = user.listings.filter((l:{status:string}) => l.status === "MATCHED")
+  const activeListings = user.listings.filter(
+    (l: { status: string }) => l.status === "ACTIVE"
+  )
+  const inactiveListings = user.listings.filter(
+    (l: { status: string }) => l.status === "INACTIVE"
+  )
+  const matchedListings = user.listings.filter(
+    (l: { status: string }) => l.status === "MATCHED"
+  )
 
   return (
     <div className="space-y-8">
@@ -68,7 +74,9 @@ export default async function ProfilePage() {
           </div>
           <div className="flex justify-between">
             <span className="text-slate-600">Member since:</span>
-            <span className="text-slate-900">{new Date(user.createdAt).toLocaleDateString()}</span>
+            <span className="text-slate-900">
+              {new Date(user.createdAt).toLocaleDateString()}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-600">Total listings:</span>
@@ -89,10 +97,6 @@ export default async function ProfilePage() {
         </CardContent>
       </Card>
 
-      <NotificationSettings initialEmailNotificationsEnabled={user.emailNotificationsEnabled} />
-
-      <DeleteAccountSection />
-
       <MyListingsSection
         activeListings={activeListings}
         inactiveListings={inactiveListings}
@@ -102,11 +106,11 @@ export default async function ProfilePage() {
   )
 }
 
-function MyListingsSection({ 
-  activeListings, 
-  inactiveListings, 
-  matchedListings 
-}: { 
+function MyListingsSection({
+  activeListings,
+  inactiveListings,
+  matchedListings,
+}: {
   activeListings: any[]
   inactiveListings: any[]
   matchedListings: any[]
@@ -118,7 +122,9 @@ function MyListingsSection({
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-900">Your Active Listings</h2>
           <Link href="/listings/new">
-            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">Create New Listing</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
+              Create New Listing
+            </Button>
           </Link>
         </div>
 
@@ -130,7 +136,7 @@ function MyListingsSection({
           </Card>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeListings.map((listing:any) => (
+            {activeListings.map((listing: any) => (
               <MyListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -142,7 +148,7 @@ function MyListingsSection({
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-slate-900">Inactive Listings</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {inactiveListings.map((listing:any) => (
+            {inactiveListings.map((listing: any) => (
               <MyListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -154,7 +160,7 @@ function MyListingsSection({
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-slate-900">Completed Swaps</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {matchedListings.map((listing:any) => (
+            {matchedListings.map((listing: any) => (
               <MyListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -197,14 +203,16 @@ function ListingStatusBadge({ status }: { status: string }) {
     EXPIRED: "outline",
   }
 
-  return (
-    <Badge variant={variants[status] || "secondary"}>
-      {status}
-    </Badge>
-  )
+  return <Badge variant={variants[status] || "secondary"}>{status}</Badge>
 }
 
-function ListingStatusToggle({ listingId, currentStatus }: { listingId: string, currentStatus: string }) {
+function ListingStatusToggle({
+  listingId,
+  currentStatus,
+}: {
+  listingId: string
+  currentStatus: string
+}) {
   if (currentStatus === "MATCHED" || currentStatus === "EXPIRED") {
     return null
   }
