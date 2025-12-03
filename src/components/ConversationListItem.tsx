@@ -42,7 +42,13 @@ export function ConversationListItem({ conversation, currentUserId }: Conversati
 
   return (
     <Link href={`/messages/${conversation.id}`}>
-      <Card className={`hover:bg-accent cursor-pointer transition-colors ${isEnded ? "opacity-75" : ""}`}>
+      <Card className={`transition-all
+        bg-white
+        hover:shadow-md
+        hover:-translate-y-0.5
+        hover:bg-white
+        cursor-pointer
+        rounded-xl ${isEnded ? "opacity-75" : ""}`}>
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2">
             <div className="flex-1">
