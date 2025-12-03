@@ -18,6 +18,9 @@ export default async function MessagesPage() {
           userId: session.user.id,
         },
       },
+      messages: {
+        some: {}, // Only include conversations with at least one message
+      },
     },
     include: {
       participants: {

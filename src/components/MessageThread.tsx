@@ -6,6 +6,7 @@ import { Textarea } from "./ui/textarea"
 import { Card, CardContent } from "./ui/card"
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
 import { useSocket } from "../contexts/SocketContext"
+import { ArrowDown } from "lucide-react"
 import { EndChatDialog } from "./EndChatDialog"
 import { MoreVertical, XCircle, CheckCircle2 } from "lucide-react"
 import {
@@ -53,19 +54,76 @@ export function MessageThread({
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [showEndDialog, setShowEndDialog] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [showScrollButton, setShowScrollButton] = useState(false)
+
+  const threadRef = useRef<HTMLDivElement | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout>()
+  const isInitialMount = useRef(true)
 
   const { socket, isConnected } = useSocket()
 
   const isEnded = conversationStatus === "ENDED"
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  const scrollMessagesToBottom = (smooth = true) => {
+  const container = messagesContainerRef.current
+  if (!container) return
+
+  const top = container.scrollHeight - container.clientHeight
+
+  if ("scrollTo" in container && smooth) {
+    container.scrollTo({ top, behavior: "smooth" })
+  } else {
+    container.scrollTop = top
+  }
+}
+  // Scroll only the messages container to the bottom
+  const scrollToBottom = (smooth = true) => {
+    scrollMessagesToBottom(smooth)
+  }
+  const userIsNearBottom = () => {
+    const container = messagesContainerRef.current
+    if (!container) return true
+
+    const threshold = 120
+    const position =
+      container.scrollHeight - container.scrollTop - container.clientHeight
+
+    return position <= threshold
   }
 
   useEffect(() => {
-    scrollToBottom()
+    if (!isInitialMount.current && userIsNearBottom()) {
+      scrollMessagesToBottom()
+    }
+  }, [messages])
+
+
+  const handleScroll = () => {
+    setShowScrollButton(!userIsNearBottom())
+  }
+
+  // Auto-scroll on initial mount
+  useEffect(() => {
+    if (isInitialMount.current) {
+      // Bring the chat into view, but not all the way to the footer
+      threadRef.current?.scrollIntoView({
+      behavior: "auto",
+      block: "center",   // key: center, not "end"
+    })
+
+    // Then scroll messages to the bottom inside the chat box
+    scrollMessagesToBottom(false)
+      isInitialMount.current = false
+    }
+  }, [])
+
+  // Auto-scroll only when new messages arrive and user is at bottom
+  useEffect(() => {
+    if (!isInitialMount.current && userIsNearBottom()) {
+      scrollToBottom()
+    }
   }, [messages])
 
   // Socket event listeners
@@ -79,7 +137,7 @@ export function MessageThread({
     socket.on("new-message", (message: Message) => {
       setMessages((prev) => {
         // Avoid duplicates
-        if (prev.some((m:{id:string}) => m.id === message.id)) {
+        if (prev.some((m: { id: string }) => m.id === message.id)) {
           return prev
         }
         return [...prev, message]
@@ -87,19 +145,22 @@ export function MessageThread({
     })
 
     // Listen for typing indicators
-    socket.on("user-typing", ({ userId, isTyping }: { userId: string, isTyping: boolean }) => {
-      if (userId === currentUserId) return
-      
-      setTypingUsers((prev) => {
-        const updated = new Set(prev)
-        if (isTyping) {
-          updated.add(userId)
-        } else {
-          updated.delete(userId)
-        }
-        return updated
-      })
-    })
+    socket.on(
+      "user-typing",
+      ({ userId, isTyping }: { userId: string; isTyping: boolean }) => {
+        if (userId === currentUserId) return
+
+        setTypingUsers((prev) => {
+          const updated = new Set(prev)
+          if (isTyping) {
+            updated.add(userId)
+          } else {
+            updated.delete(userId)
+          }
+          return updated
+        })
+      },
+    )
 
     return () => {
       socket.emit("leave-conversation", conversationId)
@@ -214,7 +275,7 @@ export function MessageThread({
   }
 
   return (
-    <div className="flex flex-col h-[600px]">
+    <div ref={threadRef} className="flex flex-col h-[600px]">
       {/* Options Menu */}
       <div className="flex justify-between items-center px-3 py-2 border-b">
         <div className="text-sm font-medium">
@@ -259,27 +320,42 @@ export function MessageThread({
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto pb-4 space-y-4 relative"
+      >
         {messages.map((message) => {
           const isOwnMessage = message.sender.id === currentUserId
-          
+
           return (
             <div
               key={message.id}
               className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
             >
-              <Card className={`max-w-[70%] ${isOwnMessage ? "bg-primary text-primary-foreground" : ""}`}>
+              <Card
+                className={`max-w-[70%] ${
+                  isOwnMessage ? "bg-primary text-primary-foreground" : ""
+                }`}
+              >
                 <CardContent className="p-3">
                   {!isOwnMessage && message.sender.profile && (
                     <p className="text-xs font-semibold mb-1">
-                      {message.sender.profile.firstName} {message.sender.profile.lastInitial}.
+                      {message.sender.profile.firstName}{" "}
+                      {message.sender.profile.lastInitial}.
                     </p>
                   )}
                   <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-                  <p className={`text-xs mt-1 ${isOwnMessage ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                    {new Date(message.createdAt).toLocaleTimeString([], { 
-                      hour: "2-digit", 
-                      minute: "2-digit" 
+                  <p
+                    className={`text-xs mt-1 ${
+                      isOwnMessage
+                        ? "text-primary-foreground/70"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {new Date(message.createdAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </p>
                 </CardContent>
@@ -288,6 +364,21 @@ export function MessageThread({
           )
         })}
         <div ref={messagesEndRef} />
+
+        {/* Scroll to Bottom Button */}
+        {showScrollButton && (
+          <div className="sticky bottom-4 left-0 right-0 flex justify-center pointer-events-none">
+            <Button
+              onClick={() => scrollToBottom()}
+              className="pointer-events-auto shadow-lg"
+              size="sm"
+              variant="secondary"
+            >
+              <ArrowDown className="h-4 w-4 mr-2" />
+              Scroll to bottom
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Typing Indicator */}
