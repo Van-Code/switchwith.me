@@ -1,20 +1,18 @@
 /**
  * Email Notification Service
  *
- * Sends notification emails via SpaceMail
+ * Sends notification emails via Resend
  */
 
 import { NotificationType } from "@prisma/client"
 import type { MessageNotificationData, MatchNotificationData } from "./notifications"
+import { Resend } from "resend";
 
-const SPACEMAIL_API_KEY = process.env.SPACEMAIL_API_KEY
-const SPACEMAIL_FROM = process.env.SPACEMAIL_FROM || "notifications@switchwith.me"
-const SPACEMAIL_NOTIFICATION_TO_OVERRIDE = process.env.SPACEMAIL_NOTIFICATION_TO_OVERRIDE
-const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://switchwith.me"
+const RESEND_API_KEY = process.env.RESEND_API_KEY
+const RESEND_FROM = process.env.RESEND_FROM || "support@switchwith.me"
+const APP_BASE_URL = process.env.NEXTAUTH_URL || "https://switchwith.me"
 
-// SpaceMail API endpoint - adjust this to match SpaceMail's actual API
-// Check SpaceMail docs at https://spacemail.com/docs for the correct endpoint
-const SPACEMAIL_API_URL = "https://api.spacemail.com/v1/send"
+const resend = new Resend(RESEND_API_KEY);
 
 interface EmailPayload {
   to: string
@@ -24,7 +22,7 @@ interface EmailPayload {
 }
 
 /**
- * Sends a notification email via SpaceMail
+ * Sends a notification email via Resend
  */
 export async function sendNotificationEmail({
   to,
@@ -32,45 +30,33 @@ export async function sendNotificationEmail({
   type,
   data
 }: EmailPayload): Promise<void> {
-  if (!SPACEMAIL_API_KEY) {
-    console.warn("SPACEMAIL_API_KEY not configured, skipping email notification")
+  if (!RESEND_API_KEY) {
+    console.warn("RESEND_API_KEY not configured, skipping email notification")
     return
   }
 
   // Use override email for development/testing if configured
-  const recipientEmail = SPACEMAIL_NOTIFICATION_TO_OVERRIDE || to
-
+  const recipientEmail = to
   const { subject, text } = buildEmailContent({ userName, type, data })
 
   try {
-    const response = await fetch(SPACEMAIL_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SPACEMAIL_API_KEY}`
-        // Adjust headers based on SpaceMail's actual API requirements
-      },
-      body: JSON.stringify({
-        from: SPACEMAIL_FROM,
-        to: recipientEmail,
+    const {data:response, error} = await resend.emails.send({
+        from: RESEND_FROM,
+        to: [recipientEmail],
         subject,
-        text
-        // If SpaceMail supports HTML emails, you can add:
-        // html: buildHtmlEmail({ userName, type, data }),
-      })
+        html: buildHtmlEmail({ userName, type, data }),
+        //text
     })
-
-    if (!response.ok) {
-      const errorText = await response.text()
+    if (error) {
       throw new Error(
-        `SpaceMail API error: ${response.status} ${response.statusText} - ${errorText}`
+        `Resend API error: ${error.statusCode} ${error.name} - ${error.message}`
       )
     }
 
     console.log(`Notification email sent to ${recipientEmail} (type: ${type})`)
-  } catch (error) {
-    console.error("Failed to send notification email:", error)
-    throw error
+  } catch (err) {
+    console.error("Failed to send notification email:", err)
+    throw err
   }
 }
 
@@ -157,11 +143,6 @@ To turn off email notifications, visit ${APP_BASE_URL}/profile`
   return { subject, text }
 }
 
-/**
- * Optional: Build HTML email for better formatting
- * Uncomment and use if SpaceMail supports HTML emails
- */
-/*
 function buildHtmlEmail({
   userName,
   type,
@@ -173,7 +154,6 @@ function buildHtmlEmail({
 }): string {
   const { text } = buildEmailContent({ userName, type, data });
 
-  // Basic HTML wrapper - you can make this fancier with proper email templates
   return `
     <!DOCTYPE html>
     <html>
@@ -187,4 +167,3 @@ function buildHtmlEmail({
     </html>
   `;
 }
-*/
