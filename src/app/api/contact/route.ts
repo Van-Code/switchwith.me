@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
+import { Resend } from "resend"
 
+const RESEND_API_KEY = process.env.RESEND_API_KEY
+const RESEND_FROM = process.env.RESEND_FROM || "support@switchwith.me"
+const APP_BASE_URL = process.env.NEXTAUTH_URL || "https://switchwith.me"
+
+const resend = new Resend(RESEND_API_KEY)
 interface ContactFormData {
   name: string
   email: string
@@ -38,12 +44,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get SpaceMail configuration from environment variables
-    const spaceMailApiKey = process.env.SPACEMAIL_API_KEY
-    const spaceMailFrom = process.env.SPACEMAIL_FROM
-    const spaceMailTo = process.env.SPACEMAIL_TO
-
-    if (!spaceMailApiKey || !spaceMailFrom || !spaceMailTo) {
+    if (!RESEND_API_KEY || !RESEND_FROM) {
       console.error("SpaceMail environment variables are not configured")
       return NextResponse.json(
         { error: "Email service is not configured. Please try again later." },
@@ -58,53 +59,33 @@ export async function POST(request: NextRequest) {
 
     // Build email body
     const emailBody = `
-You have received a new message from the contact form:
-Name: ${body.name}
-Email: ${body.email}
-${body.subject ? `Subject: ${body.subject}` : ""}
+You have received a new message from the contact form:/n
+Name: ${body.name}/n
+Email: ${body.email}/n
+${body.subject ? `Subject: ${body.subject}` : ""}/n
 Message:
-${body.message}
+${body.message}/n
 ---
 Sent at: ${new Date().toISOString()}
     `.trim()
 
-    // Send email via SpaceMail API
-    // NOTE: Adjust the API endpoint and request structure based on SpaceMail's actual documentation
-    // This is a generic implementation that should work with most transactional email APIs
-    const spaceMailResponse = await fetch("https://api.spacemail.com/v1/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // Use whichever auth header SpaceMail requires:
-        // Option 1: Bearer token
-        Authorization: `Bearer ${spaceMailApiKey}`,
-        // Option 2: Custom header (uncomment if needed)
-        // "X-API-Key": spaceMailApiKey,
-      },
-      body: JSON.stringify({
-        from: spaceMailFrom,
-        to: spaceMailTo,
-        subject: emailSubject,
-        text: emailBody,
-        // If SpaceMail supports HTML, you can add an html field:
-        // html: `<p><strong>Name:</strong> ${body.name}</p>...`,
-      }),
+    const { data: response, error } = await resend.emails.send({
+      from: RESEND_FROM,
+      to: [RESEND_FROM],
+      subject: emailSubject,
+      html: emailBody,
+      replyTo: body.email,
     })
-
-    if (!spaceMailResponse.ok) {
-      const errorText = await spaceMailResponse.text()
-      console.error("SpaceMail API error:", spaceMailResponse.status, errorText)
-      return NextResponse.json(
-        { error: "Failed to send message. Please try again later." },
-        { status: 500 }
+    if (error) {
+      throw new Error(
+        `Resend API error: ${error.statusCode} ${error.name} - ${error.message}`
       )
     }
-
     console.log(`Contact form message sent from ${body.email}`)
 
     return NextResponse.json({ success: true }, { status: 200 })
-  } catch (error) {
-    console.error("Error processing contact form:", error)
+  } catch (err) {
+    console.error("Error processing contact form:", err)
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again later." },
       { status: 500 }
@@ -114,8 +95,5 @@ Sent at: ${new Date().toISOString()}
 
 // Only allow POST requests
 export async function GET() {
-  return NextResponse.json(
-    { error: "Method not allowed" },
-    { status: 405 }
-  )
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 })
 }

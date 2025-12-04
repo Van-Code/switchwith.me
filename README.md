@@ -11,6 +11,7 @@ The platform was created specifically for Golden State Valkyries fans and the br
 ## Features
 
 ### Core Functionality
+
 - **Listing Management**: Create and manage ticket swap listings with detailed seat information
 - **Smart Matching**: Browse listings and get matched with compatible swap partners based on preferences
 - **Real-time Messaging**: Direct messaging system with WebSocket support for instant communication
@@ -19,6 +20,7 @@ The platform was created specifically for Golden State Valkyries fans and the br
 - **Team Support**: Multi-team support with team branding and colors
 
 ### User Experience
+
 - **Google OAuth Authentication**: Secure, password-free sign-in
 - **Responsive Design**: Mobile-friendly interface built with Tailwind CSS
 - **Real-time Updates**: Socket.IO powered real-time features for messaging and notifications
@@ -26,6 +28,7 @@ The platform was created specifically for Golden State Valkyries fans and the br
 - **Listing Status Management**: Mark listings as active, inactive, matched, or expired
 
 ### Safety & Trust
+
 - **Profile Verification**: Email, phone, and season ticket holder verification badges
 - **Swap Counter**: Track successful swap history
 - **Transparent Conversations**: All communication kept within the platform
@@ -34,6 +37,7 @@ The platform was created specifically for Golden State Valkyries fans and the br
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: Next.js 14 (React 18)
 - **Styling**: Tailwind CSS with custom theme
 - **UI Components**: Radix UI primitives
@@ -41,6 +45,7 @@ The platform was created specifically for Golden State Valkyries fans and the br
 - **Icons**: Lucide React
 
 ### Backend
+
 - **Framework**: Next.js API Routes
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js with Google OAuth
@@ -48,6 +53,7 @@ The platform was created specifically for Golden State Valkyries fans and the br
 - **Password Hashing**: bcryptjs (for legacy support)
 
 ### Infrastructure
+
 - **Node.js**: Version 22.x
 - **Custom Server**: Node.js HTTP server with Socket.IO integration
 - **Environment Management**: env-cmd for multi-environment support
@@ -64,12 +70,14 @@ Before setting up the project, ensure you have:
 ## Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd kidney-swap
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -77,6 +85,7 @@ Before setting up the project, ensure you have:
 3. **Set up environment variables**
 
    Copy the example environment file:
+
    ```bash
    cp .env.example .env.development
    ```
@@ -106,21 +115,25 @@ Before setting up the project, ensure you have:
 4. **Set up the database**
 
    Create the database:
+
    ```bash
    createdb valkyries_seat_swap
    ```
 
    Push the schema to the database:
+
    ```bash
    npm run db:push
    ```
 
    Or use migrations (recommended for production):
+
    ```bash
    npm run db:migrate
    ```
 
    Seed the database with initial data (teams, etc.):
+
    ```bash
    npm run db:seed
    ```
@@ -128,6 +141,7 @@ Before setting up the project, ensure you have:
 ## Running the Application
 
 ### Development Mode
+
 ```bash
 npm run start:dev
 ```
@@ -135,6 +149,7 @@ npm run start:dev
 The application will be available at `http://localhost:3000`
 
 ### Production Build
+
 ```bash
 # Build the application
 npm run build:prod
@@ -144,6 +159,7 @@ npm run start:prod
 ```
 
 ### Other Commands
+
 ```bash
 # Linting
 npm run lint
@@ -203,26 +219,32 @@ kidney-swap/
 ## Key Features Implementation
 
 ### Authentication Flow
+
 - OAuth-only authentication using NextAuth.js
 - Google sign-in integration
 - Automatic user and profile creation on first login
 - Session management with JWT
 
 ### Listing System
+
 Users can:
+
 - Create listings specifying what seats they have and want
 - Filter listings by team, date, section, and zone
 - Toggle listing status (active/inactive)
 - View suggested matches based on compatibility
 
 ### Matching Algorithm
+
 The platform includes a smart matching system (`src/lib/matching.ts`) that:
+
 - Finds compatible swaps based on wants/haves
 - Scores matches based on compatibility
 - Suggests potential swap partners
 - Considers zone preferences and section preferences
 
 ### Real-time Messaging
+
 - Socket.IO integration for real-time communication
 - Typing indicators
 - Message notifications
@@ -230,6 +252,7 @@ The platform includes a smart matching system (`src/lib/matching.ts`) that:
 - Ability to end conversations with reasons
 
 ### Notification System
+
 - In-app notification bell with unread counts
 - Email notifications (configurable per user)
 - Notification types: matches, new messages
@@ -258,6 +281,7 @@ The project supports multiple environment configurations:
 - **Production**: `npm run build:prod` / `npm run start:prod`
 
 Environment files:
+
 - `.env.development` - Development environment
 - `.env.production` - Production environment
 
@@ -285,4 +309,4 @@ Built with care for the Golden State Valkyries community and all women's and gen
 
 ---
 
-*Because we're better when we sit together.*
+_Because we're better when we sit together._
