@@ -1,4 +1,19 @@
-export { default } from "next-auth/middleware"
+import { withAuth } from "next-auth/middleware"
+import { NextResponse } from "next/server"
 
-export const config = { matcher: ["/messages(.*)","/profile","/settings","/listings/new", "/matches"] }
+export default withAuth(
+  function middleware(req) {
+    return NextResponse.next()
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
+    pages: {
+      signIn: "/auth/signin",
+    },
+  }
+)
+
+export const config = { matcher: ["/messages(.*)", "/profile", "/settings", "/listings/new", "/matches"] }
 

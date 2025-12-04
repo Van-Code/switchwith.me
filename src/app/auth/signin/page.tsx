@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -25,12 +26,16 @@ const prisma = new PrismaClient()
 export default function SignInPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const searchParams = useSearchParams()
+
+  // Get callbackUrl from query params, default to /listings
+  const callbackUrl = searchParams.get("callbackUrl") || "/listings"
 
   const handleGoogleSignIn = async () => {
     setLoading(true)
     setError("") // Clear any existing errors
     try {
-      await signIn("google", { callbackUrl: "/listings" })
+      await signIn("google", { callbackUrl })
     } catch (error) {
       setError("An error occurred. Please try again.")
       setLoading(false)

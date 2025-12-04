@@ -303,12 +303,12 @@ export default function ListingsFilters() {
                 <Popover>
                   <PopoverTrigger
                     type="button"
-                    className="inline-flex items-center justify-center rounded-md border border-cyan-200 px-2 text-slate-600 hover:bg-cyan-50"
+                    className="inline-flex items-center justify-center rounded-md border border-cyan-200 px-2 text-slate-600 hover:bg-cyan-50 transition-colors"
                     aria-label="Open calendar to pick start date"
                   >
                     <CalendarIcon className="h-4 w-4" />
                   </PopoverTrigger>
-                  <PopoverContent className="p-0" align="start">
+                  <PopoverContent className="p-3 w-auto bg-white rounded-lg shadow-lg border border-slate-200" align="start">
                     <Calendar
                       mode="single"
                       selected={fromDateObj}
@@ -370,12 +370,12 @@ export default function ListingsFilters() {
                   <PopoverTrigger
                     type="button"
                     disabled={!filters.from}
-                    className="inline-flex items-center justify-center rounded-md border border-cyan-200 px-2 text-slate-600 hover:bg-cyan-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center rounded-md border border-cyan-200 px-2 text-slate-600 hover:bg-cyan-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     aria-label="Open calendar to pick end date"
                   >
                     <CalendarIcon className="h-4 w-4" />
                   </PopoverTrigger>
-                  <PopoverContent className="p-0" align="start">
+                  <PopoverContent className="p-3 w-auto bg-white rounded-lg shadow-lg border border-slate-200" align="start">
                     <Calendar
                       mode="single"
                       selected={toDateObj}

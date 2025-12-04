@@ -7,6 +7,8 @@ import ListingsSortSelect from "@/components/listings-sort-select";
 import { ListingsClient } from "./ListingsClient";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { signIn } from "next-auth/react";
+import { LogIn } from "lucide-react";
 
 interface ListingsPageClientProps {
   currentUserId?: string;
@@ -16,6 +18,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
   const { activeFilters } = useListingsFilters();
   const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const isAuthenticated = !!currentUserId;
 
   // Fetch listings whenever active filters change
   useEffect(() => {
@@ -51,6 +54,10 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
 
     fetchListings();
   }, [activeFilters]);
+
+  // For unauthenticated users, limit to first 6 listings
+  const displayedListings = !isAuthenticated ? listings.slice(0, 6) : listings;
+  const totalListings = listings.length;
 
   const hasFilters = !!(
     activeFilters.team.length > 0 ||
@@ -102,6 +109,27 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
 
             {/* Right column: Sort + Listings */}
             <div className="space-y-4">
+              {/* Sign-in CTA for unauthenticated users */}
+              {!isAuthenticated && totalListings > 0 && (
+                <div className="bg-gradient-to-r from-cyan-600 to-cyan-700 rounded-lg border border-cyan-800 px-6 py-4 shadow-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="text-white">
+                      <h3 className="font-bold text-lg mb-1">You're viewing a preview of real listings</h3>
+                      <p className="text-cyan-50 text-sm">
+                        Sign in with Google to unlock full details, see all {totalListings} listings, and start swapping seats for free.
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => signIn("google", { callbackUrl: "/listings" })}
+                      className="bg-white text-cyan-700 hover:bg-cyan-50 font-semibold shadow-md whitespace-nowrap"
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign in with Google
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Toolbar with result count and sort */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white rounded-lg border border-slate-200 px-4 py-3 shadow-sm">
                 <div className="text-sm text-slate-600">
@@ -109,20 +137,38 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                     "Loading..."
                   ) : hasFilters ? (
                     <>
-                      Found <span className="font-semibold text-slate-900">{listings.length}</span>{" "}
-                      {listings.length === 1 ? "listing" : "listings"}
-                      {filterCount > 0 && (
+                      {!isAuthenticated && totalListings > displayedListings.length ? (
                         <>
-                          {" "}
-                          with <span className="font-semibold">{filterCount}</span>{" "}
-                          {filterCount === 1 ? "filter" : "filters"} applied
+                          Showing <span className="font-semibold text-slate-900">{displayedListings.length}</span> of{" "}
+                          <span className="font-semibold text-slate-900">{totalListings}</span> {totalListings === 1 ? "listing" : "listings"}
+                        </>
+                      ) : (
+                        <>
+                          Found <span className="font-semibold text-slate-900">{displayedListings.length}</span>{" "}
+                          {displayedListings.length === 1 ? "listing" : "listings"}
+                          {filterCount > 0 && (
+                            <>
+                              {" "}
+                              with <span className="font-semibold">{filterCount}</span>{" "}
+                              {filterCount === 1 ? "filter" : "filters"} applied
+                            </>
+                          )}
                         </>
                       )}
                     </>
                   ) : (
                     <>
-                      Showing <span className="font-semibold text-slate-900">{listings.length}</span>{" "}
-                      {listings.length === 1 ? "listing" : "listings"}
+                      {!isAuthenticated && totalListings > displayedListings.length ? (
+                        <>
+                          Showing <span className="font-semibold text-slate-900">{displayedListings.length}</span> of{" "}
+                          <span className="font-semibold text-slate-900">{totalListings}</span> {totalListings === 1 ? "listing" : "listings"}
+                        </>
+                      ) : (
+                        <>
+                          Showing <span className="font-semibold text-slate-900">{displayedListings.length}</span>{" "}
+                          {displayedListings.length === 1 ? "listing" : "listings"}
+                        </>
+                      )}
                     </>
                   )}
                 </div>
@@ -139,7 +185,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                     <p className="text-lg font-medium text-slate-900 mb-2">Loading listings...</p>
                   </div>
                 </div>
-              ) : listings.length === 0 ? (
+              ) : displayedListings.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-lg border border-slate-200 shadow-sm">
                   <div className="max-w-md mx-auto px-4">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-100 to-orange-100 flex items-center justify-center">
@@ -158,17 +204,26 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                     <p className="text-slate-600 mb-6">
                       {hasFilters ? "Try adjusting your filters or search criteria." : "Be the first to create a listing!"}
                     </p>
-                    {!hasFilters && (
+                    {!hasFilters && isAuthenticated && (
                       <Link href="/listings/new">
                         <Button className="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white">
                           Create a Listing
                         </Button>
                       </Link>
                     )}
+                    {!hasFilters && !isAuthenticated && (
+                      <Button
+                        onClick={() => signIn("google", { callbackUrl: "/listings" })}
+                        className="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white"
+                      >
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Sign in to create listings
+                      </Button>
+                    )}
                   </div>
                 </div>
               ) : (
-                <ListingsClient listings={listings} currentUserId={currentUserId} />
+                <ListingsClient listings={displayedListings} currentUserId={currentUserId} />
               )}
             </div>
           </div>

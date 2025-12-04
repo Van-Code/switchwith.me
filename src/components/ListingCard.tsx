@@ -40,6 +40,15 @@ interface ListingCardProps {
 export function ListingCard({ listing, onMessage, isAuthenticated = false }: ListingCardProps) {
   const gameDate = new Date(listing.gameDate)
 
+  // Determine zone category for preview mode
+  const getZoneCategory = (zone: string): string => {
+    const zoneLower = zone.toLowerCase()
+    if (zoneLower.includes('lower') || zoneLower.includes('floor')) return 'Lower Bowl'
+    if (zoneLower.includes('upper')) return 'Upper Bowl'
+    if (zoneLower.includes('club') || zoneLower.includes('suite')) return 'Club/Suite'
+    return 'General Seating'
+  }
+
   return (
     <Card className={listing.boosted ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent shadow-lg" : ""}>
       <CardHeader>
@@ -63,10 +72,18 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-lg">
-              Section {listing.haveSection}, Row {listing.haveRow}
+              {isAuthenticated ? (
+                <>Section {listing.haveSection}, Row {listing.haveRow}</>
+              ) : (
+                <>{getZoneCategory(listing.haveZone)}</>
+              )}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Seat {listing.haveSeat} • {listing.haveZone}
+              {isAuthenticated ? (
+                <>Seat {listing.haveSeat} • {listing.haveZone}</>
+              ) : (
+                <>Sign in to see exact location</>
+              )}
             </p>
           </div>
           <div className="flex flex-col gap-1.5 items-end">
