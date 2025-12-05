@@ -82,6 +82,41 @@ export async function POST(req: Request) {
       )
     }
 
+    // If listingId is provided, check if conversation already exists for this specific listing
+    if (listingId) {
+      const existingListingConversation = await prisma.conversation.findFirst({
+        where: {
+          listingId,
+          participants: {
+            some: {
+              userId: session.user.id,
+            },
+          },
+        },
+        include: {
+          participants: {
+            include: {
+              user: {
+                include: {
+                  profile: true,
+                },
+              },
+            },
+          },
+          messages: {
+            orderBy: {
+              createdAt: "asc",
+            },
+          },
+          listing: true,
+        },
+      })
+
+      if (existingListingConversation) {
+        return NextResponse.json({ conversation: existingListingConversation })
+      }
+    }
+
     // Check if conversation already exists between these two users
     const existingConversation = await prisma.conversation.findFirst({
       where: {

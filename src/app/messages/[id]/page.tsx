@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { MessageThreadClient } from "./MessageThreadClient"
-import { ConversationListingHeader } from "@/components/ConversationListingHeader"
+import { ConversationSidebar } from "@/components/ConversationSidebar"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
@@ -84,34 +84,50 @@ export default async function ConversationPage({ params }: { params: { id: strin
   } : null
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4">
-      <div className="flex items-center gap-4">
-        <Link href="/messages">
-          <Button variant="ghost" size="icon" className="hover:bg-slate-100">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {otherParticipant?.user.profile
-              ? `${otherParticipant.user.profile.firstName} ${otherParticipant.user.profile.lastInitial}.`
-              : "Unknown User"}
-          </h1>
-          <p className="text-sm text-slate-600">Conversation</p>
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50/30 via-white to-orange-50/30">
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-4">
+            <Link href="/messages">
+              <Button variant="ghost" size="icon" className="hover:bg-slate-100">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-xl font-bold text-slate-900">
+                {otherParticipant?.user.profile
+                  ? `${otherParticipant.user.profile.firstName} ${otherParticipant.user.profile.lastInitial}.`
+                  : "Unknown User"}
+              </h1>
+              <p className="text-sm text-slate-600">Conversation</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Listing Header */}
-      <ConversationListingHeader listing={serializedListing} />
+      {/* Main Content - Side by Side Layout */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid lg:grid-cols-[350px_1fr] gap-6">
+          {/* Left Sidebar - Listing Details & Related */}
+          <ConversationSidebar
+            listing={serializedListing}
+            listingId={conversation.listingId}
+            currentUserId={session.user.id}
+          />
 
-      {/* Messages */}
-      <MessageThreadClient
-        conversationId={conversation.id}
-        initialMessages={serializedMessages}
-        currentUserId={session.user.id}
-        conversationStatus={conversation.status}
-        listingId={conversation.listingId}
-      />
+          {/* Right - Message Thread */}
+          <main className="min-h-[600px]">
+            <MessageThreadClient
+              conversationId={conversation.id}
+              initialMessages={serializedMessages}
+              currentUserId={session.user.id}
+              conversationStatus={conversation.status}
+              listingId={conversation.listingId}
+            />
+          </main>
+        </div>
+      </div>
     </div>
   )
 }
