@@ -1,13 +1,13 @@
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { NotificationBell } from "@/components/notification-bell";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import Link from "next/link"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { NotificationBell } from "@/components/notification-bell"
+import { ProfileDropdown } from "@/components/profile-dropdown"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function Header() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions)
 
   return (
     <nav className="border-b bg-white">
@@ -19,7 +19,7 @@ export async function Header() {
               <div className="flex items-center gap-3">
                 <div className="square-full overflow-hidden w-8 h-8 bg-muted">
                   <Image
-                    src="/images/switch_logo.jpeg"
+                    src="/images/switch_logo--white.jpg"
                     alt="Switch With Me logo"
                     width={60}
                     height={60}
@@ -74,16 +74,13 @@ export async function Header() {
                   </Button>
                 </Link>
                 <Link href="/auth/signin">
-                  <Button size="sm">
-                    Sign In
-                  </Button>
+                  <Button size="sm">Sign In</Button>
                 </Link>
-             
               </>
             )}
           </div>
         </div>
       </div>
     </nav>
-  );
+  )
 }
