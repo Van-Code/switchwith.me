@@ -1,14 +1,23 @@
+# dependencies
 node_modules/
-.env
-.env.development
-.env.production
+package-lock.json
+
+# misc
 *.log
 .DS_Store
 scripts.txt
-dist/
-coverage/
 .vscode/
 .idea/
+
+# nextjs
 .next/
-package-lock.json
-src_bk/
+dist/
+.vercel
+
+# local env
+.env
+.env.development
+.env.production
+
+#testing 
+coverage/
