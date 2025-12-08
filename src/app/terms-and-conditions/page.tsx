@@ -270,7 +270,7 @@ export default function TermsAndConditionsPage() {
             <p className="text-center">
               If you have questions or concerns about safety or something sketchy
               happening on the site, you can reach out at:{" "}
-              <strong className="text-amber-800">[your contact email here]</strong>
+              <strong className="text-amber-800">bonsaitrees@gmail.com</strong>
             </p>
           </CardContent>
         </Card>
