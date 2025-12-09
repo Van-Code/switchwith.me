@@ -13,6 +13,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { isFlagUserEnabled } from "@/lib/features"
 
 export default async function HowItWorksPage() {
   const session = await getServerSession(authOptions)
@@ -251,7 +252,10 @@ export default async function HowItWorksPage() {
                   random links.
                 </li>
                 <li>Double check game, date, and team before you agree on a swap.</li>
-                <li>If something feels off, you can report a listing or block a user.</li>
+                
+                {isFlagUserEnabled() && (
+                  <li>If something feels off, you can report a listing or block a user.</li>
+                )}
               </ul>
               <p className="text-xs text-slate-500 pt-1">
                 Switch With Me is a fan project. It is not affiliated with any team,

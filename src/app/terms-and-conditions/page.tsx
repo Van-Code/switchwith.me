@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { isFlagUserEnabled } from "@/lib/features"
 
 export const metadata: Metadata = {
   title: "Terms, Safety & Common Sense - Switch With Me",
@@ -173,10 +174,12 @@ export default function TermsAndConditionsPage() {
                 you can always say <strong>no</strong>
               </li>
             </ul>
-            <p className="bg-white p-3 rounded-md border border-emerald-200">
-              If you think someone is scamming or harassing people, you can report it and
-              we may review or remove their listings or account.
-            </p>
+            {isFlagUserEnabled() && (
+              <p className="bg-white p-3 rounded-md border border-emerald-200">
+                If you think someone is scamming or harassing people, you can report it and
+                we may review or remove their listings or account.
+              </p>
+            )}
           </CardContent>
         </Card>
 
