@@ -61,6 +61,7 @@ export default function ListingsFilters() {
   const {
     filters,
     setTeam,
+    setZone,
     setSection,
     setMinPrice,
     setMaxPrice,
@@ -188,6 +189,7 @@ export default function ListingsFilters() {
 
   const hasActiveFilters = !!(
     activeFilters.team.length > 0 ||
+    activeFilters.zone ||
     activeFilters.section ||
     activeFilters.minPrice ||
     activeFilters.maxPrice ||
@@ -233,6 +235,20 @@ export default function ListingsFilters() {
         </div>
 
         <div className="border-t border-orange-200" />
+
+         {/* Zone filter */}
+        <div className="space-y-2">
+          <Label htmlFor="filter-zone" className="text-sm font-semibold text-slate-700">
+            Zone
+          </Label>
+          <Input
+            id="filter-zone"
+            placeholder="e.g., Courtside"
+            value={filters.zone}
+            onChange={(e) => setZone(e.target.value)}
+            className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
+          />
+        </div>
 
         {/* Section filter */}
         <div className="space-y-2">

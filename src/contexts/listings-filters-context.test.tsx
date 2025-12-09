@@ -75,6 +75,7 @@ describe('ListingsFiltersContext', () => {
 
       expect(result.current.filters).toEqual({
         team: [],
+        zone: '',
         section: '',
         minPrice: '',
         maxPrice: '',
@@ -91,6 +92,7 @@ describe('ListingsFiltersContext', () => {
 
       expect(result.current.activeFilters).toEqual({
         team: [],
+        zone: '',
         section: '',
         minPrice: '',
         maxPrice: '',
@@ -112,6 +114,18 @@ describe('ListingsFiltersContext', () => {
       });
 
       expect(result.current.filters.team).toEqual(['team1', 'team2']);
+    });
+
+    it('setZone updates zone filter', () => {
+      const { result } = renderHook(() => useListingsFilters(), {
+        wrapper: ListingsFiltersProvider,
+      });
+
+      act(() => {
+        result.current.setZone('Club');
+      });
+
+      expect(result.current.filters.zone).toBe('Club');
     });
 
     it('setSection updates section filter', () => {
@@ -221,7 +235,7 @@ describe('ListingsFiltersContext', () => {
       });
 
       act(() => {
-        result.current.setTeam(['team1']);
+       result.current.setTeam(['team1']);
         result.current.setSection('Section A');
       });
 
@@ -307,6 +321,7 @@ describe('ListingsFiltersContext', () => {
 
       expect(result.current.filters).toEqual({
         team: [],
+        zone: '',
         section: '',
         minPrice: '',
         maxPrice: '',
@@ -332,6 +347,7 @@ describe('ListingsFiltersContext', () => {
       });
 
       expect(result.current.filters.team).toEqual([]);
+      expect(result.current.filters.zone).toBe('');
       expect(result.current.filters.section).toBe('');
       expect(result.current.activeFilters.team).toEqual([]);
       expect(result.current.activeFilters.section).toBe('');
@@ -417,6 +433,7 @@ describe('ListingsFiltersContext', () => {
 
       expect(result.current.filters).toEqual({
         team: [],
+        zone: '',
         section: '',
         minPrice: '',
         maxPrice: '',

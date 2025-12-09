@@ -6,10 +6,10 @@ import { ProfileHeader } from "@/components/ProfileHeader"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { NotificationSettings } from "@/components/notification-settings"
-import { DeleteAccountSection } from "@/components/DeleteAccountSection"
 import Link from "next/link"
 import { Edit, MapPin, Sparkles } from "lucide-react"
+import { isBoostEnabled } from "@/lib/features"
+
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions)
@@ -173,7 +173,7 @@ function MyListingsSection({
 function MyListingCard({ listing }: { listing: any }) {
   return (
     <Card className={`border-slate-200 hover:shadow-md transition-shadow ${
-      listing.boosted ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent" : ""
+     isBoostEnabled() && listing.boosted ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent" : ""
     }`}>
       <CardHeader>
         <div className="flex justify-between items-start">
@@ -184,7 +184,7 @@ function MyListingCard({ listing }: { listing: any }) {
             <p className="text-xs text-slate-500 mt-1">{listing.haveZone}</p>
           </div>
           <div className="flex flex-col gap-1.5 items-end">
-            {listing.boosted && (
+            {isBoostEnabled() && listing.boosted && (
               <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs">
                 <Sparkles className="h-3 w-3 mr-1" />
                 Boosted
@@ -200,7 +200,7 @@ function MyListingCard({ listing }: { listing: any }) {
           {new Date(listing.gameDate).toLocaleDateString()}
         </div>
         <ListingStatusToggle listingId={listing.id} currentStatus={listing.status} />
-        {listing.status === "ACTIVE" && !listing.boosted && (
+        {isBoostEnabled() && listing.status === "ACTIVE" && !listing.boosted && (
           <BoostListingButton listingId={listing.id} />
         )}
       </CardContent>

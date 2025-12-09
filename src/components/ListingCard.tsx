@@ -1,9 +1,10 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
-import { Calendar, MapPin, DollarSign, Sparkles } from "lucide-react"
+import { Calendar, DollarSign, Sparkles } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { isBoostEnabled } from "@/lib/features"
 
 interface ListingCardProps {
   listing: {
@@ -50,7 +51,7 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
   }
 
   return (
-    <Card className={listing.boosted ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent shadow-lg" : ""}>
+    <Card className={isBoostEnabled() && listing.boosted ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent shadow-lg" : ""}>
       <CardHeader>
         {listing.team && (
           <div className="flex items-center gap-2 mb-3">
@@ -87,7 +88,7 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
             </p>
           </div>
           <div className="flex flex-col gap-1.5 items-end">
-            {listing.boosted && (
+            {isBoostEnabled() && listing.boosted && (
               <Badge className="bg-amber-500 hover:bg-amber-600 text-white">
                 <Sparkles className="h-3 w-3 mr-1" />
                 Boosted

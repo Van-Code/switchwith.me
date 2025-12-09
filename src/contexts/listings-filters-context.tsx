@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export interface ListingsFilters {
   team: string[];
+  zone: string;
   section: string;
   minPrice: string;
   maxPrice: string;
@@ -15,6 +16,7 @@ export interface ListingsFilters {
 interface ListingsFiltersContextType {
   filters: ListingsFilters;
   setTeam: (value: string[]) => void;
+  setZone: (value:string) => void;
   setSection: (value: string) => void;
   setMinPrice: (value: string) => void;
   setMaxPrice: (value: string) => void;
@@ -28,6 +30,7 @@ interface ListingsFiltersContextType {
 
 const defaultFilters: ListingsFilters = {
   team: [],
+  zone: "",
   section: "",
   minPrice: "",
   maxPrice: "",
@@ -49,6 +52,10 @@ export function ListingsFiltersProvider({ children }: { children: ReactNode }) {
 
   const setTeam = (value: string[]) => {
     setFilters((prev) => ({ ...prev, team: value }));
+  };
+  
+  const setZone = (value: string) => {
+    setFilters((prev) => ({ ...prev, zone: value }));
   };
 
   const setSection = (value: string) => {
@@ -92,6 +99,7 @@ export function ListingsFiltersProvider({ children }: { children: ReactNode }) {
       value={{
         filters,
         setTeam,
+        setZone,
         setSection,
         setMinPrice,
         setMaxPrice,

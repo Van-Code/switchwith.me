@@ -7,6 +7,7 @@ import { Calendar, DollarSign, MapPin, Sparkles } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "./ui/button"
+import { isBoostEnabled } from "@/lib/features"
 
 interface Listing {
   id: string
@@ -98,7 +99,7 @@ export function RelatedListings({ listingId, currentUserId }: RelatedListingsPro
             <div
               key={listing.id}
               className={`border rounded-lg p-3 hover:bg-muted/50 transition-colors ${
-                listing.boosted ? "border-amber-400 bg-amber-50/30" : ""
+                isBoostEnabled() && listing.boosted ? "border-amber-400 bg-amber-50/30" : ""
               }`}
             >
               {/* Team info */}
@@ -117,7 +118,7 @@ export function RelatedListings({ listingId, currentUserId }: RelatedListingsPro
                   <span className="text-xs font-semibold text-slate-700">
                     {listing.team.name}
                   </span>
-                  {listing.boosted && (
+                  {isBoostEnabled() && listing.boosted && (
                     <Badge className="bg-amber-500 hover:bg-amber-600 text-white h-5 text-[10px]">
                       <Sparkles className="h-2.5 w-2.5 mr-0.5" />
                       Boosted
