@@ -120,22 +120,6 @@ export async function POST(
       }
     }
 
-    // Emit socket event to all clients in the conversation room
-    if (global.io) {
-      global.io.to(`conversation:${params.id}`).emit("new-message", {
-        id: message.id,
-        text: message.text,
-        createdAt: message.createdAt.toISOString(),
-        sender: {
-          id: message.sender.id,
-          profile: message.sender.profile ? {
-            firstName: message.sender.profile.firstName,
-            lastInitial: message.sender.profile.lastInitial,
-          } : null,
-        },
-      })
-    }
-
     // Create notification for the recipient (don't notify the sender!)
     const recipient = conversation.participants.find(
       (p: {userId: string}) => p.userId !== session.user.id

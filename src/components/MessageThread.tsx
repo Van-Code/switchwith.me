@@ -1,20 +1,17 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "./ui/button"
 import { Textarea } from "./ui/textarea"
 import { Card, CardContent } from "./ui/card"
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
-import { useSocket } from "../contexts/SocketContext"
-import { ArrowDown } from "lucide-react"
-import { EndChatDialog } from "./EndChatDialog"
-import { MoreVertical, XCircle, CheckCircle2 } from "lucide-react"
+import { ArrowDown, MoreVertical, XCircle } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
+import { EndChatDialog } from "./EndChatDialog"
 
 interface Message {
   id: string
@@ -51,7 +48,6 @@ export function MessageThread({
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [newMessage, setNewMessage] = useState("")
   const [sending, setSending] = useState(false)
-  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [showEndDialog, setShowEndDialog] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
   const [showScrollButton, setShowScrollButton] = useState(false)
@@ -59,29 +55,32 @@ export function MessageThread({
   const threadRef = useRef<HTMLDivElement | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const messagesContainerRef = useRef<HTMLDivElement | null>(null)
-  const typingTimeoutRef = useRef<NodeJS.Timeout>()
   const isInitialMount = useRef(true)
-
-  const { socket, isConnected } = useSocket()
 
   const isEnded = conversationStatus === "ENDED"
 
+  // Keep local messages in sync if parent sends new initialMessages
+  useEffect(() => {
+    setMessages(initialMessages)
+  }, [initialMessages, conversationId])
+
   const scrollMessagesToBottom = (smooth = true) => {
-  const container = messagesContainerRef.current
-  if (!container) return
+    const container = messagesContainerRef.current
+    if (!container) return
 
-  const top = container.scrollHeight - container.clientHeight
+    const top = container.scrollHeight - container.clientHeight
 
-  if ("scrollTo" in container && smooth) {
-    container.scrollTo({ top, behavior: "smooth" })
-  } else {
-    container.scrollTop = top
+    if ("scrollTo" in container && smooth) {
+      container.scrollTo({ top, behavior: "smooth" })
+    } else {
+      container.scrollTop = top
+    }
   }
-}
-  // Scroll only the messages container to the bottom
+
   const scrollToBottom = (smooth = true) => {
     scrollMessagesToBottom(smooth)
   }
+
   const userIsNearBottom = () => {
     const container = messagesContainerRef.current
     if (!container) return true
@@ -93,110 +92,85 @@ export function MessageThread({
     return position <= threshold
   }
 
+  // Auto-scroll when new messages arrive and user is at bottom
   useEffect(() => {
     if (!isInitialMount.current && userIsNearBottom()) {
       scrollMessagesToBottom()
     }
   }, [messages])
 
-
   const handleScroll = () => {
     setShowScrollButton(!userIsNearBottom())
   }
 
-  // Auto-scroll on initial mount
+  // Initial scroll on mount
   useEffect(() => {
     if (isInitialMount.current) {
-      // Bring the chat into view, but not all the way to the footer
       threadRef.current?.scrollIntoView({
-      behavior: "auto",
-      block: "center",   // key: center, not "end"
-    })
+        behavior: "auto",
+        block: "center",
+      })
 
-    // Then scroll messages to the bottom inside the chat box
-    scrollMessagesToBottom(false)
+      scrollMessagesToBottom(false)
       isInitialMount.current = false
     }
   }, [])
 
-  // Auto-scroll only when new messages arrive and user is at bottom
-  useEffect(() => {
-    if (!isInitialMount.current && userIsNearBottom()) {
-      scrollToBottom()
-    }
-  }, [messages])
+  // ------- POLLING USING /api/conversations/[id] -------
 
-  // Socket event listeners
-  useEffect(() => {
-    if (!socket) return
-
-    // Join conversation room
-    socket.emit("join-conversation", conversationId)
-
-    // Listen for new messages
-    socket.on("new-message", (message: Message) => {
-      setMessages((prev) => {
-        // Avoid duplicates
-        if (prev.some((m: { id: string }) => m.id === message.id)) {
-          return prev
-        }
-        return [...prev, message]
+  const fetchMessages = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}`, {
+        cache: "no-store",
       })
-    })
 
-    // Listen for typing indicators
-    socket.on(
-      "user-typing",
-      ({ userId, isTyping }: { userId: string; isTyping: boolean }) => {
-        if (userId === currentUserId) return
+      if (!res.ok) {
+        console.error("Failed to fetch conversation", await res.text())
+        return
+      }
 
-        setTypingUsers((prev) => {
-          const updated = new Set(prev)
-          if (isTyping) {
-            updated.add(userId)
-          } else {
-            updated.delete(userId)
-          }
-          return updated
-        })
-      },
-    )
+      const data = await res.json()
+      const updatedMessages: Message[] = data.conversation?.messages ?? []
+      setMessages(updatedMessages)
+    } catch (error) {
+      console.error("Error fetching conversation", error)
+    }
+  }, [conversationId])
+
+  useEffect(() => {
+    let intervalId: number | null = null
+
+    const start = () => {
+      // Initial load + polling
+      fetchMessages()
+      intervalId = window.setInterval(fetchMessages, 4000)
+    }
+
+    const stop = () => {
+      if (intervalId !== null) {
+        window.clearInterval(intervalId)
+        intervalId = null
+      }
+    }
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        start()
+      } else {
+        stop()
+      }
+    }
+
+    handleVisibility()
+    document.addEventListener("visibilitychange", handleVisibility)
 
     return () => {
-      socket.emit("leave-conversation", conversationId)
-      socket.off("new-message")
-      socket.off("user-typing")
+      stop()
+      document.removeEventListener("visibilitychange", handleVisibility)
     }
-  }, [socket, conversationId, currentUserId])
+  }, [fetchMessages])
 
-  const handleTyping = (text: string) => {
-    setNewMessage(text)
-
-    if (!socket) return
-
-    // Emit typing event
-    socket.emit("typing", {
-      conversationId,
-      userId: currentUserId,
-      isTyping: text.length > 0,
-    })
-
-    // Clear previous timeout
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current)
-    }
-
-    // Stop typing after 2 seconds of inactivity
-    if (text.length > 0) {
-      typingTimeoutRef.current = setTimeout(() => {
-        socket.emit("typing", {
-          conversationId,
-          userId: currentUserId,
-          isTyping: false,
-        })
-      }, 2000)
-    }
-  }
+  // ------- END POLLING -------
 
   const handleSend = async () => {
     if (!newMessage.trim() || sending || isEnded) return
@@ -205,15 +179,8 @@ export function MessageThread({
     try {
       await onSendMessage(newMessage)
       setNewMessage("")
-
-      // Stop typing indicator
-      if (socket) {
-        socket.emit("typing", {
-          conversationId,
-          userId: currentUserId,
-          isTyping: false,
-        })
-      }
+      // Immediately refresh from server so the new message + other side's replies show up
+      await fetchMessages()
     } catch (error) {
       console.error("Failed to send message:", error)
     } finally {
@@ -313,13 +280,6 @@ export function MessageThread({
         verify ticket ownership or handle payments.
       </div>
 
-      {/* Connection Status */}
-      {!isConnected && (
-        <div className="bg-yellow-500/10 text-yellow-700 text-xs px-3 py-2 text-center">
-          Reconnecting...
-        </div>
-      )}
-
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
@@ -381,13 +341,6 @@ export function MessageThread({
         )}
       </div>
 
-      {/* Typing Indicator */}
-      {typingUsers.size > 0 && (
-        <div className="px-4 py-2 text-sm text-muted-foreground italic">
-          Someone is typing...
-        </div>
-      )}
-
       <div className="border-t p-4">
         {isEnded ? (
           <div className="text-center py-4 text-muted-foreground">
@@ -397,7 +350,7 @@ export function MessageThread({
           <div className="flex gap-2">
             <Textarea
               value={newMessage}
-              onChange={(e) => handleTyping(e.target.value)}
+              onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
               className="resize-none"

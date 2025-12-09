@@ -14,7 +14,7 @@ The platform was created specifically for Golden State Valkyries fans and the br
 
 - **Listing Management**: Create and manage ticket swap listings with detailed seat information
 - **Smart Matching**: Browse listings and get matched with compatible swap partners based on preferences
-- **Real-time Messaging**: Direct messaging system with WebSocket support for instant communication
+- **Messaging**: Direct messaging system 
 - **User Profiles**: Profile system with verification badges and swap history
 - **Notification System**: In-app and email notifications for matches and messages
 - **Team Support**: Multi-team support with team branding and colors
@@ -23,7 +23,6 @@ The platform was created specifically for Golden State Valkyries fans and the br
 
 - **Google OAuth Authentication**: Secure, password-free sign-in
 - **Responsive Design**: Mobile-friendly interface built with Tailwind CSS
-- **Real-time Updates**: Socket.IO powered real-time features for messaging and notifications
 - **Archive Conversations**: Keep your inbox clean by archiving completed swaps
 - **Listing Status Management**: Mark listings as active, inactive, matched, or expired
 
@@ -41,7 +40,6 @@ The platform was created specifically for Golden State Valkyries fans and the br
 - **Framework**: Next.js 14 (React 18)
 - **Styling**: Tailwind CSS with custom theme
 - **UI Components**: Radix UI primitives
-- **Real-time**: Socket.IO Client
 - **Icons**: Lucide React
 
 ### Backend
@@ -49,13 +47,12 @@ The platform was created specifically for Golden State Valkyries fans and the br
 - **Framework**: Next.js API Routes
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js with Google OAuth
-- **Real-time**: Socket.IO server
 - **Password Hashing**: bcryptjs (for legacy support)
 
 ### Infrastructure
 
 - **Node.js**: Version 22.x
-- **Custom Server**: Node.js HTTP server with Socket.IO integration
+- **Custom Server**: Node.js HTTP server
 - **Environment Management**: env-cmd for multi-environment support
 
 ## Prerequisites
@@ -201,16 +198,14 @@ kidney-swap/
 │   │   ├── ui/            # Reusable UI components
 │   │   └── ...            # Feature components
 │   ├── contexts/          # React contexts
-│   │   └── SocketContext.tsx # Socket.IO context
 │   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Utility libraries
 │   │   ├── auth.ts        # NextAuth configuration
 │   │   ├── db.ts          # Database utilities
 │   │   ├── matching.ts    # Matching algorithm
 │   │   ├── notifications.ts # Notification utilities
-│   │   └── socket.ts      # Socket.IO utilities
 │   └── types/             # TypeScript type definitions
-├── server.js              # Custom Node.js server with Socket.IO
+├── server.js              # Custom Node.js server 
 ├── package.json
 ├── tsconfig.json
 └── tailwind.config.js
@@ -245,8 +240,6 @@ The platform includes a smart matching system (`src/lib/matching.ts`) that:
 
 ### Real-time Messaging
 
-- Socket.IO integration for real-time communication
-- Typing indicators
 - Message notifications
 - Conversation archiving
 - Ability to end conversations with reasons

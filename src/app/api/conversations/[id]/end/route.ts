@@ -113,15 +113,6 @@ export async function PATCH(
       },
     })
 
-    // Emit socket event if socket.io is available
-    if (global.io) {
-      global.io.to(`conversation:${params.id}`).emit("conversation-ended", {
-        conversationId: params.id,
-        endedBy: session.user.id,
-        endedReason,
-      })
-    }
-
     return NextResponse.json({ conversation: updatedConversation })
   } catch (error) {
     console.error("Error ending conversation:", error)
