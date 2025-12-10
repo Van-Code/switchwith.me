@@ -19,7 +19,7 @@ interface EditProfileFormProps {
     favoritePlayer: string | null
   }
 }
-
+const enableProfilePhoto = false 
 export function EditProfileForm({ profile }: EditProfileFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -110,6 +110,7 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
                 {formData.lastInitial}
               </AvatarFallback>
             </Avatar>
+            {enableProfilePhoto && ( 
             <div className="flex-1">
               <Label htmlFor="photo" className="cursor-pointer">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -129,6 +130,7 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
                 JPEG, PNG or WebP. Max 5MB.
               </p>
             </div>
+            )}
           </div>
 
           {/* Name Fields */}
