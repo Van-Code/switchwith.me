@@ -8,8 +8,6 @@ package-lock.json
 scripts.txt
 .vscode/
 .idea/
-
-# nextjs
 .next/
 dist/
 .vercel

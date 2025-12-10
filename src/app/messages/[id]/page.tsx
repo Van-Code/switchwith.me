@@ -1,3 +1,4 @@
+import React from "react"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
@@ -7,6 +8,7 @@ import { ConversationSidebar } from "@/components/ConversationSidebar"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { ConversationHeader } from "./ConversationHeader"
 
 export default async function ConversationPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
@@ -84,27 +86,11 @@ export default async function ConversationPage({ params }: { params: { id: strin
   } : null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50/30 via-white to-orange-50/30">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/messages">
-              <Button variant="ghost" size="icon" className="hover:bg-slate-100">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900">
-                {otherParticipant?.user.profile
-                  ? `${otherParticipant.user.profile.firstName} ${otherParticipant.user.profile.lastInitial}.`
-                  : "Unknown User"}
-              </h1>
-              <p className="text-sm text-slate-600">Conversation</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-4xl mx-auto space-y-4">
+      <ConversationHeader
+        otherParticipant={otherParticipant}
+        conversationId={conversation.id}
+      />
 
       {/* Main Content - Side by Side Layout */}
       <div className="max-w-7xl mx-auto px-4 py-6">

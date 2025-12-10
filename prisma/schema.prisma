@@ -10,9 +10,9 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  password      String?   // DEPRECATED: App now uses OAuth-only authentication
+  password      String? // DEPRECATED: App now uses OAuth-only authentication
   emailVerified DateTime? // For NextAuth
-  image         String?   // For OAuth profile images
+  image         String? // For OAuth profile images
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -24,11 +24,13 @@ model User {
 
   profile            Profile?
   listings           Listing[]
-  sentMessages       Message[]      @relation("SentMessages")
+  sentMessages       Message[]                 @relation("SentMessages")
   conversations      ConversationParticipant[]
+  reportsSubmitted   Report[]                  @relation("ReportsSubmitted")
+  reportsReceived    Report[]                  @relation("ReportsReceived")
   notifications      Notification[]
-  accounts           Account[]  // For OAuth
-  sessions           Session[]  // For NextAuth sessions
+  accounts           Account[] // For OAuth
+  sessions           Session[] // For NextAuth sessions
   creditTransactions CreditTransaction[]
 }
 
@@ -74,38 +76,37 @@ model VerificationToken {
 }
 
 model Profile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  firstName String
-  lastInitial String?
-  avatarUrl String?   // This already exists, we'll use it for photo
-  bio       String?
-  favoritePlayer String? 
-  
-  emailVerified            Boolean @default(false)
-  phoneVerified            Boolean @default(false)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  firstName      String
+  lastInitial    String?
+  avatarUrl      String? // This already exists, we'll use it for photo
+  bio            String?
+  favoritePlayer String?
+
+  emailVerified              Boolean @default(false)
+  phoneVerified              Boolean @default(false)
   seasonTicketHolderVerified Boolean @default(false)
-  successfulSwapsCount     Int     @default(0)
-  
+  successfulSwapsCount       Int     @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-
 model Team {
-  id             Int       @id @default(autoincrement())
+  id             Int     @id @default(autoincrement())
   name           String
-  slug           String    @unique
-  logoUrl        String?   @map("logo_url")
-  primaryColor   String?   @map("primary_color")
-  secondaryColor String?   @map("secondary_color")
+  slug           String  @unique
+  logoUrl        String? @map("logo_url")
+  primaryColor   String? @map("primary_color")
+  secondaryColor String? @map("secondary_color")
 
-  listings       Listing[]
+  listings Listing[]
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("teams")
 }
@@ -123,31 +124,31 @@ enum ConversationStatus {
 }
 
 model Listing {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Team association
-  teamId    Int      @map("team_id")
-  team      Team     @relation(fields: [teamId], references: [id])
+  teamId Int  @map("team_id")
+  team   Team @relation(fields: [teamId], references: [id])
 
   // Game info
-  gameId    String?
-  gameDate  DateTime
-  
+  gameId   String?
+  gameDate DateTime
+
   // What they HAVE
   haveSection String
   haveRow     String
   haveSeat    String
   haveZone    String
   faceValue   Float
-  
-  // What they WANT
-  wantZones         String[]
-  wantSections      String[]
-  willingToAddCash  Boolean  @default(false)
 
-  status    ListingStatus @default(ACTIVE)
+  // What they WANT
+  wantZones        String[]
+  wantSections     String[]
+  willingToAddCash Boolean  @default(false)
+
+  status ListingStatus @default(ACTIVE)
 
   // Boosted listings (paid feature)
   boosted   Boolean   @default(false)
@@ -164,34 +165,35 @@ model Listing {
 }
 
 model Conversation {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
 
   participants ConversationParticipant[]
   messages     Message[]
+  reports      Report[]
 
   // Add listing relationship
-  listing      Listing?  @relation(fields: [listingId], references: [id])
-  listingId    String?
+  listing   Listing? @relation(fields: [listingId], references: [id])
+  listingId String?
 
   // Conversation lifecycle
-  status       ConversationStatus @default(ACTIVE)
-  endedReason  String?
-  endedAt      DateTime?
-  endedBy      String?  // userId who ended the conversation
+  status      ConversationStatus @default(ACTIVE)
+  endedReason String?
+  endedAt     DateTime?
+  endedBy     String? // userId who ended the conversation
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model ConversationParticipant {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Per-user archiving
-  archived       Boolean  @default(false)
+  archived Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -201,17 +203,55 @@ model ConversationParticipant {
 }
 
 model Message {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   senderId       String
-  sender         User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
-  text      String
+  text String
 
   createdAt DateTime @default(now())
 
   @@index([conversationId, createdAt])
+}
+
+enum ReportReason {
+  HARASSMENT
+  INAPPROPRIATE_CONTENT
+  SPAM
+  SCAM
+  FAKE_PROFILE
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id             String @id @default(cuid())
+  reporterId     String
+  reporter       User   @relation("ReportsSubmitted", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUserId String
+  reportedUser   User   @relation("ReportsReceived", fields: [reportedUserId], references: [id], onDelete: Cascade)
+
+  conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  reason      ReportReason
+  description String?
+  status      ReportStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([reportedUserId])
+  @@index([reporterId])
+  @@index([status])
 }
 
 // Notification system
@@ -224,7 +264,7 @@ model Notification {
   id        String           @id @default(cuid())
   userId    String
   type      NotificationType
-  data      Json             // Flexible storage for notification details
+  data      Json // Flexible storage for notification details
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
 
@@ -238,12 +278,12 @@ model Notification {
 
 // Credit transaction system for pay-to-chat
 model CreditTransaction {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  amount    Int      // Positive for credits added, negative for credits spent
-  note      String?  // e.g., "Purchase", "Start conversation with User X"
+  amount Int // Positive for credits added, negative for credits spent
+  note   String? // e.g., "Purchase", "Start conversation with User X"
 
   createdAt DateTime @default(now())
 
