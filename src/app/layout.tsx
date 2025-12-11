@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import Footer from "@/components/Footer"
 import { Header } from "@/components/header"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,6 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <main className="container mx-auto px-4 py-8 flex-1">{children}</main>
 
           <Footer />
+          <Toaster />
       </body>
     </html>
   )

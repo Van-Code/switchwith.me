@@ -1,8 +1,11 @@
+"use client"
+
+import { useState } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Calendar, DollarSign, Sparkles } from "lucide-react"
-import Link from "next/link"
+import { signIn } from "next-auth/react"
 import Image from "next/image"
 import { isBoostEnabled } from "@/lib/features"
 
@@ -39,7 +42,20 @@ interface ListingCardProps {
 }
 
 export function ListingCard({ listing, onMessage, isAuthenticated = false }: ListingCardProps) {
+  const [isSigningIn, setIsSigningIn] = useState(false)
   const gameDate = new Date(listing.gameDate)
+
+  const handleSignInToMessage = async () => {
+    setIsSigningIn(true)
+    try {
+      await signIn("google", {
+        callbackUrl: `/listings/message?listingId=${listing.id}`,
+      })
+    } catch (error) {
+      console.error("Sign in error:", error)
+      setIsSigningIn(false)
+    }
+  }
 
   // Determine zone category for preview mode
   const getZoneCategory = (zone: string): string => {
@@ -154,11 +170,15 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
       {listing.status === "ACTIVE" && (
         <CardFooter>
           {!isAuthenticated ? (
-            <Link href="/auth/signin" className="w-full">
-              <Button variant="outline" size="sm" className="w-full">
-                Sign in to contact
-              </Button>
-            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={handleSignInToMessage}
+              disabled={isSigningIn}
+            >
+              {isSigningIn ? "Signing in..." : "Sign in to Message"}
+            </Button>
           ) : onMessage ? (
             <Button onClick={onMessage} className="w-full">
               Message Owner

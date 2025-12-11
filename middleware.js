@@ -15,5 +15,5 @@ export default withAuth(
   }
 )
 
-export const config = { matcher: ["/messages(.*)", "/profile", "/settings", "/listings/new", "/matches"] }
+export const config = { matcher: ["/messages(.*)", "/profile", "/settings", "/listings/new", "/listings/message(.*)", "/matches"] }
 

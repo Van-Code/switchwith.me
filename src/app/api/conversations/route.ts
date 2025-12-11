@@ -82,7 +82,8 @@ export async function POST(req: Request) {
       )
     }
 
-    // If listingId is provided, check if conversation already exists for this specific listing
+    // DEFENSIVE CHECK: If listingId is provided, check if conversation already exists for this specific listing + current user
+    // This prevents duplicate conversations for the same listing
     if (listingId) {
       const existingListingConversation = await prisma.conversation.findFirst({
         where: {
@@ -113,6 +114,7 @@ export async function POST(req: Request) {
       })
 
       if (existingListingConversation) {
+        console.log(`[DUPLICATE_PREVENTION] Found existing conversation for listing ${listingId} and user ${session.user.id}`)
         return NextResponse.json({ conversation: existingListingConversation })
       }
     }
@@ -272,6 +274,48 @@ export async function POST(req: Request) {
     }
 
     // Early launch mode (free conversations)
+    // FINAL DEFENSIVE CHECK: Double-check no conversation was created in a race condition
+    // This handles the edge case where two requests come in simultaneously
+    const finalCheck = await prisma.conversation.findFirst({
+      where: {
+        AND: [
+          {
+            participants: {
+              some: {
+                userId: session.user.id,
+              },
+            },
+          },
+          {
+            participants: {
+              some: {
+                userId: otherUserId,
+              },
+            },
+          },
+          ...(listingId ? [{ listingId }] : []),
+        ],
+      },
+      include: {
+        participants: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        messages: true,
+        listing: true,
+      },
+    })
+
+    if (finalCheck) {
+      console.log(`[RACE_CONDITION_PREVENTION] Conversation already exists, returning existing one`)
+      return NextResponse.json({ conversation: finalCheck })
+    }
+
     // Create new conversation without credit deduction
     const conversation = await prisma.conversation.create({
       data: {

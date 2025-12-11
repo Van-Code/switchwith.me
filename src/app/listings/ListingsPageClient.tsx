@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { ListingsFiltersProvider, useListingsFilters } from "@/contexts/listings-filters-context";
 import ListingsFilters from "@/components/listings-filters";
 import ListingsSortSelect from "@/components/listings-sort-select";
@@ -9,6 +10,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
 import { LogIn } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ListingsPageClientProps {
   currentUserId?: string;
@@ -19,6 +21,80 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
   const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const isAuthenticated = !!currentUserId;
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+
+  // Handle error query params and show toast notifications
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (!error) return;
+
+    switch (error) {
+      case "missing_listing":
+        toast({
+          title: "Invalid Request",
+          description: "The listing you're trying to access is invalid or missing.",
+          variant: "destructive",
+        });
+        break;
+      case "listing_not_found":
+        toast({
+          title: "Listing Not Found",
+          description: "That listing is no longer available, but here are similar options.",
+          variant: "destructive",
+        });
+        break;
+      case "listing_inactive":
+        toast({
+          title: "Listing No Longer Available",
+          description: "That listing is no longer active, but here are similar options.",
+          variant: "destructive",
+        });
+        break;
+      case "own_listing":
+        toast({
+          title: "Cannot Message Own Listing",
+          description: "You cannot start a conversation with yourself.",
+          variant: "destructive",
+        });
+        break;
+      case "server_error":
+        toast({
+          title: "Server Error",
+          description: "Something went wrong. Please try again later.",
+          variant: "destructive",
+        });
+        break;
+      case "insufficient_credits":
+        const required = searchParams.get("required") || "1";
+        const current = searchParams.get("current") || "0";
+        toast({
+          title: "Insufficient Credits",
+          description: `You need ${required} credit(s) to start a conversation, but you only have ${current}.`,
+          variant: "destructive",
+        });
+        break;
+      case "missing_params":
+        toast({
+          title: "Invalid Request",
+          description: "Missing required parameters. Please try again.",
+          variant: "destructive",
+        });
+        break;
+      default:
+        break;
+    }
+
+    // Clean up URL by removing error params (optional, for better UX)
+    if (error) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      url.searchParams.delete("team");
+      url.searchParams.delete("required");
+      url.searchParams.delete("current");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [searchParams, toast]);
 
   // Fetch listings whenever active filters change
   useEffect(() => {
