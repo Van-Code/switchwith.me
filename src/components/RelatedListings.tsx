@@ -16,7 +16,6 @@ interface Listing {
   haveRow: string
   haveSeat: string
   haveZone: string
-  faceValue: number
   wantZones: string[]
   wantSections: string[]
   status: string
@@ -99,7 +98,9 @@ export function RelatedListings({ listingId, currentUserId }: RelatedListingsPro
             <div
               key={listing.id}
               className={`border rounded-lg p-3 hover:bg-muted/50 transition-colors ${
-                isBoostEnabled() && listing.boosted ? "border-amber-400 bg-amber-50/30" : ""
+                isBoostEnabled() && listing.boosted
+                  ? "border-amber-400 bg-amber-50/30"
+                  : ""
               }`}
             >
               {/* Team info */}
@@ -130,7 +131,8 @@ export function RelatedListings({ listingId, currentUserId }: RelatedListingsPro
               {/* Location */}
               <div className="mb-2">
                 <p className="font-semibold text-sm">
-                  Section {listing.haveSection}, Row {listing.haveRow}, Seat {listing.haveSeat}
+                  Section {listing.haveSection}, Row {listing.haveRow}, Seat{" "}
+                  {listing.haveSeat}
                 </p>
                 <p className="text-xs text-muted-foreground">{listing.haveZone}</p>
               </div>
@@ -145,10 +147,6 @@ export function RelatedListings({ listingId, currentUserId }: RelatedListingsPro
                       day: "numeric",
                     })}
                   </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <DollarSign className="h-3 w-3 text-muted-foreground" />
-                  <span>${listing.faceValue.toFixed(0)}</span>
                 </div>
               </div>
 

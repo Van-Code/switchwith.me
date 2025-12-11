@@ -6,7 +6,6 @@ export type Listing = {
   haveSection: string
   wantSections: string[]
   status: string
-  faceValue: number
 }
 export interface MatchScore {
   listingId: string
@@ -116,14 +115,6 @@ function calculateScore(listing1: Listing, listing2: Listing): number {
     score += 25
   }
 
-  // Similar face values
-  const priceDiff = Math.abs(listing1.faceValue - listing2.faceValue)
-  if (priceDiff < 10) {
-    score += 20
-  } else if (priceDiff < 25) {
-    score += 10
-  }
-
   return score
 }
 
@@ -139,11 +130,6 @@ function generateReason(listing1: Listing, listing2: Listing): string {
 
   if (listing1.wantZones.includes(listing2.haveZone)) {
     reasons.push(`Your want matches their ${listing2.haveZone}`)
-  }
-
-  const priceDiff = Math.abs(listing1.faceValue - listing2.faceValue)
-  if (priceDiff < 10) {
-    reasons.push("Similar price")
   }
 
   return reasons.length > 0 ? reasons.join(" • ") : "Compatible swap"

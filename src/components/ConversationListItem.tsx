@@ -27,28 +27,32 @@ interface ConversationListItemProps {
       haveSeat: string
       haveZone: string
       gameDate: Date | string
-      faceValue: number
     } | null
   }
   currentUserId: string
 }
 
-export function ConversationListItem({ conversation, currentUserId }: ConversationListItemProps) {
+export function ConversationListItem({
+  conversation,
+  currentUserId,
+}: ConversationListItemProps) {
   const otherParticipant = conversation.participants.find(
-    (p:any) => p.user.id !== currentUserId
+    (p: any) => p.user.id !== currentUserId
   )
   const lastMessage = conversation.messages[0]
   const isEnded = conversation.status === "ENDED"
 
   return (
     <Link href={`/messages/${conversation.id}`}>
-      <Card className={`transition-all
+      <Card
+        className={`transition-all
         bg-white
         hover:shadow-md
         hover:-translate-y-0.5
         hover:bg-white
         cursor-pointer
-        rounded-xl ${isEnded ? "opacity-75" : ""}`}>
+        rounded-xl ${isEnded ? "opacity-75" : ""}`}
+      >
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2">
             <div className="flex-1">
@@ -82,7 +86,8 @@ export function ConversationListItem({ conversation, currentUserId }: Conversati
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="font-medium">
-                  Sec {conversation.listing.haveSection} • Row {conversation.listing.haveRow} • Seat {conversation.listing.haveSeat}
+                  Sec {conversation.listing.haveSection} • Row{" "}
+                  {conversation.listing.haveRow} • Seat {conversation.listing.haveSeat}
                 </span>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -91,15 +96,12 @@ export function ConversationListItem({ conversation, currentUserId }: Conversati
                 </Badge>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="h-3 w-3" />
-                  {new Date(conversation.listing.gameDate).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
+                  {new Date(conversation.listing.gameDate).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
                   })}
                 </div>
-                <Badge variant="outline" className="text-xs">
-                  ${conversation.listing.faceValue}
-                </Badge>
               </div>
             </div>
           ) : (

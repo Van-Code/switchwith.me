@@ -10,7 +10,6 @@ interface Listing {
   haveSeat: string
   haveZone: string
   gameDate: Date | string
-  faceValue: number
   gameId?: string | null
 }
 

@@ -9,7 +9,6 @@ interface ConversationListingHeaderProps {
     haveSeat: string
     haveZone: string
     gameDate: Date | string
-    faceValue: number
     gameId?: string | null
   } | null
 }
@@ -32,15 +31,14 @@ export function ConversationListingHeader({ listing }: ConversationListingHeader
   return (
     <Card className="border-2 border-primary/20 bg-primary/5">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base text-muted-foreground">
-          Seat Details
-        </CardTitle>
+        <CardTitle className="text-base text-muted-foreground">Seat Details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Main Seat Info */}
         <div>
           <div className="text-2xl font-bold mb-1">
-            Section {listing.haveSection} • Row {listing.haveRow} • Seat {listing.haveSeat}
+            Section {listing.haveSection} • Row {listing.haveRow} • Seat{" "}
+            {listing.haveSeat}
           </div>
           <Badge variant="secondary" className="text-sm">
             {listing.haveZone}
@@ -54,22 +52,12 @@ export function ConversationListingHeader({ listing }: ConversationListingHeader
             <div>
               <div className="font-medium">Game Date</div>
               <div className="text-muted-foreground">
-                {gameDate.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric'
+                {gameDate.toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
                 })}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <div className="font-medium">Face Value</div>
-              <div className="text-muted-foreground">
-                ${listing.faceValue.toFixed(2)}
               </div>
             </div>
           </div>

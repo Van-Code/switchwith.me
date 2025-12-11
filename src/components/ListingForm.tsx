@@ -51,8 +51,14 @@ export function ListingForm() {
           teamId: parseInt(formData.teamId),
           gameDate: new Date(formData.gameDate).toISOString(),
           listingType: formData.listingType,
-          wantZones: formData.wantZones.split(",").map(z => z.trim()).filter(Boolean),
-          wantSections: formData.wantSections.split(",").map(s => s.trim()).filter(Boolean),
+          wantZones: formData.wantZones
+            .split(",")
+            .map((z) => z.trim())
+            .filter(Boolean),
+          wantSections: formData.wantSections
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
         }),
       })
 
@@ -77,6 +83,24 @@ export function ListingForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <Label htmlFor="listingType">Listing Type</Label>
+            <select
+              id="listingType"
+              required
+              value={formData.listingType}
+              onChange={(e) => setFormData({ ...formData, listingType: e.target.value })}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="HAVE">I have tickets to offer</option>
+              <option value="WANT">I want tickets</option>
+            </select>
+            <p className="text-xs text-muted-foreground mt-1">
+              {formData.listingType === "HAVE"
+                ? "You currently have tickets and want to trade them"
+                : "You're looking for tickets and want someone to trade with you"}
+            </p>
+          </div>
+          <div>
             <Label htmlFor="teamId">Team</Label>
             <select
               id="teamId"
@@ -99,29 +123,10 @@ export function ListingForm() {
             <Input
               id="gameDate"
               type="date"
-              required
+              required={formData.listingType === "HAVE"}
               value={formData.gameDate}
               onChange={(e) => setFormData({ ...formData, gameDate: e.target.value })}
             />
-          </div>
-
-          <div>
-            <Label htmlFor="listingType">Listing Type</Label>
-            <select
-              id="listingType"
-              required
-              value={formData.listingType}
-              onChange={(e) => setFormData({ ...formData, listingType: e.target.value })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="HAVE">I have tickets to offer</option>
-              <option value="WANT">I want tickets</option>
-            </select>
-            <p className="text-xs text-muted-foreground mt-1">
-              {formData.listingType === "HAVE"
-                ? "You currently have tickets and want to trade them"
-                : "You're looking for tickets and want someone to trade with you"}
-            </p>
           </div>
 
           {formData.listingType === "HAVE" && (
@@ -134,7 +139,9 @@ export function ListingForm() {
                     required={formData.listingType === "HAVE"}
                     placeholder="101"
                     value={formData.haveSection}
-                    onChange={(e) => setFormData({ ...formData, haveSection: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, haveSection: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -144,7 +151,9 @@ export function ListingForm() {
                     required={formData.listingType === "HAVE"}
                     placeholder="A"
                     value={formData.haveRow}
-                    onChange={(e) => setFormData({ ...formData, haveRow: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, haveRow: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -154,7 +163,9 @@ export function ListingForm() {
                     required={formData.listingType === "HAVE"}
                     placeholder="1"
                     value={formData.haveSeat}
-                    onChange={(e) => setFormData({ ...formData, haveSeat: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, haveSeat: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -180,7 +191,9 @@ export function ListingForm() {
               value={formData.wantZones}
               onChange={(e) => setFormData({ ...formData, wantZones: e.target.value })}
             />
-            <p className="text-xs text-muted-foreground mt-1">Leave empty to accept any zone</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Leave empty to accept any zone
+            </p>
           </div>
 
           <div>
@@ -191,7 +204,9 @@ export function ListingForm() {
               value={formData.wantSections}
               onChange={(e) => setFormData({ ...formData, wantSections: e.target.value })}
             />
-            <p className="text-xs text-muted-foreground mt-1">Leave empty to accept any section</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Leave empty to accept any section
+            </p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -199,7 +214,9 @@ export function ListingForm() {
               type="checkbox"
               id="willingToAddCash"
               checked={formData.willingToAddCash}
-              onChange={(e) => setFormData({ ...formData, willingToAddCash: e.target.checked })}
+              onChange={(e) =>
+                setFormData({ ...formData, willingToAddCash: e.target.checked })
+              }
               className="h-4 w-4"
             />
             <Label htmlFor="willingToAddCash" className="font-normal">

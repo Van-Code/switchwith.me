@@ -54,19 +54,20 @@ export function SectionListingsPanel({
                         Row {listing.haveRow}, Seat {listing.haveSeat}
                       </CardTitle>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(listing.gameDate).toLocaleDateString('en-US', {
-                          weekday: 'short',
-                          month: 'short',
-                          day: 'numeric',
+                        {new Date(listing.gameDate).toLocaleDateString("en-US", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
                         })}
                       </p>
                     </div>
-                    <Badge variant="secondary">${listing.faceValue.toFixed(2)}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Wants:</p>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">
+                      Wants:
+                    </p>
                     <div className="flex flex-wrap gap-1">
                       {listing.wantZones.length > 0 ? (
                         listing.wantZones.map((zone: string, i: number) => (
@@ -83,7 +84,8 @@ export function SectionListingsPanel({
                   {listing.user?.profile && (
                     <div className="pt-2 border-t">
                       <p className="text-xs font-medium mb-2">
-                        {listing.user.profile.firstName} {listing.user.profile.lastInitial}.
+                        {listing.user.profile.firstName}{" "}
+                        {listing.user.profile.lastInitial}.
                       </p>
                       <ProfileBadge
                         successfulSwapsCount={listing.user.profile.successfulSwapsCount}

@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 
 // GET /api/listings/[id]/related - Get related listings
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
     const listingId = params.id
 
@@ -20,10 +17,7 @@ export async function GET(
     })
 
     if (!originalListing) {
-      return NextResponse.json(
-        { error: "Listing not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Listing not found" }, { status: 404 })
     }
 
     // Calculate date range (2 weeks before and after)
@@ -96,12 +90,6 @@ export async function GET(
       )
       score += Math.max(0, 7 - daysDiff)
 
-      // Similar face value (+1-3 points based on closeness)
-      const priceDiff = Math.abs(listing.faceValue - originalListing.faceValue)
-      if (priceDiff < 10) score += 3
-      else if (priceDiff < 25) score += 2
-      else if (priceDiff < 50) score += 1
-
       return {
         ...listing,
         relevanceScore: score,
@@ -112,7 +100,9 @@ export async function GET(
     scoredListings.sort((a, b) => b.relevanceScore - a.relevanceScore)
 
     return NextResponse.json({
-      listings: scoredListings.slice(0, 6).map(({ relevanceScore, ...listing }) => listing)
+      listings: scoredListings
+        .slice(0, 6)
+        .map(({ relevanceScore, ...listing }) => listing),
     })
   } catch (error) {
     console.error("Error fetching related listings:", error)

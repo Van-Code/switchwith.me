@@ -39,7 +39,6 @@ interface Conversation {
     haveSeat: string
     haveZone: string
     gameDate: string
-    faceValue: number
     createdAt: string
     updatedAt: string
   } | null
@@ -50,7 +49,10 @@ interface MessagesListClientProps {
   currentUserId: string
 }
 
-export function MessagesListClient({ conversations, currentUserId }: MessagesListClientProps) {
+export function MessagesListClient({
+  conversations,
+  currentUserId,
+}: MessagesListClientProps) {
   const [showArchived, setShowArchived] = useState(false)
 
   // Filter conversations based on archived status
@@ -58,7 +60,9 @@ export function MessagesListClient({ conversations, currentUserId }: MessagesLis
     const currentUserParticipant = conversation.participants.find(
       (p) => p.user.id === currentUserId
     )
-    return showArchived ? currentUserParticipant?.archived : !currentUserParticipant?.archived
+    return showArchived
+      ? currentUserParticipant?.archived
+      : !currentUserParticipant?.archived
   })
 
   return (
