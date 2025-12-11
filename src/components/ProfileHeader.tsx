@@ -1,4 +1,7 @@
+"use client"
+
 import { ProfileBadge } from "./ProfileBadge"
+import { useAvatarUrl } from "@/hooks/useAvatarUrl"
 
 interface ProfileHeaderProps {
   firstName: string
@@ -16,11 +19,13 @@ export function ProfileHeader({
   bio,
   successfulSwapsCount,
 }: ProfileHeaderProps) {
+  const avatarViewUrl = useAvatarUrl(avatarUrl)
+
   return (
     <div className="flex items-start gap-4">
       <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-2xl font-bold">
-        {avatarUrl ? (
-          <img src={avatarUrl} alt="Avatar" className="h-16 w-16 rounded-full object-cover" />
+        {avatarViewUrl ? (
+          <img src={avatarViewUrl} alt="Avatar" className="h-16 w-16 rounded-full object-cover" />
         ) : (
           `${firstName[0]}${lastInitial}`
         )}

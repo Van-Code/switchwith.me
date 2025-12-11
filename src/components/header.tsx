@@ -5,9 +5,19 @@ import { NotificationBell } from "@/components/notification-bell"
 import { ProfileDropdown } from "@/components/profile-dropdown"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 export async function Header() {
   const session = await getServerSession(authOptions)
+
+  // Fetch profile with avatarUrl if user is logged in
+  let profile = null
+  if (session?.user?.id) {
+    profile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
+      select: { avatarUrl: true },
+    })
+  }
 
   return (
     <nav className="border-b bg-white">
@@ -64,7 +74,7 @@ export async function Header() {
                   </Button>
                 </Link>
                 <NotificationBell />
-                <ProfileDropdown user={session.user} />
+                <ProfileDropdown user={session.user} avatarUrl={profile?.avatarUrl} />
               </>
             ) : (
               <>

@@ -2,98 +2,148 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { writeFile, mkdir } from "fs/promises"
-import path from "path"
+import {
+  generateUploadPresignedUrl,
+  deleteProfilePhoto,
+} from "@/lib/s3"
 
-// Force dynamic rendering - this route needs to access headers for authentication
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
 
-export async function POST(req: Request) {
+/**
+ * GET /api/profile/photo
+ * Returns a presigned URL for uploading a profile photo
+ */
+export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const formData = await req.formData()
-    const file = formData.get("photo") as File | null
+    const { searchParams } = new URL(req.url)
+    const fileExtension = searchParams.get("ext")
 
-    if (!file) {
+    if (!fileExtension) {
       return NextResponse.json(
-        { error: "No file uploaded" },
+        { error: "File extension required" },
         { status: 400 }
       )
     }
 
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
-    if (!allowedTypes.includes(file.type)) {
+    // Validate file extension
+    const allowedExtensions = ["jpg", "jpeg", "png", "webp"]
+    if (!allowedExtensions.includes(fileExtension.toLowerCase())) {
       return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, and WebP are allowed" },
+        { error: "Invalid file extension. Allowed: jpg, jpeg, png, webp" },
         { status: 400 }
       )
     }
 
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: "File too large. Maximum size is 5MB" },
-        { status: 400 }
-      )
-    }
+    const { uploadUrl, key } = await generateUploadPresignedUrl(
+      session.user.id,
+      fileExtension.toLowerCase()
+    )
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // Generate unique filename
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
-    const fileExtension = file.name.split(".").pop()
-    const filename = `${session.user.id}-${uniqueSuffix}.${fileExtension}`
-
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), "public", "uploads")
-    try {
-      await mkdir(uploadsDir, { recursive: true })
-    } catch (error) {
-      // Directory might already exist
-    }
-
-    // Save file
-    const filepath = path.join(uploadsDir, filename)
-    await writeFile(filepath, buffer)
-
-    // Update user profile with photo URL
-    const photoUrl = `/uploads/${filename}`
-    await prisma.profile.update({
-      where: { userId: session.user.id },
-      data: { avatarUrl: photoUrl },
-    })
-
-    return NextResponse.json({ 
-      success: true,
-      photoUrl 
-    })
+    return NextResponse.json({ uploadUrl, key })
   } catch (error) {
-    console.error("Error uploading photo:", error)
+    console.error("Error generating presigned URL:", error)
     return NextResponse.json(
-      { error: "Failed to upload photo" },
+      { error: "Failed to generate upload URL" },
       { status: 500 }
     )
   }
 }
 
-// Note: For production, replace the file saving logic with S3 upload:
-// import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
-// const s3Client = new S3Client({ region: process.env.AWS_REGION })
-// await s3Client.send(new PutObjectCommand({
-//   Bucket: process.env.S3_BUCKET,
-//   Key: filename,
-//   Body: buffer,
-//   ContentType: file.type,
-// }))
-// const photoUrl = `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${filename}`
+/**
+ * POST /api/profile/photo
+ * Confirms the upload and saves the S3 key to the database
+ */
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await req.json()
+    const { key } = body
+
+    if (!key) {
+      return NextResponse.json({ error: "S3 key required" }, { status: 400 })
+    }
+
+    // Delete old photo if exists
+    const profile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
+      select: { avatarUrl: true },
+    })
+
+    if (profile?.avatarUrl) {
+      try {
+        await deleteProfilePhoto(profile.avatarUrl)
+      } catch (error) {
+        console.error("Error deleting old photo:", error)
+        // Continue even if delete fails
+      }
+    }
+
+    // Update profile with new S3 key
+    await prisma.profile.update({
+      where: { userId: session.user.id },
+      data: { avatarUrl: key },
+    })
+
+    return NextResponse.json({ success: true, key })
+  } catch (error) {
+    console.error("Error saving photo:", error)
+    return NextResponse.json(
+      { error: "Failed to save photo" },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * DELETE /api/profile/photo
+ * Deletes the profile photo from S3 and clears the avatarUrl
+ */
+export async function DELETE() {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
+      select: { avatarUrl: true },
+    })
+
+    if (!profile?.avatarUrl) {
+      return NextResponse.json(
+        { error: "No photo to delete" },
+        { status: 404 }
+      )
+    }
+
+    // Delete from S3
+    await deleteProfilePhoto(profile.avatarUrl)
+
+    // Clear avatarUrl in database
+    await prisma.profile.update({
+      where: { userId: session.user.id },
+      data: { avatarUrl: null },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error deleting photo:", error)
+    return NextResponse.json(
+      { error: "Failed to delete photo" },
+      { status: 500 }
+    )
+  }
+}

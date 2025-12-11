@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useAvatarUrl } from "@/hooks/useAvatarUrl";
 
 interface ProfileDropdownProps {
   user: {
@@ -20,9 +21,12 @@ interface ProfileDropdownProps {
     email: string;
     name?: string | null;
   };
+  avatarUrl?: string | null;
 }
 
-export function ProfileDropdown({ user }: ProfileDropdownProps) {
+export function ProfileDropdown({ user, avatarUrl }: ProfileDropdownProps) {
+  const avatarViewUrl = useAvatarUrl(avatarUrl);
+
   // Get initials from name or email
   const getInitials = () => {
     if (user.name) {
@@ -52,7 +56,7 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
           aria-label="Profile menu"
         >
           <Avatar className="h-9 w-9">
-            <AvatarImage src={undefined} alt={user.name || user.email} />
+            <AvatarImage src={avatarViewUrl || undefined} alt={user.name || user.email} />
             <AvatarFallback className="bg-gradient-to-br from-cyan-500 to-purple-600 text-white font-semibold text-sm">
               {getInitials()}
             </AvatarFallback>
