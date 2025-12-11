@@ -6,8 +6,7 @@ export interface ListingsFilters {
   team: string[];
   zone: string;
   section: string;
-  minPrice: string;
-  maxPrice: string;
+  listingType: string;
   from: string; // ISO YYYY-MM-DD
   to: string; // ISO YYYY-MM-DD
   sort: string;
@@ -18,8 +17,7 @@ interface ListingsFiltersContextType {
   setTeam: (value: string[]) => void;
   setZone: (value:string) => void;
   setSection: (value: string) => void;
-  setMinPrice: (value: string) => void;
-  setMaxPrice: (value: string) => void;
+  setListingType: (value: string) => void;
   setFromDate: (value: string) => void;
   setToDate: (value: string) => void;
   setSort: (value: string) => void;
@@ -32,8 +30,7 @@ const defaultFilters: ListingsFilters = {
   team: [],
   zone: "",
   section: "",
-  minPrice: "",
-  maxPrice: "",
+  listingType: "",
   from: "",
   to: "",
   sort: "createdDesc",
@@ -62,12 +59,8 @@ export function ListingsFiltersProvider({ children }: { children: ReactNode }) {
     setFilters((prev) => ({ ...prev, section: value }));
   };
 
-  const setMinPrice = (value: string) => {
-    setFilters((prev) => ({ ...prev, minPrice: value }));
-  };
-
-  const setMaxPrice = (value: string) => {
-    setFilters((prev) => ({ ...prev, maxPrice: value }));
+  const setListingType = (value: string) => {
+    setFilters((prev) => ({ ...prev, listingType: value }));
   };
 
   const setFromDate = (value: string) => {
@@ -101,8 +94,7 @@ export function ListingsFiltersProvider({ children }: { children: ReactNode }) {
         setTeam,
         setZone,
         setSection,
-        setMinPrice,
-        setMaxPrice,
+        setListingType,
         setFromDate,
         setToDate,
         setSort,

@@ -118,6 +118,11 @@ enum ListingStatus {
   EXPIRED
 }
 
+enum ListingType {
+  HAVE
+  WANT
+}
+
 enum ConversationStatus {
   ACTIVE
   ENDED
@@ -136,12 +141,14 @@ model Listing {
   gameId   String?
   gameDate DateTime
 
-  // What they HAVE
+  // Listing type (HAVE tickets or WANT tickets)
+  listingType ListingType @default(HAVE)
+
+  // What they HAVE (only for HAVE listings)
   haveSection String
   haveRow     String
   haveSeat    String
   haveZone    String
-  faceValue   Float
 
   // What they WANT
   wantZones        String[]

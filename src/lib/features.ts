@@ -10,6 +10,7 @@ export const features = {
   relatedListings: process.env.NEXT_PUBLIC_FEATURE_RELATED_LISTINGS_EANBLED === "true",
   boostListings: process.env.NEXT_PUBLIC_FEATURE_BOOST_LISTINGS_ENABLED === "true",
   flagUser: process.env.NEXT_PUBLIC_FEATURE_FLAG_USER_ENABLED === "true",
+  showListingActiveStatus: process.env.NEXT_PUBLIC_FEATURE_SHOW_LISTING_ACTIVE_STATUS === "true",
 
 }
 
@@ -19,3 +20,4 @@ export const isSeatMapEnabled = (): boolean => features.seatMap
 export const isRelatedListingsEnabled = (): boolean => features.relatedListings
 export const isBoostEnabled = (): boolean => features.boostListings
 export const isFlagUserEnabled = (): boolean => features.flagUser
+export const isShowListingActiveStatusEnabled = (): boolean => features.showListingActiveStatus

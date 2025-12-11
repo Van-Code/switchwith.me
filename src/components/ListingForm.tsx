@@ -21,11 +21,11 @@ export function ListingForm() {
   const [formData, setFormData] = useState({
     teamId: "",
     gameDate: "",
+    listingType: "HAVE",
     haveSection: "",
     haveRow: "",
     haveSeat: "",
     haveZone: "",
-    faceValue: "",
     wantZones: "",
     wantSections: "",
     willingToAddCash: false,
@@ -50,7 +50,7 @@ export function ListingForm() {
           ...formData,
           teamId: parseInt(formData.teamId),
           gameDate: new Date(formData.gameDate).toISOString(),
-          faceValue: parseFloat(formData.faceValue),
+          listingType: formData.listingType,
           wantZones: formData.wantZones.split(",").map(z => z.trim()).filter(Boolean),
           wantSections: formData.wantSections.split(",").map(s => s.trim()).filter(Boolean),
         }),
@@ -105,62 +105,72 @@ export function ListingForm() {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="haveSection">Section</Label>
-              <Input
-                id="haveSection"
-                required
-                placeholder="101"
-                value={formData.haveSection}
-                onChange={(e) => setFormData({ ...formData, haveSection: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="haveRow">Row</Label>
-              <Input
-                id="haveRow"
-                required
-                placeholder="A"
-                value={formData.haveRow}
-                onChange={(e) => setFormData({ ...formData, haveRow: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="haveSeat">Seat</Label>
-              <Input
-                id="haveSeat"
-                required
-                placeholder="1"
-                value={formData.haveSeat}
-                onChange={(e) => setFormData({ ...formData, haveSeat: e.target.value })}
-              />
-            </div>
+          <div>
+            <Label htmlFor="listingType">Listing Type</Label>
+            <select
+              id="listingType"
+              required
+              value={formData.listingType}
+              onChange={(e) => setFormData({ ...formData, listingType: e.target.value })}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="HAVE">I have tickets to offer</option>
+              <option value="WANT">I want tickets</option>
+            </select>
+            <p className="text-xs text-muted-foreground mt-1">
+              {formData.listingType === "HAVE"
+                ? "You currently have tickets and want to trade them"
+                : "You're looking for tickets and want someone to trade with you"}
+            </p>
           </div>
 
-          <div>
-            <Label htmlFor="haveZone">Zone</Label>
-            <Input
-              id="haveZone"
-              required
-              placeholder="Lower Bowl Corner"
-              value={formData.haveZone}
-              onChange={(e) => setFormData({ ...formData, haveZone: e.target.value })}
-            />
-          </div>
+          {formData.listingType === "HAVE" && (
+            <>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="haveSection">Section</Label>
+                  <Input
+                    id="haveSection"
+                    required={formData.listingType === "HAVE"}
+                    placeholder="101"
+                    value={formData.haveSection}
+                    onChange={(e) => setFormData({ ...formData, haveSection: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="haveRow">Row</Label>
+                  <Input
+                    id="haveRow"
+                    required={formData.listingType === "HAVE"}
+                    placeholder="A"
+                    value={formData.haveRow}
+                    onChange={(e) => setFormData({ ...formData, haveRow: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="haveSeat">Seat</Label>
+                  <Input
+                    id="haveSeat"
+                    required={formData.listingType === "HAVE"}
+                    placeholder="1"
+                    value={formData.haveSeat}
+                    onChange={(e) => setFormData({ ...formData, haveSeat: e.target.value })}
+                  />
+                </div>
+              </div>
 
-          <div>
-            <Label htmlFor="faceValue">Face Value ($)</Label>
-            <Input
-              id="faceValue"
-              type="number"
-              step="0.01"
-              required
-              placeholder="75.00"
-              value={formData.faceValue}
-              onChange={(e) => setFormData({ ...formData, faceValue: e.target.value })}
-            />
-          </div>
+              <div>
+                <Label htmlFor="haveZone">Zone</Label>
+                <Input
+                  id="haveZone"
+                  required={formData.listingType === "HAVE"}
+                  placeholder="Lower Bowl Corner"
+                  value={formData.haveZone}
+                  onChange={(e) => setFormData({ ...formData, haveZone: e.target.value })}
+                />
+              </div>
+            </>
+          )}
 
           <div>
             <Label htmlFor="wantZones">Want Zones (comma-separated)</Label>

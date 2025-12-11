@@ -105,8 +105,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
 
         if (activeFilters.team.length > 0) params.set("team", activeFilters.team.join(","));
         if (activeFilters.section) params.set("section", activeFilters.section);
-        if (activeFilters.minPrice) params.set("minPrice", activeFilters.minPrice);
-        if (activeFilters.maxPrice) params.set("maxPrice", activeFilters.maxPrice);
+        if (activeFilters.listingType) params.set("listingType", activeFilters.listingType);
         if (activeFilters.from) params.set("from", activeFilters.from);
         if (activeFilters.to) params.set("to", activeFilters.to);
         if (activeFilters.sort) params.set("sort", activeFilters.sort);
@@ -138,8 +137,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
   const hasFilters = !!(
     activeFilters.team.length > 0 ||
     activeFilters.section ||
-    activeFilters.minPrice ||
-    activeFilters.maxPrice ||
+    activeFilters.listingType ||
     activeFilters.from ||
     activeFilters.to
   );
@@ -147,8 +145,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
   const filterCount = [
     activeFilters.team.length > 0,
     activeFilters.section,
-    activeFilters.minPrice,
-    activeFilters.maxPrice,
+    activeFilters.listingType,
     activeFilters.from,
     activeFilters.to,
   ].filter(Boolean).length;

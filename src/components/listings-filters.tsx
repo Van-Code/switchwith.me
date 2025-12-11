@@ -63,8 +63,7 @@ export default function ListingsFilters() {
     setTeam,
     setZone,
     setSection,
-    setMinPrice,
-    setMaxPrice,
+    setListingType,
     setFromDate,
     setToDate,
     resetFilters,
@@ -191,8 +190,7 @@ export default function ListingsFilters() {
     activeFilters.team.length > 0 ||
     activeFilters.zone ||
     activeFilters.section ||
-    activeFilters.minPrice ||
-    activeFilters.maxPrice ||
+    activeFilters.listingType ||
     activeFilters.from ||
     activeFilters.to
   );
@@ -264,29 +262,18 @@ export default function ListingsFilters() {
           />
         </div>
 
-        {/* Price range */}
+        {/* Listing Type filter */}
         <div className="space-y-2">
-          <Label className="text-sm font-semibold text-slate-700">Price Range ($)</Label>
-          <div className="grid grid-cols-2 gap-2">
-            <Input
-              type="number"
-              placeholder="Min"
-              value={filters.minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
-              min="0"
-              step="0.01"
-            />
-            <Input
-              type="number"
-              placeholder="Max"
-              value={filters.maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              className="text-sm border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400"
-              min="0"
-              step="0.01"
-            />
-          </div>
+          <Label className="text-sm font-semibold text-slate-700">Listing Type</Label>
+          <select
+            value={filters.listingType}
+            onChange={(e) => setListingType(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-cyan-200 bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2"
+          >
+            <option value="">All listings</option>
+            <option value="HAVE">Has tickets</option>
+            <option value="WANT">Wants tickets</option>
+          </select>
         </div>
 
         {/* Game Date Range */}

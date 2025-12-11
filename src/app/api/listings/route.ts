@@ -17,8 +17,6 @@ export async function GET(req: Request) {
     const search = (searchParams.get("search") ?? "").trim()
     const sort = searchParams.get("sort") ?? "createdDesc"
     const section = (searchParams.get("section") ?? "").trim()
-    const minPrice = searchParams.get("minPrice")
-    const maxPrice = searchParams.get("maxPrice")
     const from = searchParams.get("from")
     const to = searchParams.get("to")
     const teamFilter = searchParams.get("team") // comma-separated team slugs
@@ -42,21 +40,10 @@ export async function GET(req: Request) {
       where.haveSection = { contains: section, mode: "insensitive" }
     }
 
-    // Price range filter
-    if (minPrice || maxPrice) {
-      where.faceValue = {}
-      if (minPrice) {
-        const min = parseFloat(minPrice)
-        if (!isNaN(min)) {
-          where.faceValue.gte = min
-        }
-      }
-      if (maxPrice) {
-        const max = parseFloat(maxPrice)
-        if (!isNaN(max)) {
-          where.faceValue.lte = max
-        }
-      }
+    // Listing type filter
+    const listingType = searchParams.get("listingType")
+    if (listingType && (listingType === "HAVE" || listingType === "WANT")) {
+      where.listingType = listingType
     }
 
     // Date range filter
@@ -186,26 +173,24 @@ export async function POST(req: Request) {
       teamId,
       gameId,
       gameDate,
+      listingType,
       haveSection,
       haveRow,
       haveSeat,
       haveZone,
-      faceValue,
       wantZones,
       wantSections,
       willingToAddCash
     } = body
 
-    if (
-      !teamId ||
-      !gameDate ||
-      !haveSection ||
-      !haveRow ||
-      !haveSeat ||
-      !haveZone ||
-      faceValue === undefined
-    ) {
+    // Validate required fields
+    if (!teamId || !gameDate) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    // For HAVE listings, seat details are required
+    if (listingType === "HAVE" && (!haveSection || !haveRow || !haveSeat || !haveZone)) {
+      return NextResponse.json({ error: "Seat details required for HAVE listings" }, { status: 400 })
     }
 
     // Validate that team exists
@@ -223,11 +208,11 @@ export async function POST(req: Request) {
         teamId: parseInt(teamId),
         gameId,
         gameDate: new Date(gameDate),
-        haveSection,
-        haveRow,
-        haveSeat,
-        haveZone,
-        faceValue: parseFloat(faceValue),
+        listingType: listingType || "HAVE",
+        haveSection: haveSection || "",
+        haveRow: haveRow || "",
+        haveSeat: haveSeat || "",
+        haveZone: haveZone || "",
         wantZones: wantZones || [],
         wantSections: wantSections || [],
         willingToAddCash: willingToAddCash || false

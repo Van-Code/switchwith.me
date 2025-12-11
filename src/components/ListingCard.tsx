@@ -4,20 +4,20 @@ import { useState } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
-import { Calendar, DollarSign, Sparkles } from "lucide-react"
+import { Calendar, Sparkles } from "lucide-react"
 import { signIn } from "next-auth/react"
 import Image from "next/image"
-import { isBoostEnabled } from "@/lib/features"
+import { isBoostEnabled, isShowListingActiveStatusEnabled } from "@/lib/features"
 
 interface ListingCardProps {
   listing: {
     id: string
     gameDate: Date | string
+    listingType?: string
     haveSection: string
     haveRow: string
     haveSeat: string
     haveZone: string
-    faceValue: number
     wantZones: string[]
     wantSections: string[]
     status: string
@@ -84,24 +84,43 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
             <span className="text-sm font-semibold text-slate-700">
               {listing.team.name}
             </span>
+            {listing.listingType && (
+              <Badge
+                variant={listing.listingType === "HAVE" ? "default" : "outline"}
+                className={listing.listingType === "HAVE" ? "bg-green-600 hover:bg-green-700" : "border-blue-600 text-blue-600"}
+              >
+                {listing.listingType === "HAVE" ? "Has tickets" : "Wants tickets"}
+              </Badge>
+            )}
           </div>
         )}
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-lg">
-              {isAuthenticated ? (
-                <>Section {listing.haveSection}, Row {listing.haveRow}</>
-              ) : (
-                <>{getZoneCategory(listing.haveZone)}</>
-              )}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {isAuthenticated ? (
-                <>Seat {listing.haveSeat} • {listing.haveZone}</>
-              ) : (
-                <>Sign in to see exact location</>
-              )}
-            </p>
+            {listing.listingType === "HAVE" ? (
+              <>
+                <CardTitle className="text-lg">
+                  {isAuthenticated ? (
+                    <>Section {listing.haveSection}, Row {listing.haveRow}</>
+                  ) : (
+                    <>{getZoneCategory(listing.haveZone)}</>
+                  )}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {isAuthenticated ? (
+                    <>Seat {listing.haveSeat} • {listing.haveZone}</>
+                  ) : (
+                    <>Sign in to see exact location</>
+                  )}
+                </p>
+              </>
+            ) : (
+              <>
+                <CardTitle className="text-lg">Looking for tickets</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {listing.wantZones.length > 0 ? listing.wantZones.join(", ") : "Any zone"}
+                </p>
+              </>
+            )}
           </div>
           <div className="flex flex-col gap-1.5 items-end">
             {isBoostEnabled() && listing.boosted && (
@@ -110,9 +129,11 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
                 Boosted
               </Badge>
             )}
-            <Badge variant={listing.status === "ACTIVE" ? "default" : "secondary"}>
-              {listing.status}
-            </Badge>
+            {isShowListingActiveStatusEnabled() && (
+              <Badge variant={listing.status === "ACTIVE" ? "default" : "secondary"}>
+                {listing.status}
+              </Badge>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -128,13 +149,8 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
           })}</span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm">
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-          <span>Face Value: ${listing.faceValue.toFixed(2)}</span>
-        </div>
-
         <div className="space-y-1">
-          <p className="text-sm font-medium">Wants:</p>
+          <p className="text-sm font-medium">{listing.listingType === "HAVE" ? "Wants:" : "Interested in:"}</p>
           <div className="flex flex-wrap gap-1">
             {listing.wantZones.length > 0 ? (
               listing.wantZones.map((zone, i) => (
