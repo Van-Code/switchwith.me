@@ -12,6 +12,9 @@ scripts.txt
 dist/
 .vercel
 
+# TypeScript build cache
+*.tsbuildinfo
+
 # local env
 .env
 .env.development
