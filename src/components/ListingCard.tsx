@@ -45,6 +45,17 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
   const [isSigningIn, setIsSigningIn] = useState(false)
   const gameDate = new Date(listing.gameDate)
 
+  // Format date to avoid timezone issues - use UTC methods to display the date as-is
+  const formatGameDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC" // Force UTC to prevent timezone shifts
+    })
+  }
+
   const handleSignInToMessage = async () => {
     setIsSigningIn(true)
     try {
@@ -141,12 +152,7 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
       <CardContent className="space-y-3">
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span>{gameDate.toLocaleDateString("en-US", {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-            year: "numeric"
-          })}</span>
+          <span>{formatGameDate(gameDate)}</span>
         </div>
 
         <div className="space-y-1">

@@ -202,12 +202,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid team ID" }, { status: 400 })
     }
 
+    // Parse gameDate as YYYY-MM-DD and create Date at noon UTC to avoid timezone shifts
+    const parsedGameDate = new Date(`${gameDate}T12:00:00.000Z`)
+
     const listing = await prisma.listing.create({
       data: {
         userId: session.user.id,
         teamId: parseInt(teamId),
         gameId,
-        gameDate: new Date(gameDate),
+        gameDate: parsedGameDate,
         listingType: listingType || "HAVE",
         haveSection: haveSection || "",
         haveRow: haveRow || "",

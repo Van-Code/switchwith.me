@@ -1,6 +1,7 @@
 export type Listing = {
   id: string
   gameDate: Date
+  listingType?: string
   haveZone: string
   wantZones: string[]
   haveSection: string
@@ -26,12 +27,14 @@ export interface ListingWithUser extends Listing {
 
 /**
  * Find potential matches for a given listing
- * A match occurs when:
- * - Listing A's HAVE matches Listing B's WANT
- * - Listing B's HAVE matches Listing A's WANT
+ * For HAVE listings:
+ * - Match occurs when my HAVE matches their WANT and their HAVE matches my WANT (mutual swap)
+ * For WANT listings:
+ * - Match occurs when their HAVE matches my WANT (I'm looking for what they have)
  */
 export function findMatches(myListing: Listing, allListings: Listing[]): MatchScore[] {
   const matches: MatchScore[] = []
+  const myListingType = myListing.listingType || "HAVE"
 
   for (const otherListing of allListings) {
     // Skip own listings
@@ -43,24 +46,50 @@ export function findMatches(myListing: Listing, allListings: Listing[]): MatchSc
     // Skip non-active listings
     if (otherListing.status !== "ACTIVE") continue
 
-    // Check if there's a mutual match
-    const myHaveMatchesTheirWant = checkMatch(
-      myListing.haveZone,
-      myListing.haveSection,
-      otherListing.wantZones,
-      otherListing.wantSections
-    )
+    const otherListingType = otherListing.listingType || "HAVE"
+    let isMatch = false
 
-    const theirHaveMatchesMyWant = checkMatch(
-      otherListing.haveZone,
-      otherListing.haveSection,
-      myListing.wantZones,
-      myListing.wantSections
-    )
+    if (myListingType === "HAVE" && otherListingType === "HAVE") {
+      // Traditional mutual swap: both have tickets to trade
+      const myHaveMatchesTheirWant = checkMatch(
+        myListing.haveZone,
+        myListing.haveSection,
+        otherListing.wantZones,
+        otherListing.wantSections
+      )
 
-    if (myHaveMatchesTheirWant && theirHaveMatchesMyWant) {
+      const theirHaveMatchesMyWant = checkMatch(
+        otherListing.haveZone,
+        otherListing.haveSection,
+        myListing.wantZones,
+        myListing.wantSections
+      )
+
+      isMatch = myHaveMatchesTheirWant && theirHaveMatchesMyWant
+    } else if (myListingType === "WANT" && otherListingType === "HAVE") {
+      // I want tickets, they have tickets
+      // Check if what they have matches what I want
+      isMatch = checkMatch(
+        otherListing.haveZone,
+        otherListing.haveSection,
+        myListing.wantZones,
+        myListing.wantSections
+      )
+    } else if (myListingType === "HAVE" && otherListingType === "WANT") {
+      // I have tickets, they want tickets
+      // Check if what I have matches what they want
+      isMatch = checkMatch(
+        myListing.haveZone,
+        myListing.haveSection,
+        otherListing.wantZones,
+        otherListing.wantSections
+      )
+    }
+    // Skip WANT-to-WANT matches (both looking for tickets)
+
+    if (isMatch) {
       const score = calculateScore(myListing, otherListing)
-      const reason = generateReason(myListing, otherListing)
+      const reason = generateReason(myListing, otherListing, myListingType, otherListingType)
 
       matches.push({
         listingId: otherListing.id,
@@ -99,20 +128,38 @@ function checkMatch(
 function calculateScore(listing1: Listing, listing2: Listing): number {
   let score = 100 // Base score
 
-  // Exact section match is best
-  if (
-    listing1.haveSection === listing2.wantSections[0] &&
-    listing2.haveSection === listing1.wantSections[0]
-  ) {
-    score += 50
-  }
+  const type1 = listing1.listingType || "HAVE"
+  const type2 = listing2.listingType || "HAVE"
 
-  // Same zone is good
-  if (
-    listing1.wantZones.includes(listing2.haveZone) &&
-    listing2.wantZones.includes(listing1.haveZone)
-  ) {
-    score += 25
+  if (type1 === "HAVE" && type2 === "HAVE") {
+    // Traditional mutual swap scoring
+    if (
+      listing1.haveSection === listing2.wantSections[0] &&
+      listing2.haveSection === listing1.wantSections[0]
+    ) {
+      score += 50
+    }
+
+    if (
+      listing1.wantZones.includes(listing2.haveZone) &&
+      listing2.wantZones.includes(listing1.haveZone)
+    ) {
+      score += 25
+    }
+  } else {
+    // HAVE/WANT or WANT/HAVE matching
+    const haveListing = type1 === "HAVE" ? listing1 : listing2
+    const wantListing = type1 === "WANT" ? listing1 : listing2
+
+    // Exact section match for what they want
+    if (wantListing.wantSections.includes(haveListing.haveSection)) {
+      score += 50
+    }
+
+    // Zone match
+    if (wantListing.wantZones.includes(haveListing.haveZone)) {
+      score += 25
+    }
   }
 
   return score
@@ -121,16 +168,33 @@ function calculateScore(listing1: Listing, listing2: Listing): number {
 /**
  * Generate a human-readable reason for the match
  */
-function generateReason(listing1: Listing, listing2: Listing): string {
+function generateReason(listing1: Listing, listing2: Listing, type1: string, type2: string): string {
   const reasons: string[] = []
 
-  if (listing1.haveSection === listing2.wantSections[0]) {
-    reasons.push("Exact section match")
+  if (type1 === "HAVE" && type2 === "HAVE") {
+    // Traditional swap
+    if (listing1.haveSection === listing2.wantSections[0]) {
+      reasons.push("Exact section match")
+    }
+
+    if (listing1.wantZones.includes(listing2.haveZone)) {
+      reasons.push(`Your want matches their ${listing2.haveZone}`)
+    }
+  } else if (type1 === "WANT" && type2 === "HAVE") {
+    // I want, they have
+    if (listing1.wantSections.includes(listing2.haveSection)) {
+      reasons.push(`They have Section ${listing2.haveSection} that you want`)
+    } else if (listing1.wantZones.includes(listing2.haveZone)) {
+      reasons.push(`They have ${listing2.haveZone} tickets`)
+    }
+  } else if (type1 === "HAVE" && type2 === "WANT") {
+    // I have, they want
+    if (listing2.wantSections.includes(listing1.haveSection)) {
+      reasons.push(`They want Section ${listing1.haveSection} that you have`)
+    } else if (listing2.wantZones.includes(listing1.haveZone)) {
+      reasons.push(`They want ${listing1.haveZone} tickets`)
+    }
   }
 
-  if (listing1.wantZones.includes(listing2.haveZone)) {
-    reasons.push(`Your want matches their ${listing2.haveZone}`)
-  }
-
-  return reasons.length > 0 ? reasons.join(" • ") : "Compatible swap"
+  return reasons.length > 0 ? reasons.join(" • ") : "Compatible match"
 }

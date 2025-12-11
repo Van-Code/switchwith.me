@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
+import { Switch } from "./ui/switch"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { useRouter } from "next/navigation"
 
@@ -49,7 +50,7 @@ export function ListingForm() {
         body: JSON.stringify({
           ...formData,
           teamId: parseInt(formData.teamId),
-          gameDate: new Date(formData.gameDate).toISOString(),
+          gameDate: formData.gameDate, // Send as YYYY-MM-DD string, let API handle conversion
           listingType: formData.listingType,
           wantZones: formData.wantZones
             .split(",")
@@ -77,31 +78,35 @@ export function ListingForm() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Create New Listing</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="listingType">Listing Type</Label>
-            <select
-              id="listingType"
-              required
-              value={formData.listingType}
-              onChange={(e) => setFormData({ ...formData, listingType: e.target.value })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="HAVE">I have tickets to offer</option>
-              <option value="WANT">I want tickets</option>
-            </select>
-            <p className="text-xs text-muted-foreground mt-1">
-              {formData.listingType === "HAVE"
-                ? "You currently have tickets and want to trade them"
-                : "You're looking for tickets and want someone to trade with you"}
-            </p>
+          <div className="space-y-3">
+            <Label>Listing Type</Label>
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-slate-50">
+              <div className="flex-1">
+                <div className="font-medium text-sm">
+                  {formData.listingType === "HAVE" ? "Has tickets" : "Wants tickets"}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.listingType === "HAVE"
+                    ? "You currently have tickets and want to trade them"
+                    : "You're looking for tickets and want someone to trade with you"}
+                </p>
+              </div>
+              <Switch
+                id="listingTypeSwitch"
+                checked={formData.listingType === "WANT"}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, listingType: checked ? "WANT" : "HAVE" })
+                }
+                aria-label="Toggle listing type between Has tickets and Wants tickets"
+              />
+            </div>
           </div>
           <div>
-            <Label htmlFor="teamId">Team</Label>
+            <Label htmlFor="teamId">
+              Team <span className="text-red-500" aria-label="required">*</span>
+            </Label>
             <select
               id="teamId"
               required
@@ -119,11 +124,13 @@ export function ListingForm() {
           </div>
 
           <div>
-            <Label htmlFor="gameDate">Game Date</Label>
+            <Label htmlFor="gameDate">
+              Game Date <span className="text-red-500" aria-label="required">*</span>
+            </Label>
             <Input
               id="gameDate"
               type="date"
-              required={formData.listingType === "HAVE"}
+              required
               value={formData.gameDate}
               onChange={(e) => setFormData({ ...formData, gameDate: e.target.value })}
             />
@@ -133,7 +140,9 @@ export function ListingForm() {
             <>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="haveSection">Section</Label>
+                  <Label htmlFor="haveSection">
+                    Section <span className="text-red-500" aria-label="required">*</span>
+                  </Label>
                   <Input
                     id="haveSection"
                     required={formData.listingType === "HAVE"}
@@ -145,7 +154,9 @@ export function ListingForm() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="haveRow">Row</Label>
+                  <Label htmlFor="haveRow">
+                    Row <span className="text-red-500" aria-label="required">*</span>
+                  </Label>
                   <Input
                     id="haveRow"
                     required={formData.listingType === "HAVE"}
@@ -157,7 +168,9 @@ export function ListingForm() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="haveSeat">Seat</Label>
+                  <Label htmlFor="haveSeat">
+                    Seat <span className="text-red-500" aria-label="required">*</span>
+                  </Label>
                   <Input
                     id="haveSeat"
                     required={formData.listingType === "HAVE"}
@@ -171,7 +184,9 @@ export function ListingForm() {
               </div>
 
               <div>
-                <Label htmlFor="haveZone">Zone</Label>
+                <Label htmlFor="haveZone">
+                  Zone <span className="text-red-500" aria-label="required">*</span>
+                </Label>
                 <Input
                   id="haveZone"
                   required={formData.listingType === "HAVE"}
