@@ -1,18 +1,21 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 
-export default function CreateListingMessagePage() {
+interface PageProps {
+  searchParams: { listingId?: string; ownerId?: string }
+}
+
+export default function CreateListingMessagePage({ searchParams }: PageProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
 
-  const listingId = searchParams.get("listingId")
-  const ownerId = searchParams.get("ownerId")
+  const { listingId, ownerId } = searchParams
 
+  console.log(searchParams)
   useEffect(() => {
     if (!listingId || !ownerId) {
       router.push("/listings?error=missing_params")
