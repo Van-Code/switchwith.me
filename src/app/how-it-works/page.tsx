@@ -13,7 +13,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { isFlagUserEnabled } from "@/lib/features"
+import { isReportUserEnabled } from "@/lib/features"
 
 export default async function HowItWorksPage() {
   const session = await getServerSession(authOptions)
@@ -159,9 +159,10 @@ export default async function HowItWorksPage() {
               <div>
                 <h3 className="font-semibold text-slate-900">Create a listing</h3>
                 <p>
-                  List seats you have and want to trade, or create a listing if you're looking
-                  for tickets. Choose your game, specify your preferences, and connect with
-                  other fans. You can keep exact seat numbers private until you feel comfortable.
+                  List seats you have and want to trade, or create a listing if you're
+                  looking for tickets. Choose your game, specify your preferences, and
+                  connect with other fans. You can keep exact seat numbers private until
+                  you feel comfortable.
                 </p>
               </div>
 
@@ -252,9 +253,11 @@ export default async function HowItWorksPage() {
                   random links.
                 </li>
                 <li>Double check game, date, and team before you agree on a swap.</li>
-                
-                {isFlagUserEnabled() && (
-                  <li>If something feels off, you can report a listing or block a user.</li>
+
+                {isReportUserEnabled() && (
+                  <li>
+                    If something feels off, you can report a listing or block a user.
+                  </li>
                 )}
               </ul>
               <p className="text-xs text-slate-500 pt-1">
