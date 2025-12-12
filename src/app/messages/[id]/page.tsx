@@ -89,7 +89,6 @@ export default async function ConversationPage({ params }: { params: { id: strin
     <div className="max-w-4xl mx-auto space-y-4">
       <ConversationHeader
         otherParticipant={otherParticipant}
-        conversationId={conversation.id}
       />
 
       {/* Main Content - Side by Side Layout */}
@@ -110,6 +109,7 @@ export default async function ConversationPage({ params }: { params: { id: strin
               currentUserId={session.user.id}
               conversationStatus={conversation.status}
               listingId={conversation.listingId}
+              otherParticipant={otherParticipant}
             />
           </main>
         </div>

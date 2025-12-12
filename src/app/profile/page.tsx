@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { Edit, MapPin, Sparkles } from "lucide-react"
-import { isBoostEnabled } from "@/lib/features"
-
+import { isBoostEnabled, isShowListingActiveStatusEnabled } from "@/lib/features"
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions)
@@ -172,9 +171,13 @@ function MyListingsSection({
 
 function MyListingCard({ listing }: { listing: any }) {
   return (
-    <Card className={`border-slate-200 hover:shadow-md transition-shadow ${
-     isBoostEnabled() && listing.boosted ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent" : ""
-    }`}>
+    <Card
+      className={`border-slate-200 hover:shadow-md transition-shadow ${
+        isBoostEnabled() && listing.boosted
+          ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent"
+          : ""
+      }`}
+    >
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
@@ -190,7 +193,9 @@ function MyListingCard({ listing }: { listing: any }) {
                 Boosted
               </Badge>
             )}
-            <ListingStatusBadge status={listing.status} />
+            {isShowListingActiveStatusEnabled() && (
+              <ListingStatusBadge status={listing.status} />
+            )}
           </div>
         </div>
       </CardHeader>

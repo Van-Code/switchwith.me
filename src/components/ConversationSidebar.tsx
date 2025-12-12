@@ -5,10 +5,13 @@ import { RelatedListings } from "./RelatedListings"
 import { isRelatedListingsEnabled } from "@/lib/features"
 
 interface Listing {
+  listingType: string
   haveSection: string
   haveRow: string
   haveSeat: string
   haveZone: string
+  wantZones: string[]
+  wantSections: string[]
   gameDate: Date | string
   gameId?: string | null
 }

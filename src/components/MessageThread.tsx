@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "./ui/button"
 import { Textarea } from "./ui/textarea"
 import { Card, CardContent } from "./ui/card"
-import { ArrowDown, MoreVertical, XCircle } from "lucide-react"
+import { ArrowDown, MoreVertical, XCircle, Flag } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 import { EndChatDialog } from "./EndChatDialog"
+import { ReportUserModal } from "./ReportUserModal"
 
 interface Message {
   id: string
@@ -34,6 +35,16 @@ interface MessageThreadProps {
   conversationStatus?: "ACTIVE" | "ENDED"
   onEndConversation?: () => void
   onArchiveConversation?: () => void
+  otherParticipant?: {
+    userId: string
+    user: {
+      id: string
+      profile: {
+        firstName: string
+        lastInitial: string | null
+      } | null
+    }
+  }
 }
 
 export function MessageThread({
@@ -44,6 +55,7 @@ export function MessageThread({
   conversationStatus = "ACTIVE",
   onEndConversation,
   onArchiveConversation,
+  otherParticipant,
 }: MessageThreadProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [newMessage, setNewMessage] = useState("")
@@ -51,6 +63,7 @@ export function MessageThread({
   const [showEndDialog, setShowEndDialog] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
   const [showScrollButton, setShowScrollButton] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
 
   const threadRef = useRef<HTMLDivElement | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
@@ -241,6 +254,10 @@ export function MessageThread({
     }
   }
 
+  const otherUserName = otherParticipant?.user.profile
+    ? `${otherParticipant.user.profile.firstName} ${otherParticipant.user.profile.lastInitial}.`
+    : "Unknown User"
+
   return (
     <div ref={threadRef} className="flex flex-col h-[600px]">
       {/* Options Menu */}
@@ -253,24 +270,41 @@ export function MessageThread({
             </span>
           )}
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          {otherParticipant && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowReportModal(true)}
+              className="text-muted-foreground hover:text-destructive rounded-full"
+            >
+              <Flag className="h-4 w-4 mr-1.5" />
+              Report
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {!isEnded && (
-              <DropdownMenuItem onClick={() => setShowEndDialog(true)}>
-                <XCircle className="mr-2 h-4 w-4" />
-                End chat
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full px-3"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!isEnded && (
+                <DropdownMenuItem onClick={() => setShowEndDialog(true)}>
+                  <XCircle className="mr-2 h-4 w-4" />
+                  End chat
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={handleArchive}>
+                Archive conversation
               </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onClick={handleArchive}>
-              Archive conversation
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Safety Disclaimer */}
@@ -369,6 +403,16 @@ export function MessageThread({
         onConfirm={handleEndChat}
         isEnding={isEnding}
       />
+
+      {otherParticipant && (
+        <ReportUserModal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          reportedUserId={otherParticipant.user.id}
+          reportedUserName={otherUserName}
+          conversationId={conversationId}
+        />
+      )}
     </div>
   )
 }

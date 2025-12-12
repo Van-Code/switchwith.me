@@ -67,7 +67,7 @@ export default async function Home() {
           </CardHeader>
           <CardContent>
             <p className="text-slate-600 leading-relaxed">
-              List the seats you have and specify what you want. Our matching system helps surface compatible swaps.
+              List the seats you have or the seats you're looking for. Our matching system helps surface compatible swaps.
             </p>
           </CardContent>
         </Card>
@@ -110,7 +110,7 @@ export default async function Home() {
             <span className="flex-shrink-0 h-8 w-8 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-sm">
               1
             </span>
-            <span className="text-slate-700 pt-1">Sign in with Google and list the seats you have.</span>
+            <span className="text-slate-700 pt-1">Sign in with Google and create a listing for seats you have or want.</span>
           </li>
           <li className="flex gap-4 items-start">
             <span className="flex-shrink-0 h-8 w-8 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-sm">

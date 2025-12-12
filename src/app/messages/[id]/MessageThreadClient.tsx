@@ -26,6 +26,16 @@ interface MessageThreadClientProps {
   currentUserId: string
   conversationStatus: "ACTIVE" | "ENDED"
   listingId?: string | null
+  otherParticipant?: {
+    userId: string
+    user: {
+      id: string
+      profile: {
+        firstName: string
+        lastInitial: string | null
+      } | null
+    }
+  }
 }
 
 export function MessageThreadClient({
@@ -34,6 +44,7 @@ export function MessageThreadClient({
   currentUserId,
   conversationStatus,
   listingId,
+  otherParticipant,
 }: MessageThreadClientProps) {
   const router = useRouter()
   const [showSwapPrompt, setShowSwapPrompt] = useState(false)
@@ -134,6 +145,7 @@ export function MessageThreadClient({
         onSendMessage={handleSendMessage}
         onEndConversation={handleEndConversation}
         onArchiveConversation={handleArchiveConversation}
+        otherParticipant={otherParticipant}
       />
     </div>
   )

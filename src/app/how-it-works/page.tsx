@@ -159,9 +159,9 @@ export default async function HowItWorksPage() {
               <div>
                 <h3 className="font-semibold text-slate-900">Create a listing</h3>
                 <p>
-                  Share what you have and what you want. Choose your game, your current
-                  section, and what kind of move you are hoping for. You can keep exact
-                  seat numbers private until you feel comfortable.
+                  List seats you have and want to trade, or create a listing if you're looking
+                  for tickets. Choose your game, specify your preferences, and connect with
+                  other fans. You can keep exact seat numbers private until you feel comfortable.
                 </p>
               </div>
 
