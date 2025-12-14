@@ -105,7 +105,10 @@ export function ListingForm() {
           </div>
           <div>
             <Label htmlFor="teamId">
-              Team <span className="text-red-500" aria-label="required">*</span>
+              Team{" "}
+              <span className="text-red-500" aria-label="required">
+                *
+              </span>
             </Label>
             <select
               id="teamId"
@@ -125,7 +128,10 @@ export function ListingForm() {
 
           <div>
             <Label htmlFor="gameDate">
-              Game Date <span className="text-red-500" aria-label="required">*</span>
+              Game Date{" "}
+              <span className="text-red-500" aria-label="required">
+                *
+              </span>
             </Label>
             <Input
               id="gameDate"
@@ -141,7 +147,10 @@ export function ListingForm() {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="haveSection">
-                    Section <span className="text-red-500" aria-label="required">*</span>
+                    Section{" "}
+                    <span className="text-red-500" aria-label="required">
+                      *
+                    </span>
                   </Label>
                   <Input
                     id="haveSection"
@@ -155,7 +164,10 @@ export function ListingForm() {
                 </div>
                 <div>
                   <Label htmlFor="haveRow">
-                    Row <span className="text-red-500" aria-label="required">*</span>
+                    Row{" "}
+                    <span className="text-red-500" aria-label="required">
+                      *
+                    </span>
                   </Label>
                   <Input
                     id="haveRow"
@@ -169,7 +181,10 @@ export function ListingForm() {
                 </div>
                 <div>
                   <Label htmlFor="haveSeat">
-                    Seat <span className="text-red-500" aria-label="required">*</span>
+                    Seat{" "}
+                    <span className="text-red-500" aria-label="required">
+                      *
+                    </span>
                   </Label>
                   <Input
                     id="haveSeat"
@@ -181,19 +196,6 @@ export function ListingForm() {
                     }
                   />
                 </div>
-              </div>
-
-              <div>
-                <Label htmlFor="haveZone">
-                  Zone <span className="text-red-500" aria-label="required">*</span>
-                </Label>
-                <Input
-                  id="haveZone"
-                  required={formData.listingType === "HAVE"}
-                  placeholder="Lower Bowl Corner"
-                  value={formData.haveZone}
-                  onChange={(e) => setFormData({ ...formData, haveZone: e.target.value })}
-                />
               </div>
             </>
           )}
