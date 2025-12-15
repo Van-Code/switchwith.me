@@ -5,6 +5,8 @@ import { CreditModal } from "@/components/CreditModal"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { isPayToChatEnabled } from "@/lib/features"
+import { apiClientJson, SessionExpiredError } from "@/lib/api-client"
+import { useToast } from "@/hooks/use-toast"
 
 interface ListingsClientProps {
   listings: any[]
@@ -13,6 +15,7 @@ interface ListingsClientProps {
 
 export function ListingsClient({ listings, currentUserId }: ListingsClientProps) {
   const router = useRouter()
+  const { toast } = useToast()
   const [loading, setLoading] = useState<string | null>(null)
   const [showCreditModal, setShowCreditModal] = useState(false)
   const [userCredits, setUserCredits] = useState(0)
@@ -59,30 +62,34 @@ export function ListingsClient({ listings, currentUserId }: ListingsClientProps)
 
     try {
       // Create or get conversation WITH listingId
-      const response = await fetch("/api/conversations", {
+      const data = await apiClientJson("/api/conversations", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           otherUserId: listing.user.id,
           listingId: listing.id // Pass the listing ID
         }),
       })
 
-      const data = await response.json()
-
-      if (response.ok) {
-        router.push(`/messages/${data.conversation.id}`)
-      } else {
-        // Handle insufficient credits error
-        if (response.status === 402) {
-          alert(`Insufficient credits. You have ${data.currentCredits} credits but need ${data.creditsRequired}.`)
-        } else {
-          alert(data.error || "Failed to start conversation")
-        }
-      }
+      router.push(`/messages/${data.conversation.id}`)
     } catch (error) {
+      if (error instanceof SessionExpiredError) {
+        // Session expired, user will be redirected to sign-in
+        toast({
+          title: "Session Expired",
+          description: "Your session has expired. Please sign in again.",
+          variant: "destructive",
+        })
+        return
+      }
+
       console.error("Error:", error)
-      alert("An error occurred")
+      const errorMessage = error instanceof Error ? error.message : "An error occurred"
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      })
     } finally {
       setLoading(null)
     }

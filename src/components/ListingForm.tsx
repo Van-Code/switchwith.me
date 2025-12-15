@@ -26,7 +26,6 @@ export function ListingForm() {
     haveSection: "",
     haveRow: "",
     haveSeat: "",
-    haveZone: "",
     wantZones: "",
     wantSections: "",
     willingToAddCash: false,

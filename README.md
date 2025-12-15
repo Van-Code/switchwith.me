@@ -13,9 +13,14 @@ The platform was created specifically for Golden State Valkyries fans and the br
 ### Core Functionality
 
 - **Listing Management**: Create and manage ticket swap listings with detailed seat information
+  - Automatic zone inference from section numbers for Have listings
+  - Share listings via native share on mobile or clipboard copy
 - **Smart Matching**: Browse listings and get matched with compatible swap partners based on preferences
-- **Messaging**: Direct messaging system 
+- **Messaging**: Direct messaging system with session management
 - **User Profiles**: Profile system with verification badges and swap history
+  - Public profile pages accessible via `/users/[id]`
+  - Email verification badges for Google OAuth users
+  - View other users' active listings and swap history
 - **Notification System**: In-app and email notifications for matches and messages
 - **Team Support**: Multi-team support with team branding and colors
 
@@ -28,10 +33,12 @@ The platform was created specifically for Golden State Valkyries fans and the br
 
 ### Safety & Trust
 
-- **Profile Verification**: Email, phone, and season ticket holder verification badges
+- **Profile Verification**: Email verification badges for Google OAuth users
 - **Swap Counter**: Track successful swap history
 - **Transparent Conversations**: All communication kept within the platform
 - **User Controls**: End conversations and archive chats as needed
+- **Session Management**: Automatic sign-out after 5 minutes of inactivity
+- **Robust Error Handling**: Graceful handling of session expiration with user feedback
 
 ## Tech Stack
 
@@ -216,18 +223,24 @@ kidney-swap/
 ### Authentication Flow
 
 - OAuth-only authentication using NextAuth.js
-- Google sign-in integration
+- Google sign-in integration with email verification
 - Automatic user and profile creation on first login
 - Session management with JWT
+- Automatic session expiration after 5 minutes of inactivity
+- Global API client for consistent 401/session expired handling
 
 ### Listing System
 
 Users can:
 
 - Create listings specifying what seats they have and want
+  - For Have listings, zone is automatically inferred from section number
+  - Supports various section formats (100s, 200s, C-prefix for clubs, S-prefix for suites, etc.)
 - Filter listings by team, date, section, and zone
 - Toggle listing status (active/inactive)
 - View suggested matches based on compatibility
+- Share listings via mobile native share or clipboard copy
+- Click on lister names to view their public profiles
 
 ### Matching Algorithm
 

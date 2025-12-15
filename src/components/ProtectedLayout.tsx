@@ -16,14 +16,17 @@ export default function ProtectedLayout({ children, session }: Props) {
   const [remaining, setRemaining] = useState<number>(0)
 
   const onIdle = async () => {
-    //do signout and delete session
+    // User has been idle for 5 minutes, sign them out
     setState("Idle")
 
-    if (session?.user?.id)
-      signOut({
-        callbackUrl: "/auth/signin",
+    if (session?.user?.id) {
+      // Sign out with redirect to ensure both client and server sessions are cleared
+      // The redirect: true ensures a full page navigation, which clears server-side session cache
+      await signOut({
+        callbackUrl: "/auth/signin?reason=idle",
         redirect: true,
       })
+    }
   }
 
   const onActive = () => {

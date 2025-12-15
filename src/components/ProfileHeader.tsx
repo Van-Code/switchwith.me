@@ -9,7 +9,8 @@ interface ProfileHeaderProps {
   avatarUrl?: string | null
   bio?: string | null
   successfulSwapsCount?: number
-  favoritePlayer:string | null
+  favoritePlayer?: string | null
+  isEmailVerified?: boolean
 }
 
 export function ProfileHeader({
@@ -18,6 +19,7 @@ export function ProfileHeader({
   avatarUrl,
   bio,
   successfulSwapsCount,
+  isEmailVerified,
 }: ProfileHeaderProps) {
   const avatarViewUrl = useAvatarUrl(avatarUrl)
 
@@ -38,6 +40,7 @@ export function ProfileHeader({
         <div className="mt-2">
           <ProfileBadge
             successfulSwapsCount={successfulSwapsCount}
+            isEmailVerified={isEmailVerified}
           />
         </div>
       </div>

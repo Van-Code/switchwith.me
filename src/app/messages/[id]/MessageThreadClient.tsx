@@ -6,6 +6,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { CheckCircle2, X } from "lucide-react"
+import { apiClientJson, SessionExpiredError } from "@/lib/api-client"
+import { useToast } from "@/hooks/use-toast"
 
 interface Message {
   id: string
@@ -47,27 +49,35 @@ export function MessageThreadClient({
   otherParticipant,
 }: MessageThreadClientProps) {
   const router = useRouter()
+  const { toast } = useToast()
   const [showSwapPrompt, setShowSwapPrompt] = useState(false)
   const [suggestedListingId, setSuggestedListingId] = useState<string | null>(null)
   const [settingInactive, setSettingInactive] = useState(false)
 
   const handleSendMessage = async (text: string) => {
-    const response = await fetch(`/api/conversations/${conversationId}/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    })
+    try {
+      const data = await apiClientJson(`/api/conversations/${conversationId}/messages`, {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      })
 
-    if (!response.ok) {
-      throw new Error("Failed to send message")
-    }
+      // Check if we should suggest marking listing inactive
+      if (data.suggestSetInactive && data.listingId) {
+        setSuggestedListingId(data.listingId)
+        setShowSwapPrompt(true)
+      }
+    } catch (error) {
+      if (error instanceof SessionExpiredError) {
+        // Session expired, user will be redirected to sign-in
+        toast({
+          title: "Session Expired",
+          description: "Your session has expired. Please sign in again.",
+          variant: "destructive",
+        })
+        return
+      }
 
-    const data = await response.json()
-
-    // Check if we should suggest marking listing inactive
-    if (data.suggestSetInactive && data.listingId) {
-      setSuggestedListingId(data.listingId)
-      setShowSwapPrompt(true)
+      throw error
     }
   }
 
