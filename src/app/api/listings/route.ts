@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { findMatches } from "@/lib/matching"
 import { createMatchNotification } from "@/lib/notifications"
+import { inferZoneFromSection } from "@/lib/zone-mapping"
 
 // Force dynamic rendering - this route needs to access headers for authentication
 export const dynamic = "force-dynamic";
@@ -120,7 +121,8 @@ export async function GET(req: Request) {
             profile: {
               select: {
                 firstName: true,
-                lastInitial: true
+                lastInitial: true,
+                emailVerified: true
               }
             }
           }
@@ -177,7 +179,6 @@ export async function POST(req: Request) {
       haveSection,
       haveRow,
       haveSeat,
-      haveZone,
       wantZones,
       wantSections,
       willingToAddCash
@@ -188,10 +189,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // For HAVE listings, seat details are required
-    if (listingType === "HAVE" && (!haveSection || !haveRow || !haveSeat || !haveZone)) {
+    // For HAVE listings, seat details are required (zone will be inferred)
+    if (listingType === "HAVE" && (!haveSection || !haveRow || !haveSeat)) {
       return NextResponse.json({ error: "Seat details required for HAVE listings" }, { status: 400 })
     }
+
+    // Infer zone from section for HAVE listings
+    const haveZone = listingType === "HAVE" ? inferZoneFromSection(haveSection) : ""
 
     // Validate that team exists
     const team = await prisma.team.findUnique({

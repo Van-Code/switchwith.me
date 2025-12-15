@@ -4,10 +4,18 @@ import { useState } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
-import { Calendar, Sparkles } from "lucide-react"
+import { Calendar, Sparkles, CheckCircle2 } from "lucide-react"
 import { signIn } from "next-auth/react"
 import Image from "next/image"
+import Link from "next/link"
 import { isBoostEnabled, isShowListingActiveStatusEnabled } from "@/lib/features"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { ShareListingButton } from "./ShareListingButton"
 
 interface ListingCardProps {
   listing: {
@@ -34,6 +42,7 @@ interface ListingCardProps {
       profile?: {
         firstName: string
         lastInitial: string | null
+        emailVerified?: boolean
       } | null
     }
   }
@@ -182,30 +191,68 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
         {isAuthenticated && listing.user?.profile && (
           <div className="pt-3 border-t">
             <span className="text-xs text-muted-foreground">Listed by</span>
-            <p className="text-sm font-medium mt-0.5">
-              {listing.user.profile.firstName} {listing.user.profile.lastInitial}.
-            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <Link
+                href={`/users/${listing.user.id}`}
+                className="text-sm font-medium hover:underline hover:text-cyan-700"
+              >
+                {listing.user.profile.firstName} {listing.user.profile.lastInitial}.
+              </Link>
+              {listing.user.profile.emailVerified && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Email verified via Google</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
 
       {listing.status === "ACTIVE" && (
-        <CardFooter>
+        <CardFooter className="flex gap-2">
           {!isAuthenticated ? (
-            <Button
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={handleSignInToMessage}
+                disabled={isSigningIn}
+              >
+                {isSigningIn ? "Signing in..." : "Sign in to Message"}
+              </Button>
+              <ShareListingButton
+                listingId={listing.id}
+                listingTitle={`${listing.team?.name || "Ticket"} - ${listing.haveZone}`}
+              />
+            </>
+          ) : onMessage ? (
+            <>
+              <Button onClick={onMessage} className="flex-1">
+                Message Owner
+              </Button>
+              <ShareListingButton
+                listingId={listing.id}
+                listingTitle={`${listing.team?.name || "Ticket"} - ${listing.haveZone}`}
+              />
+            </>
+          ) : (
+            <ShareListingButton
+              listingId={listing.id}
+              listingTitle={`${listing.team?.name || "Ticket"} - ${listing.haveZone}`}
               variant="outline"
               size="sm"
-              className="w-full"
-              onClick={handleSignInToMessage}
-              disabled={isSigningIn}
-            >
-              {isSigningIn ? "Signing in..." : "Sign in to Message"}
-            </Button>
-          ) : onMessage ? (
-            <Button onClick={onMessage} className="w-full">
-              Message Owner
-            </Button>
-          ) : null}
+            />
+          )}
         </CardFooter>
       )}
     </Card>

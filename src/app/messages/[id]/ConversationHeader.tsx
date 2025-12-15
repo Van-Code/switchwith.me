@@ -33,7 +33,15 @@ export function ConversationHeader({
         </Button>
       </Link>
       <div>
-        <h1 className="text-2xl font-bold">{otherUserName}</h1>
+        {otherParticipant?.user.id ? (
+          <Link href={`/users/${otherParticipant.user.id}`}>
+            <h1 className="text-2xl font-bold hover:underline hover:text-cyan-700 cursor-pointer">
+              {otherUserName}
+            </h1>
+          </Link>
+        ) : (
+          <h1 className="text-2xl font-bold">{otherUserName}</h1>
+        )}
         <p className="text-sm text-muted-foreground">Conversation</p>
       </div>
     </div>

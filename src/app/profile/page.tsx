@@ -53,6 +53,7 @@ export default async function ProfilePage() {
           bio={user.profile.bio}
           successfulSwapsCount={user.profile.successfulSwapsCount}
           favoritePlayer={user.profile.favoritePlayer}
+          isEmailVerified={user.profile.emailVerified}
         />
         <Link href="/profile/edit">
           <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
