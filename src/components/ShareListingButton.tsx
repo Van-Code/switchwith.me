@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "./ui/button"
 import { Share2, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { isMobileDeviceUserAgent } from "@/lib/mobile"
 
 interface ShareListingButtonProps {
   listingId: string
@@ -11,7 +12,10 @@ interface ShareListingButtonProps {
   variant?: "default" | "outline" | "ghost"
   size?: "default" | "sm" | "lg" | "icon"
 }
-
+function baseUrlFromWindow() {
+  if (typeof window === "undefined") return ""
+  return window.location.origin
+}
 export function ShareListingButton({
   listingId,
   listingTitle = "Check out this ticket listing",
@@ -22,15 +26,15 @@ export function ShareListingButton({
   const [copied, setCopied] = useState(false)
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/listings?highlight=${listingId}`
+    const base = baseUrlFromWindow()
+    const shareUrl = `${base}/listings/${listingId}`
     const shareData = {
       title: "Switch With Me - Ticket Listing",
       text: listingTitle,
       url: shareUrl,
     }
-
     // Check if native share is available (mobile)
-    if (navigator.share && navigator.canShare?.(shareData)) {
+    if (isMobileDeviceUserAgent() && navigator.share && navigator.canShare?.(shareData)) {
       try {
         await navigator.share(shareData)
         toast({
@@ -67,12 +71,7 @@ export function ShareListingButton({
   }
 
   return (
-    <Button
-      variant={variant}
-      size={size}
-      onClick={handleShare}
-      className="gap-2"
-    >
+    <Button variant={variant} size={size} onClick={handleShare} className="gap-2">
       {copied ? (
         <>
           <Check className="h-4 w-4" />

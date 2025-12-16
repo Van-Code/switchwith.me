@@ -50,10 +50,13 @@ interface ListingCardProps {
   isAuthenticated?: boolean
 }
 
-export function ListingCard({ listing, onMessage, isAuthenticated = false }: ListingCardProps) {
+export function ListingCard({
+  listing,
+  onMessage,
+  isAuthenticated = false,
+}: ListingCardProps) {
   const [isSigningIn, setIsSigningIn] = useState(false)
   const gameDate = new Date(listing.gameDate)
-
   // Format date to avoid timezone issues - use UTC methods to display the date as-is
   const formatGameDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
@@ -61,7 +64,7 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
       month: "short",
       day: "numeric",
       year: "numeric",
-      timeZone: "UTC" // Force UTC to prevent timezone shifts
+      timeZone: "UTC", // Force UTC to prevent timezone shifts
     })
   }
 
@@ -80,14 +83,20 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
   // Determine zone category for preview mode
   const getZoneCategory = (zone: string): string => {
     const zoneLower = zone.toLowerCase()
-    if (zoneLower.includes('lower') || zoneLower.includes('floor')) return 'Lower Bowl'
-    if (zoneLower.includes('upper')) return 'Upper Bowl'
-    if (zoneLower.includes('club') || zoneLower.includes('suite')) return 'Club/Suite'
-    return 'General Seating'
+    if (zoneLower.includes("lower") || zoneLower.includes("floor")) return "Lower Bowl"
+    if (zoneLower.includes("upper")) return "Upper Bowl"
+    if (zoneLower.includes("club") || zoneLower.includes("suite")) return "Club/Suite"
+    return "General Seating"
   }
 
   return (
-    <Card className={isBoostEnabled() && listing.boosted ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent shadow-lg" : ""}>
+    <Card
+      className={
+        isBoostEnabled() && listing.boosted
+          ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent shadow-lg"
+          : ""
+      }
+    >
       <CardHeader>
         {listing.team && (
           <div className="flex items-center gap-2 mb-3">
@@ -107,7 +116,11 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
             {listing.listingType && (
               <Badge
                 variant={listing.listingType === "HAVE" ? "default" : "outline"}
-                className={listing.listingType === "HAVE" ? "bg-green-600 hover:bg-green-700" : "border-blue-600 text-blue-600"}
+                className={
+                  listing.listingType === "HAVE"
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "border-blue-600 text-blue-600"
+                }
               >
                 {listing.listingType === "HAVE" ? "Has tickets" : "Wants tickets"}
               </Badge>
@@ -120,14 +133,18 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
               <>
                 <CardTitle className="text-lg">
                   {isAuthenticated ? (
-                    <>Section {listing.haveSection}, Row {listing.haveRow}</>
+                    <>
+                      Section {listing.haveSection}, Row {listing.haveRow}
+                    </>
                   ) : (
                     <>{getZoneCategory(listing.haveZone)}</>
                   )}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   {isAuthenticated ? (
-                    <>Seat {listing.haveSeat} • {listing.haveZone}</>
+                    <>
+                      Seat {listing.haveSeat} • {listing.haveZone}
+                    </>
                   ) : (
                     <>Sign in to see exact location</>
                   )}
@@ -137,7 +154,9 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
               <>
                 <CardTitle className="text-lg">Looking for tickets</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  {listing.wantZones.length > 0 ? listing.wantZones.join(", ") : "Any zone"}
+                  {listing.wantZones.length > 0
+                    ? listing.wantZones.join(", ")
+                    : "Any zone"}
                 </p>
               </>
             )}
@@ -165,7 +184,9 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
         </div>
 
         <div className="space-y-1">
-          <p className="text-sm font-medium">{listing.listingType === "HAVE" ? "Wants:" : "Interested in:"}</p>
+          <p className="text-sm font-medium">
+            {listing.listingType === "HAVE" ? "Wants:" : "Interested in:"}
+          </p>
           <div className="flex flex-wrap gap-1">
             {listing.wantZones.length > 0 ? (
               listing.wantZones.map((zone, i) => (
@@ -230,10 +251,6 @@ export function ListingCard({ listing, onMessage, isAuthenticated = false }: Lis
               >
                 {isSigningIn ? "Signing in..." : "Sign in to Message"}
               </Button>
-              <ShareListingButton
-                listingId={listing.id}
-                listingTitle={`${listing.team?.name || "Ticket"} - ${listing.haveZone}`}
-              />
             </>
           ) : onMessage ? (
             <>
