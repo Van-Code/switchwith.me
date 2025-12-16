@@ -7,6 +7,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -22,16 +27,22 @@ model User {
   // Pay-to-chat credits
   credits Int @default(5)
 
-  profile            Profile?
-  listings           Listing[]
-  sentMessages       Message[]                 @relation("SentMessages")
-  conversations      ConversationParticipant[]
-  reportsSubmitted   Report[]                  @relation("ReportsSubmitted")
-  reportsReceived    Report[]                  @relation("ReportsReceived")
-  notifications      Notification[]
-  accounts           Account[] // For OAuth
-  sessions           Session[] // For NextAuth sessions
-  creditTransactions CreditTransaction[]
+  // Admin role
+  role UserRole @default(USER)
+
+  profile                Profile?
+  listings               Listing[]
+  sentMessages           Message[]                 @relation("SentMessages")
+  conversations          ConversationParticipant[]
+  reportsSubmitted       Report[]                  @relation("ReportsSubmitted")
+  reportsReceived        Report[]                  @relation("ReportsReceived")
+  notifications          Notification[]
+  accounts               Account[] // For OAuth
+  sessions               Session[] // For NextAuth sessions
+  creditTransactions     CreditTransaction[]
+  profilePhotos          ProfilePhoto[]
+  photoReportsSubmitted  PhotoReport[]             @relation("PhotoReportsSubmitted")
+  photoReportsReceived   PhotoReport[]             @relation("PhotoReportsReceived")
 }
 
 // NextAuth OAuth Account model
@@ -93,6 +104,47 @@ model Profile {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ProfilePhoto {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  url       String   // S3 key
+  order     Int      // 0, 1, or 2 for the three slots
+  createdAt DateTime @default(now())
+
+  photoReports PhotoReport[]
+
+  @@unique([userId, order])
+  @@index([userId])
+}
+
+enum PhotoReportReason {
+  CONTACT_INFO
+  INAPPROPRIATE
+  HARASSMENT
+  OTHER
+}
+
+model PhotoReport {
+  id             String            @id @default(cuid())
+  reporterId     String
+  reporter       User              @relation("PhotoReportsSubmitted", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUserId String
+  reportedUser   User              @relation("PhotoReportsReceived", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  photoId        String
+  photo          ProfilePhoto      @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  reason         PhotoReportReason
+  details        String?           @db.VarChar(300)
+  resolved       Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([reportedUserId])
+  @@index([reporterId])
+  @@index([resolved])
+  @@index([photoId])
 }
 
 model Team {

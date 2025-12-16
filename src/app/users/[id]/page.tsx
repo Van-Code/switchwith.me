@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { ProfileHeader } from "@/components/ProfileHeader"
+import { ProfilePhotoStrip } from "@/components/ProfilePhotoStrip"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, Sparkles } from "lucide-react"
@@ -28,6 +29,11 @@ export default async function PublicProfilePage({ params }: { params: { id: stri
           successfulSwapsCount: true,
           favoritePlayer: true,
           emailVerified: true,
+        },
+      },
+      profilePhotos: {
+        orderBy: {
+          order: "asc",
         },
       },
       listings: {
@@ -72,6 +78,20 @@ export default async function PublicProfilePage({ params }: { params: { id: stri
         )}
       </div>
 
+      {/* Profile Photos */}
+      {user.profilePhotos && user.profilePhotos.length > 0 && (
+        <Card className="border-slate-200">
+          <CardContent className="pt-6">
+            <ProfilePhotoStrip
+              photos={user.profilePhotos}
+              isOwnProfile={isOwnProfile}
+              reportedUserId={!isOwnProfile ? user.id : undefined}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* User Stats */}
       <Card className="border-slate-200">
         <CardHeader>
           <CardTitle className="text-slate-900">User Stats</CardTitle>

@@ -79,3 +79,39 @@ export async function fileExists(key: string): Promise<boolean> {
     return false
   }
 }
+
+/**
+ * Generate a presigned URL for uploading a profile photo (multiple photos per user)
+ * @param userId - The user's ID
+ * @param photoIndex - The photo index (0, 1, or 2)
+ * @param fileExtension - File extension (jpg, png, webp)
+ * @returns Presigned URL and the S3 key
+ */
+export async function generateProfilePhotoUploadUrl(
+  userId: string,
+  photoIndex: number,
+  fileExtension: string
+): Promise<{ uploadUrl: string; key: string }> {
+  const timestamp = Date.now()
+  const key = `profile-photos/${userId}/${photoIndex}-${timestamp}.${fileExtension}`
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: `image/${fileExtension === "jpg" ? "jpeg" : fileExtension}`,
+  })
+
+  const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 }) // 5 minutes
+
+  return { uploadUrl, key }
+}
+
+/**
+ * Delete multiple profile photos from S3
+ * @param keys - Array of S3 keys to delete
+ */
+export async function deleteProfilePhotos(keys: string[]): Promise<void> {
+  for (const key of keys) {
+    await deleteProfilePhoto(key)
+  }
+}
