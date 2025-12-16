@@ -3,13 +3,14 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { EditProfileForm } from "./EditProfileForm"
+import { ProfilePhotosEdit } from "@/components/ProfilePhotosEdit"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
 export default async function EditProfilePage() {
   const session = await getServerSession(authOptions)
-  
+
   if (!session?.user?.id) {
     redirect("/auth/signin")
   }
@@ -18,6 +19,11 @@ export default async function EditProfilePage() {
     where: { id: session.user.id },
     include: {
       profile: true,
+      profilePhotos: {
+        orderBy: {
+          order: "asc",
+        },
+      },
     },
   })
 
@@ -40,6 +46,7 @@ export default async function EditProfilePage() {
       </div>
 
       <EditProfileForm profile={user.profile} />
+      <ProfilePhotosEdit photos={user.profilePhotos} />
     </div>
   )
 }
