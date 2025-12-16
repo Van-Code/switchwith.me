@@ -24,7 +24,6 @@ export default async function ListingDetailPage({ listingId, currentUserId }: Pa
   if (!listing) return notFound()
 
   const title =
-    listing.title ??
     `${listing.team.name ?? ""} ${listing.gameDate ? "· " + new Date(listing.gameDate).toLocaleDateString() : ""}`.trim()
 
   return (
