@@ -9,14 +9,13 @@ import {
   Ticket,
 } from "lucide-react"
 import Link from "next/link"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth-server"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { isReportUserEnabled } from "@/lib/features"
 
 export default async function HowItWorksPage() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
   return (
     <div className="space-y-16 pb-16">

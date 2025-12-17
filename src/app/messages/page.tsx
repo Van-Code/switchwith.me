@@ -1,21 +1,20 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { MessagesListClient } from "./MessagesListClient"
 
 export default async function MessagesPage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.id) {
+  const auth = await requireUserId()
+  if (!auth.ok) {
     redirect("/auth/signin")
   }
+  const userId = auth.userId
 
   const conversations = await prisma.conversation.findMany({
     where: {
       participants: {
         some: {
-          userId: session.user.id,
+          userId: userId,
         },
       },
       messages: {
@@ -81,5 +80,7 @@ export default async function MessagesPage() {
       : null,
   }))
 
-  return <MessagesListClient conversations={serializedConversations} currentUserId={session.user.id} />
+  return (
+    <MessagesListClient conversations={serializedConversations} currentUserId={userId} />
+  )
 }

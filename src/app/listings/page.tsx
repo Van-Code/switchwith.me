@@ -1,9 +1,8 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { ListingsPageClient } from "./ListingsPageClient";
+import { requireUserId } from "@/lib/auth-api"
+import { ListingsPageClient } from "./ListingsPageClient"
 
 export default async function ListingsPage() {
-  const session = await getServerSession(authOptions);
+  const auth = await requireUserId()
 
-  return <ListingsPageClient currentUserId={session?.user?.id} />;
+  return <ListingsPageClient currentUserId={auth.userId} />
 }

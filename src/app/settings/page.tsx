@@ -1,27 +1,25 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { NotificationSettings } from "@/components/notification-settings"
 import { DeleteAccountSection } from "@/components/DeleteAccountSection"
 
 export default async function SettingsPage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.id) {
+  const auth = await requireUserId()
+  if (!auth.ok) {
     redirect("/auth/signin")
   }
-
+  const userId = auth.userId
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     include: {
       profile: true,
       listings: {
         orderBy: {
-          createdAt: "desc"
-        }
-      }
-    }
+          createdAt: "desc",
+        },
+      },
+    },
   })
 
   if (!user || !user.profile) {

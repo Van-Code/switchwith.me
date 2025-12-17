@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { ProfileHeader } from "@/components/ProfileHeader"
@@ -11,7 +10,7 @@ import { isBoostEnabled } from "@/lib/features"
 import Link from "next/link"
 
 export default async function PublicProfilePage({ params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions)
+  const auth = await requireUserId()
   const { id } = params
 
   const user = await prisma.user.findUnique({
@@ -42,7 +41,7 @@ export default async function PublicProfilePage({ params }: { params: { id: stri
 
   if (!user || !user.profile) notFound()
 
-  const isOwnProfile = session?.user?.id === id
+  const isOwnProfile = auth.userId === id
 
   const memberSince = new Date(user.createdAt).toLocaleDateString()
   const activeListingsCount = user.listings.length

@@ -1,29 +1,24 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 import { isPayToChatEnabled } from "@/lib/features"
 
 // Force dynamic rendering - this route needs to access headers for authentication
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
 
 // GET /api/conversations - Get all conversations for current user
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    const auth = await requireUserId()
+    if (!auth.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-
+    const userId = auth.userId
     const conversations = await prisma.conversation.findMany({
       where: {
         participants: {
           some: {
-            userId: session.user.id,
+            userId: userId,
           },
         },
       },
@@ -53,33 +48,24 @@ export async function GET(req: Request) {
     return NextResponse.json({ conversations })
   } catch (error) {
     console.error("Error fetching conversations:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch conversations" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to fetch conversations" }, { status: 500 })
   }
 }
 
 // POST /api/conversations - Create or get existing conversation with another user
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    const auth = await requireUserId()
+    if (!auth.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const userId = auth.userId
 
     const body = await req.json()
     const { otherUserId, listingId } = body
 
     if (!otherUserId) {
-      return NextResponse.json(
-        { error: "Missing otherUserId" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Missing otherUserId" }, { status: 400 })
     }
 
     // DEFENSIVE CHECK: If listingId is provided, check if conversation already exists for this specific listing + current user
@@ -90,7 +76,7 @@ export async function POST(req: Request) {
           listingId,
           participants: {
             some: {
-              userId: session.user.id,
+              userId: userId,
             },
           },
         },
@@ -114,7 +100,9 @@ export async function POST(req: Request) {
       })
 
       if (existingListingConversation) {
-        console.log(`[DUPLICATE_PREVENTION] Found existing conversation for listing ${listingId} and user ${session.user.id}`)
+        console.log(
+          `[DUPLICATE_PREVENTION] Found existing conversation for listing ${listingId} and user ${userId}`
+        )
         return NextResponse.json({ conversation: existingListingConversation })
       }
     }
@@ -126,7 +114,7 @@ export async function POST(req: Request) {
           {
             participants: {
               some: {
-                userId: session.user.id,
+                userId: userId,
               },
             },
           },
@@ -191,15 +179,12 @@ export async function POST(req: Request) {
     if (isPayToChatEnabled()) {
       // Get current user with credits
       const currentUser = await prisma.user.findUnique({
-        where: { id: session.user.id },
+        where: { id: userId },
         select: { credits: true },
       })
 
       if (!currentUser) {
-        return NextResponse.json(
-          { error: "User not found" },
-          { status: 404 }
-        )
+        return NextResponse.json({ error: "User not found" }, { status: 404 })
       }
 
       // Check if user has enough credits
@@ -218,7 +203,7 @@ export async function POST(req: Request) {
       const result = await prisma.$transaction(async (tx) => {
         // Deduct 1 credit from user
         await tx.user.update({
-          where: { id: session.user.id },
+          where: { id: userId },
           data: {
             credits: {
               decrement: 1,
@@ -235,9 +220,9 @@ export async function POST(req: Request) {
         // Create credit transaction record
         await tx.creditTransaction.create({
           data: {
-            userId: session.user.id,
+            userId: userId,
             amount: -1,
-            note: `Start conversation with ${otherUser?.profile?.firstName || 'user'}`,
+            note: `Start conversation with ${otherUser?.profile?.firstName || "user"}`,
           },
         })
 
@@ -246,10 +231,7 @@ export async function POST(req: Request) {
           data: {
             ...(listingId && { listingId }),
             participants: {
-              create: [
-                { userId: session.user.id },
-                { userId: otherUserId },
-              ],
+              create: [{ userId: userId }, { userId: otherUserId }],
             },
           },
           include: {
@@ -282,7 +264,7 @@ export async function POST(req: Request) {
           {
             participants: {
               some: {
-                userId: session.user.id,
+                userId: userId,
               },
             },
           },
@@ -312,7 +294,9 @@ export async function POST(req: Request) {
     })
 
     if (finalCheck) {
-      console.log(`[RACE_CONDITION_PREVENTION] Conversation already exists, returning existing one`)
+      console.log(
+        `[RACE_CONDITION_PREVENTION] Conversation already exists, returning existing one`
+      )
       return NextResponse.json({ conversation: finalCheck })
     }
 
@@ -321,10 +305,7 @@ export async function POST(req: Request) {
       data: {
         ...(listingId && { listingId }), // Only include if listingId exists
         participants: {
-          create: [
-            { userId: session.user.id },
-            { userId: otherUserId },
-          ],
+          create: [{ userId: userId }, { userId: otherUserId }],
         },
       },
       include: {
@@ -343,22 +324,21 @@ export async function POST(req: Request) {
     })
 
     // Optionally log a free transaction for analytics
-    await prisma.creditTransaction.create({
-      data: {
-        userId: session.user.id,
-        amount: 0,
-        note: "Free conversation (early launch)",
-      },
-    }).catch(() => {
-      // Silently fail if transaction logging fails
-    })
+    await prisma.creditTransaction
+      .create({
+        data: {
+          userId: userId,
+          amount: 0,
+          note: "Free conversation (early launch)",
+        },
+      })
+      .catch(() => {
+        // Silently fail if transaction logging fails
+      })
 
     return NextResponse.json({ conversation })
   } catch (error) {
     console.error("Error creating conversation:", error)
-    return NextResponse.json(
-      { error: "Failed to create conversation" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to create conversation" }, { status: 500 })
   }
 }

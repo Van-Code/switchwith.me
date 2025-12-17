@@ -5,7 +5,7 @@
  */
 
 import { prisma } from "@/lib/db"
-import { NotificationType } from "../../prisma/generated/client"
+import { NotificationType } from "@prisma/client"
 import { sendNotificationEmail } from "./emailNotifications"
 
 /**

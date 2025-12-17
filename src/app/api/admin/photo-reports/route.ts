@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
@@ -11,15 +10,15 @@ export const dynamic = "force-dynamic"
  */
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const userId = auth.userId
 
     // Check if user is admin
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { role: true },
     })
 
@@ -58,9 +57,6 @@ export async function GET() {
     return NextResponse.json({ reports })
   } catch (error) {
     console.error("Error fetching photo reports:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch reports" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to fetch reports" }, { status: 500 })
   }
 }

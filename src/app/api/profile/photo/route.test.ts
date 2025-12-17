@@ -3,12 +3,9 @@
  */
 
 import { GET, POST, DELETE } from "./route"
-import { getServerSession } from "next-auth"
+
 import { prisma } from "@/lib/prisma"
-import {
-  generateUploadPresignedUrl,
-  deleteProfilePhoto,
-} from "@/lib/s3"
+import { generateUploadPresignedUrl, deleteProfilePhoto } from "@/lib/s3"
 
 // Mock dependencies
 jest.mock("next-auth")
@@ -22,11 +19,15 @@ jest.mock("@/lib/prisma", () => ({
 }))
 jest.mock("@/lib/s3")
 
-const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>
+const mockGetServerSession = getServerSession as jest.MockedFunction<
+  typeof getServerSession
+>
 const mockGenerateUploadPresignedUrl = generateUploadPresignedUrl as jest.MockedFunction<
   typeof generateUploadPresignedUrl
 >
-const mockDeleteProfilePhoto = deleteProfilePhoto as jest.MockedFunction<typeof deleteProfilePhoto>
+const mockDeleteProfilePhoto = deleteProfilePhoto as jest.MockedFunction<
+  typeof deleteProfilePhoto
+>
 
 describe("/api/profile/photo", () => {
   beforeEach(() => {
@@ -129,11 +130,9 @@ describe("/api/profile/photo", () => {
         user: { id: "user123", email: "test@example.com" },
         expires: "2099-01-01",
       })
-
       ;(prisma.profile.findUnique as jest.Mock).mockResolvedValue({
         avatarUrl: "profile-photos/old-photo.jpg",
       })
-
       ;(prisma.profile.update as jest.Mock).mockResolvedValue({
         avatarUrl: "profile-photos/user123.jpg",
       })
@@ -167,7 +166,6 @@ describe("/api/profile/photo", () => {
         user: { id: "user123", email: "test@example.com" },
         expires: "2099-01-01",
       })
-
       ;(prisma.profile.findUnique as jest.Mock).mockResolvedValue({
         avatarUrl: null,
       })
@@ -184,11 +182,9 @@ describe("/api/profile/photo", () => {
         user: { id: "user123", email: "test@example.com" },
         expires: "2099-01-01",
       })
-
       ;(prisma.profile.findUnique as jest.Mock).mockResolvedValue({
         avatarUrl: "profile-photos/user123.jpg",
       })
-
       ;(prisma.profile.update as jest.Mock).mockResolvedValue({
         avatarUrl: null,
       })

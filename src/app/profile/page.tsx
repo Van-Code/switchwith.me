@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { ProfileHeader } from "@/components/ProfileHeader"
@@ -11,14 +10,14 @@ import { Edit, MapPin, Sparkles } from "lucide-react"
 import { isBoostEnabled, isShowListingActiveStatusEnabled } from "@/lib/features"
 
 export default async function ProfilePage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.id) {
+  const auth = await requireUserId()
+  if (!auth.ok) {
     redirect("/auth/signin")
   }
+  const userId = auth.userId
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     include: {
       profile: true,
       listings: {

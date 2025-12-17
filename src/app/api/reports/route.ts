@@ -1,44 +1,30 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "../../../lib/auth"
-import { prisma } from "../../../lib/prisma"
+import { requireUserId } from "@/lib/auth-api"
+import { prisma } from "@/lib/prisma"
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    //@ts-ignore
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    const auth = await requireUserId()
+    if (!auth.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-
+    const userId = auth.userId
     const body = await req.json()
     const { reportedUserId, conversationId, reason, description } = body
 
     // Validation
     if (!reportedUserId) {
-      return NextResponse.json(
-        { error: "Reported user ID is required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Reported user ID is required" }, { status: 400 })
     }
 
     if (!reason) {
-      return NextResponse.json(
-        { error: "Report reason is required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Report reason is required" }, { status: 400 })
     }
 
     // Prevent users from reporting themselves
     //@ts-ignore
-    if (reportedUserId === session.user.id) {
-      return NextResponse.json(
-        { error: "You cannot report yourself" },
-        { status: 400 }
-      )
+    if (reportedUserId === userId) {
+      return NextResponse.json({ error: "You cannot report yourself" }, { status: 400 })
     }
 
     // Verify reported user exists
@@ -47,10 +33,7 @@ export async function POST(req: Request) {
     })
 
     if (!reportedUser) {
-      return NextResponse.json(
-        { error: "Reported user not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Reported user not found" }, { status: 404 })
     }
 
     // If conversationId is provided, verify the reporter is a participant
@@ -63,15 +46,12 @@ export async function POST(req: Request) {
       })
 
       if (!conversation) {
-        return NextResponse.json(
-          { error: "Conversation not found" },
-          { status: 404 }
-        )
+        return NextResponse.json({ error: "Conversation not found" }, { status: 404 })
       }
 
       const isParticipant = conversation.participants.some(
         //@ts-ignore
-        (p: { userId: string }) => p.userId === session.user.id
+        (p: { userId: string }) => p.userId === userId
       )
 
       if (!isParticipant) {
@@ -86,7 +66,7 @@ export async function POST(req: Request) {
     const report = await prisma.report.create({
       data: {
         //@ts-ignore
-        reporterId: session.user.id,
+        reporterId: userId,
         reportedUserId,
         conversationId: conversationId || null,
         reason,
@@ -113,13 +93,10 @@ export async function POST(req: Request) {
         reason: report.reason,
         status: report.status,
         createdAt: report.createdAt,
-      }
+      },
     })
   } catch (error) {
     console.error("Error creating report:", error)
-    return NextResponse.json(
-      { error: "Failed to submit report" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to submit report" }, { status: 500 })
   }
 }

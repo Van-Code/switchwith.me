@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
@@ -11,20 +10,17 @@ export const dynamic = "force-dynamic"
  */
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const userId = auth.userId
     const body = await req.json()
     const { photoId, reason, details } = body
 
     if (!photoId || !reason) {
-      return NextResponse.json(
-        { error: "Photo ID and reason required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Photo ID and reason required" }, { status: 400 })
     }
 
     // Validate reason
@@ -52,17 +48,14 @@ export async function POST(req: Request) {
     }
 
     // Prevent users from reporting their own photos
-    if (photo.userId === session.user.id) {
-      return NextResponse.json(
-        { error: "Cannot report your own photo" },
-        { status: 400 }
-      )
+    if (photo.userId === userId) {
+      return NextResponse.json({ error: "Cannot report your own photo" }, { status: 400 })
     }
 
     // Create the report
     const report = await prisma.photoReport.create({
       data: {
-        reporterId: session.user.id,
+        reporterId: userId,
         reportedUserId: photo.userId,
         photoId,
         reason,
@@ -73,9 +66,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, report })
   } catch (error) {
     console.error("Error creating photo report:", error)
-    return NextResponse.json(
-      { error: "Failed to create report" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to create report" }, { status: 500 })
   }
 }

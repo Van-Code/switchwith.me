@@ -5,7 +5,7 @@
  */
 
 import React, { ReactElement, ReactNode } from "react"
-import { NotificationType } from "../../prisma/generated/client"
+import { NotificationType } from "@prisma/client"
 import type { MessageNotificationData, MatchNotificationData } from "./notifications"
 import MinimalTemplate from "../../react-emails/emails/MinimalTemplate"
 import MatchNotification from "../../react-emails/emails/MatchNotification"

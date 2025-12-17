@@ -4,8 +4,7 @@ import "./globals.css"
 import Footer from "@/components/Footer"
 import { Header } from "@/components/header"
 import { Toaster } from "@/components/ui/toaster"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth-server"
 import ProtectedLayout from "@/components/ProtectedLayout"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -16,8 +15,7 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions)
-
+  const session = await auth()
   return (
     <html lang="en">
       <body className={`${inter.className} flex flex-col min-h-screen`}>

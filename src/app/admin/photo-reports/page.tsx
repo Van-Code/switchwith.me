@@ -1,21 +1,22 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import { requireUserId } from "@/lib/auth-api"
+
 import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PhotoReportsTable } from "@/components/PhotoReportsTable"
 
 export default async function PhotoReportsAdminPage() {
-  const session = await getServerSession(authOptions)
+  const auth = await requireUserId()
 
-  if (!session?.user?.id) {
+  if (!auth.ok) {
     redirect("/auth/signin")
   }
 
+  const userId = auth.userId
   // Check if user is admin
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { role: true },
   })
 
@@ -58,9 +59,7 @@ export default async function PhotoReportsAdminPage() {
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Photo Reports</h1>
-        <p className="text-slate-600 mt-2">
-          Review and moderate reported profile photos
-        </p>
+        <p className="text-slate-600 mt-2">Review and moderate reported profile photos</p>
       </div>
 
       {/* Statistics */}
@@ -74,9 +73,7 @@ export default async function PhotoReportsAdminPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingReports.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Require attention
-            </p>
+            <p className="text-xs text-muted-foreground">Require attention</p>
           </CardContent>
         </Card>
 
@@ -87,9 +84,7 @@ export default async function PhotoReportsAdminPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{resolvedReports.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Completed
-            </p>
+            <p className="text-xs text-muted-foreground">Completed</p>
           </CardContent>
         </Card>
       </div>
