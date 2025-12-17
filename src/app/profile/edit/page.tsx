@@ -3,7 +3,6 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { EditProfileForm } from "./EditProfileForm"
-import { ProfilePhotosEdit } from "@/components/ProfilePhotosEdit"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
@@ -45,8 +44,7 @@ export default async function EditProfilePage() {
         </div>
       </div>
 
-      <EditProfileForm profile={user.profile} />
-      <ProfilePhotosEdit photos={user.profilePhotos} />
+      <EditProfileForm user={user} />
     </div>
   )
 }

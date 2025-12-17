@@ -4,28 +4,28 @@
  * Handles creating in-app notifications and triggering email notifications
  */
 
-import { prisma } from "@/lib/db";
-import { NotificationType } from "@prisma/client";
-import { sendNotificationEmail } from "./emailNotifications";
+import { prisma } from "@/lib/db"
+import { NotificationType } from "../../prisma/generated/client"
+import { sendNotificationEmail } from "./emailNotifications"
 
 /**
  * Data structures for different notification types
  */
 export interface MessageNotificationData {
-  conversationId: string;
-  messageId: string;
-  senderName: string;
-  preview: string;
+  conversationId: string
+  messageId: string
+  senderName: string
+  preview: string
 }
 
 export interface MatchNotificationData {
-  listingId: string;
-  matchedListingId: string;
-  matchScore?: number;
-  description?: string;
+  listingId: string
+  matchedListingId: string
+  matchScore?: number
+  description?: string
 }
 
-export type NotificationData = MessageNotificationData | MatchNotificationData;
+export type NotificationData = MessageNotificationData | MatchNotificationData
 
 /**
  * Creates a notification for a user
@@ -36,9 +36,9 @@ export async function createNotification({
   type,
   data,
 }: {
-  userId: string;
-  type: NotificationType;
-  data: NotificationData;
+  userId: string
+  type: NotificationType
+  data: NotificationData
 }) {
   try {
     // Create the in-app notification
@@ -49,7 +49,7 @@ export async function createNotification({
         data: data as any, // Prisma Json type
         isRead: false,
       },
-    });
+    })
 
     // Fetch user to check email preferences
     const user = await prisma.user.findUnique({
@@ -63,7 +63,7 @@ export async function createNotification({
           },
         },
       },
-    });
+    })
 
     // Send email if enabled
     if (user?.emailNotificationsEnabled && user.email) {
@@ -74,14 +74,14 @@ export async function createNotification({
         data,
       }).catch((error) => {
         // Log email errors but don't fail the notification creation
-        console.error("Failed to send notification email:", error);
-      });
+        console.error("Failed to send notification email:", error)
+      })
     }
 
-    return notification;
+    return notification
   } catch (error) {
-    console.error("Failed to create notification:", error);
-    throw error;
+    console.error("Failed to create notification:", error)
+    throw error
   }
 }
 
@@ -95,15 +95,16 @@ export async function createMessageNotification({
   senderName,
   messagePreview,
 }: {
-  recipientId: string;
-  conversationId: string;
-  messageId: string;
-  senderName: string;
-  messagePreview: string;
+  recipientId: string
+  conversationId: string
+  messageId: string
+  senderName: string
+  messagePreview: string
 }) {
-  const preview = messagePreview.length > 100
-    ? messagePreview.substring(0, 100) + "..."
-    : messagePreview;
+  const preview =
+    messagePreview.length > 100
+      ? messagePreview.substring(0, 100) + "..."
+      : messagePreview
 
   return createNotification({
     userId: recipientId,
@@ -114,7 +115,7 @@ export async function createMessageNotification({
       senderName,
       preview,
     },
-  });
+  })
 }
 
 /**
@@ -127,11 +128,11 @@ export async function createMatchNotification({
   matchScore,
   description,
 }: {
-  userId: string;
-  listingId: string;
-  matchedListingId: string;
-  matchScore?: number;
-  description?: string;
+  userId: string
+  listingId: string
+  matchedListingId: string
+  matchScore?: number
+  description?: string
 }) {
   return createNotification({
     userId,
@@ -142,7 +143,7 @@ export async function createMatchNotification({
       matchScore,
       description: description || "We found a potential seat match for you!",
     },
-  });
+  })
 }
 
 /**
@@ -154,7 +155,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
       userId,
       isRead: false,
     },
-  });
+  })
 }
 
 /**
@@ -172,7 +173,7 @@ export async function markNotificationAsRead(
     data: {
       isRead: true,
     },
-  });
+  })
 }
 
 /**
@@ -187,7 +188,7 @@ export async function markAllNotificationsAsRead(userId: string): Promise<void> 
     data: {
       isRead: true,
     },
-  });
+  })
 }
 
 /**
@@ -198,9 +199,9 @@ export async function getUserNotifications({
   unreadOnly = false,
   limit = 50,
 }: {
-  userId: string;
-  unreadOnly?: boolean;
-  limit?: number;
+  userId: string
+  unreadOnly?: boolean
+  limit?: number
 }) {
   return prisma.notification.findMany({
     where: {
@@ -211,5 +212,5 @@ export async function getUserNotifications({
       createdAt: "desc",
     },
     take: limit,
-  });
+  })
 }

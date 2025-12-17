@@ -50,9 +50,7 @@ export default async function ProfilePage() {
           firstName={user.profile.firstName}
           lastInitial={user.profile.lastInitial}
           avatarUrl={user.profile.avatarUrl}
-          bio={user.profile.bio}
           successfulSwapsCount={user.profile.successfulSwapsCount}
-          favoritePlayer={user.profile.favoritePlayer}
           isEmailVerified={user.profile.emailVerified}
         />
         <Link href="/profile/edit">

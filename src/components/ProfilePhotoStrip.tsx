@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useAvatarUrl } from "@/hooks/useAvatarUrl"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Flag, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { Flag, X, ChevronLeft, ChevronRight, Upload } from "lucide-react"
 
 interface ProfilePhoto {
   id: string
@@ -54,27 +54,37 @@ export function ProfilePhotoStrip({
   }
 
   const prevPhoto = () => {
-    setCurrentPhotoIndex(
-      (prev) => (prev - 1 + sortedPhotos.length) % sortedPhotos.length
-    )
+    setCurrentPhotoIndex((prev) => (prev - 1 + sortedPhotos.length) % sortedPhotos.length)
   }
+
+  const slots = [0, 1, 2].map(
+    (order) => sortedPhotos.find((p) => p.order === order) || null
+  )
 
   return (
     <>
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-slate-700">Photos</h3>
-        <div className="grid grid-cols-3 gap-2">
-          {sortedPhotos.map((photo, index) => (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {slots.map((photo, slotIndex) =>
+          photo ? (
             <PhotoThumbnail
               key={photo.id}
               photo={photo}
-              onClick={() => openLightbox(index)}
+              onClick={() =>
+                openLightbox(sortedPhotos.findIndex((p) => p.id === photo.id))
+              }
             />
-          ))}
-        </div>
+          ) : (
+            <EmptyPhotoTile
+              key={`empty-${slotIndex}`}
+              label={
+                slotIndex === 0 ? "You" : slotIndex === 1 ? "Fan energy" : "Anything"
+              }
+              showAddHint={isOwnProfile}
+            />
+          )
+        )}
       </div>
 
-      {/* Lightbox Modal */}
       <PhotoLightbox
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
@@ -82,7 +92,7 @@ export function ProfilePhotoStrip({
         onNext={sortedPhotos.length > 1 ? nextPhoto : undefined}
         onPrev={sortedPhotos.length > 1 ? prevPhoto : undefined}
         onReport={
-          !isOwnProfile
+          !isOwnProfile && sortedPhotos.length > 0
             ? () => openReportModal(sortedPhotos[currentPhotoIndex].id)
             : undefined
         }
@@ -90,7 +100,6 @@ export function ProfilePhotoStrip({
         totalPhotos={sortedPhotos.length}
       />
 
-      {/* Report Modal */}
       {reportingPhotoId && reportedUserId && (
         <ReportPhotoModal
           open={reportModalOpen}
@@ -103,6 +112,19 @@ export function ProfilePhotoStrip({
         />
       )}
     </>
+  )
+}
+function EmptyPhotoTile({ label, showAddHint }: { label: string; showAddHint: boolean }) {
+  return (
+    <div className="aspect-square rounded-lg border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 text-center px-3">
+      <Upload className="h-7 w-7 text-slate-400" />
+      <div className="text-sm font-medium text-slate-700">{label}</div>
+      {showAddHint ? (
+        <div className="text-xs text-muted-foreground">Add a photo in Edit Profile</div>
+      ) : (
+        <div className="text-xs text-muted-foreground">No photo yet</div>
+      )}
+    </div>
   )
 }
 
@@ -121,11 +143,7 @@ function PhotoThumbnail({
       className="aspect-square rounded-lg overflow-hidden bg-slate-100 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-cyan-500"
     >
       {photoUrl && (
-        <img
-          src={photoUrl}
-          alt="Profile photo"
-          className="w-full h-full object-cover"
-        />
+        <img src={photoUrl} alt="Profile photo" className="w-full h-full object-cover" />
       )}
     </button>
   )
@@ -306,9 +324,7 @@ function ReportPhotoModal({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">
-              Additional details (optional)
-            </label>
+            <label className="text-sm font-medium">Additional details (optional)</label>
             <textarea
               value={details}
               onChange={(e) => setDetails(e.target.value)}

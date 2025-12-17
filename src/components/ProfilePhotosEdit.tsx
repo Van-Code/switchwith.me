@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Upload, Trash2, ChevronUp, ChevronDown, Info } from "lucide-react"
+import { Upload, Trash2, ChevronUp, ChevronDown, MoreVertical, Info } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useAvatarUrl } from "@/hooks/useAvatarUrl"
 import {
   Dialog,
@@ -39,7 +46,7 @@ const PHOTO_SLOTS = [
   },
   {
     order: 2,
-    label: "Anything you'd like to share",
+    label: "Your world",
     helper: "Hobby, pet, view from your seat, or something that feels like you.",
   },
 ]
@@ -182,7 +189,7 @@ export function ProfilePhotosEdit({ photos }: ProfilePhotosEditProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Profile photos</CardTitle>
+            <CardTitle className="text-sm">Photos</CardTitle>
             <Button
               variant="link"
               onClick={() => setShowGuidelines(true)}
@@ -197,7 +204,7 @@ export function ProfilePhotosEdit({ photos }: ProfilePhotosEditProps) {
             Public. You're always in control.
           </p>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {PHOTO_SLOTS.map((slot) => (
             <PhotoSlot
               key={slot.order}
@@ -226,12 +233,10 @@ export function ProfilePhotosEdit({ photos }: ProfilePhotosEditProps) {
             <DialogTitle>Photo guidelines</DialogTitle>
             <DialogDescription className="space-y-2 text-sm">
               <p>
-                Photos must not include contact info like phone numbers, emails, or
-                social handles.
+                Photos must not include contact info like phone numbers, emails, or social
+                handles.
               </p>
-              <p>
-                Screenshots are okay as long as no contact info is visible.
-              </p>
+              <p>Screenshots are okay as long as no contact info is visible.</p>
               <p>Keep it respectful and safe for the community.</p>
             </DialogDescription>
           </DialogHeader>
@@ -277,90 +282,88 @@ function PhotoSlot({
   }
 
   return (
-    <div className="border border-slate-200 rounded-lg p-4">
-      <div className="flex items-start gap-4">
-        {/* Photo Preview */}
-        <div className="w-32 h-32 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-          {photoUrl ? (
-            <img
-              src={photoUrl}
-              alt={slot.label}
-              className="w-full h-full object-cover"
-            />
-          ) : (
+    <div className="group border border-slate-200 rounded-xl p-3">
+      {/* Preview */}
+      <div className="relative aspect-square bg-slate-100 rounded-lg overflow-hidden">
+        {photoUrl ? (
+          <img src={photoUrl} alt={slot.label} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
             <Upload className="h-8 w-8 text-slate-400" />
-          )}
-        </div>
-
-        {/* Photo Controls */}
-        <div className="flex-1 space-y-2">
-          <div>
-            <Label className="text-base font-semibold">{slot.label}</Label>
-            <p className="text-xs text-muted-foreground mt-1">{slot.helper}</p>
           </div>
+        )}
 
-          <div className="flex flex-wrap gap-2">
-            <Label
-              htmlFor={`photo-${slot.order}`}
-              className="cursor-pointer inline-block"
-            >
-              <div className="flex items-center gap-2 text-sm border rounded px-3 py-1.5 hover:bg-slate-50 transition-colors">
-                <Upload className="h-4 w-4" />
-                <span>
-                  {uploading
-                    ? "Uploading..."
-                    : photo
-                    ? "Replace"
-                    : "Upload"}
-                </span>
-              </div>
-            </Label>
-            <Input
-              id={`photo-${slot.order}`}
-              type="file"
-              accept="image/jpeg,image/jpg,image/png,image/webp"
-              onChange={handleFileChange}
-              disabled={uploading}
-              className="hidden"
-            />
-
-            {photo && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onDelete(photo.id, slot.order)}
-                  disabled={deleting}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {deleting ? "Deleting..." : "Delete"}
+        {/* Top-right actions (only when photo exists) */}
+        {photo && (
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="secondary" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    document.getElementById(`photo-${slot.order}`)?.click()
+                  }}
+                >
+                  Replace
+                </DropdownMenuItem>
 
                 {canMoveUp && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onReorder(photo.id, "up")}
-                  >
-                    <ChevronUp className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem onSelect={() => onReorder(photo.id, "up")}>
                     Move up
-                  </Button>
+                  </DropdownMenuItem>
                 )}
 
                 {canMoveDown && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onReorder(photo.id, "down")}
-                  >
-                    <ChevronDown className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem onSelect={() => onReorder(photo.id, "down")}>
                     Move down
-                  </Button>
+                  </DropdownMenuItem>
                 )}
-              </>
-            )}
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onSelect={() => onDelete(photo.id, slot.order)}
+                  disabled={deleting}
+                >
+                  {deleting ? "Deleting..." : "Remove"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Label + helper */}
+      <div className="mt-3 space-y-1">
+        <Label className="text-sm font-semibold">{slot.label}</Label>
+
+        <p className="text-xs text-muted-foreground">{slot.helper}</p>
+      </div>
+
+      {/* Upload button */}
+      <div className="mt-3">
+        <Label htmlFor={`photo-${slot.order}`} className="cursor-pointer block">
+          <div className="flex items-center justify-center gap-2 text-sm border rounded-md px-3 py-2 hover:bg-slate-50 transition-colors">
+            <Upload className="h-4 w-4" />
+            <span>{uploading ? "Uploading..." : photo ? "Replace" : "Upload"}</span>
+          </div>
+        </Label>
+
+        <Input
+          id={`photo-${slot.order}`}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          onChange={handleFileChange}
+          disabled={uploading}
+          className="hidden"
+        />
       </div>
     </div>
   )
