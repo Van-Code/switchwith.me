@@ -9,7 +9,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription
+  CardDescription,
 } from "@/components/ui/card"
 import {
   Dialog,
@@ -17,11 +17,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog"
-import { PrismaClient } from "../../../../prisma/generated/client"
-
-const prisma = new PrismaClient()
 
 function SignInContent() {
   const [loading, setLoading] = useState(false)
@@ -135,18 +132,18 @@ function SignInContent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={
-      <div className="max-w-md mx-auto mt-12 px-4">
-        <Card className="border-slate-200 shadow-lg">
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-3xl text-slate-900">Sign In</CardTitle>
-            <CardDescription className="text-slate-600">
-              Loading...
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="max-w-md mx-auto mt-12 px-4">
+          <Card className="border-slate-200 shadow-lg">
+            <CardHeader className="space-y-2">
+              <CardTitle className="text-3xl text-slate-900">Sign In</CardTitle>
+              <CardDescription className="text-slate-600">Loading...</CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      }
+    >
       <SignInContent />
     </Suspense>
   )

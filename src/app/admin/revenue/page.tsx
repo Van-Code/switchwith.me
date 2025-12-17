@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,9 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Sparkles, CreditCard, TrendingUp, Users } from "lucide-react"
 
 export default async function RevenueAdminPage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.id) {
+  const auth = await requireUserId()
+  if (!auth.ok) {
     redirect("/auth/signin")
   }
 
@@ -91,7 +89,9 @@ export default async function RevenueAdminPage() {
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Revenue Dashboard</h1>
-        <p className="text-slate-600 mt-2">Monitor boosted listings and credit transactions</p>
+        <p className="text-slate-600 mt-2">
+          Monitor boosted listings and credit transactions
+        </p>
       </div>
 
       {/* Statistics Grid */}
@@ -113,8 +113,12 @@ export default async function RevenueAdminPage() {
             <CreditCard className="h-4 w-4 text-cyan-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalCreditsIssued._sum.amount || 0}</div>
-            <p className="text-xs text-muted-foreground">Total credits granted/purchased</p>
+            <div className="text-2xl font-bold">
+              {totalCreditsIssued._sum.amount || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Total credits granted/purchased
+            </p>
           </CardContent>
         </Card>
 
@@ -124,7 +128,9 @@ export default async function RevenueAdminPage() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Math.abs(totalCreditsSpent._sum.amount || 0)}</div>
+            <div className="text-2xl font-bold">
+              {Math.abs(totalCreditsSpent._sum.amount || 0)}
+            </div>
             <p className="text-xs text-muted-foreground">Total credits consumed</p>
           </CardContent>
         </Card>
@@ -151,7 +157,9 @@ export default async function RevenueAdminPage() {
         </CardHeader>
         <CardContent>
           {boostedListings.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No boosted listings yet</p>
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No boosted listings yet
+            </p>
           ) : (
             <div className="space-y-3">
               {boostedListings.map((listing) => (
@@ -169,11 +177,13 @@ export default async function RevenueAdminPage() {
                         />
                       )}
                       <p className="font-medium text-slate-900">
-                        {listing.team.name} - Section {listing.haveSection}, Row {listing.haveRow}
+                        {listing.team.name} - Section {listing.haveSection}, Row{" "}
+                        {listing.haveRow}
                       </p>
                     </div>
                     <p className="text-sm text-slate-600 mt-1">
-                      Boosted by {listing.user.profile?.firstName} {listing.user.profile?.lastInitial}.
+                      Boosted by {listing.user.profile?.firstName}{" "}
+                      {listing.user.profile?.lastInitial}.
                     </p>
                   </div>
                   <div className="text-right">
@@ -199,7 +209,9 @@ export default async function RevenueAdminPage() {
         </CardHeader>
         <CardContent>
           {creditTransactions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No transactions yet</p>
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No transactions yet
+            </p>
           ) : (
             <div className="space-y-2">
               {creditTransactions.map((transaction) => (
@@ -209,7 +221,8 @@ export default async function RevenueAdminPage() {
                 >
                   <div className="flex-1">
                     <p className="font-medium text-slate-900">
-                      {transaction.user.profile?.firstName} {transaction.user.profile?.lastInitial}.
+                      {transaction.user.profile?.firstName}{" "}
+                      {transaction.user.profile?.lastInitial}.
                     </p>
                     <p className="text-xs text-slate-600 mt-0.5">
                       {transaction.note || "No description"}

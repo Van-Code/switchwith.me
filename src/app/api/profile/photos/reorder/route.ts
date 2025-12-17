@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
@@ -11,12 +10,11 @@ export const dynamic = "force-dynamic"
  */
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-
+    const userId = auth.userId
     const body = await req.json()
     const { photoId, direction } = body
 
@@ -43,7 +41,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Photo not found" }, { status: 404 })
     }
 
-    if (photo.userId !== session.user.id) {
+    if (photo.userId !== userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -62,7 +60,7 @@ export async function POST(req: Request) {
     const targetPhoto = await prisma.profilePhoto.findUnique({
       where: {
         userId_order: {
-          userId: session.user.id,
+          userId: userId,
           order: newOrder,
         },
       },
@@ -94,9 +92,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error reordering photos:", error)
-    return NextResponse.json(
-      { error: "Failed to reorder photos" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to reorder photos" }, { status: 500 })
   }
 }

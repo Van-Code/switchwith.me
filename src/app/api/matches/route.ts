@@ -1,28 +1,24 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 import { findMatches } from "@/lib/matching"
 
 // Force dynamic rendering for this route
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 
 // GET /api/matches - Get matches for current user's listings
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    const auth = await requireUserId()
+    if (!auth.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const userId = auth.userId
     // Get user's active listings
     const myListings = await prisma.listing.findMany({
       where: {
-        userId: session.user.id,
+        userId: userId,
         status: "ACTIVE",
       },
     })
@@ -50,9 +46,9 @@ export async function GET(req: Request) {
 
     for (const myListing of myListings) {
       const matches = findMatches(myListing, allListings)
-      
+
       for (const match of matches) {
-        const matchedListing = allListings.find((l:any) => l.id === match.listingId)
+        const matchedListing = allListings.find((l: any) => l.id === match.listingId)
         if (matchedListing) {
           matchResults.push({
             myListing,
@@ -70,9 +66,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ matches: matchResults })
   } catch (error) {
     console.error("Error fetching matches:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch matches" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to fetch matches" }, { status: 500 })
   }
 }

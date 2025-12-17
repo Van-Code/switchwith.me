@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 
@@ -9,13 +8,13 @@ interface PageProps {
 
 export default async function ListingMessagePage({ searchParams }: PageProps) {
   // Verify user is authenticated
-  const session = await getServerSession(authOptions)
 
-  if (!session?.user?.id) {
+  const auth = await requireUserId()
+  if (!auth.ok) {
     // Should not happen since middleware protects this route, but just in case
     redirect("/auth/signin")
   }
-
+  const userId = auth.userId
   const { listingId } = searchParams
 
   // Fallback: Listing ID missing or invalid
@@ -49,7 +48,7 @@ export default async function ListingMessagePage({ searchParams }: PageProps) {
   }
 
   // Prevent messaging your own listing
-  if (listing.user.id === session.user.id) {
+  if (listing.user.id === userId) {
     redirect(`/listings?error=own_listing`)
   }
 
@@ -59,7 +58,7 @@ export default async function ListingMessagePage({ searchParams }: PageProps) {
       listingId: listingId,
       participants: {
         some: {
-          userId: session.user.id,
+          userId: userId,
         },
       },
     },

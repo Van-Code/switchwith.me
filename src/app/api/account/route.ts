@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 
 // Force dynamic rendering - this route needs to access headers for authentication
@@ -12,16 +11,15 @@ export const dynamic = "force-dynamic"
  */
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json(
         { error: "Unauthorized - You must be logged in to delete your account" },
         { status: 401 }
       )
     }
 
-    const userId = session.user.id
+    const userId = auth.userId
 
     // Use a transaction to ensure all deletions happen atomically
     await prisma.$transaction(async (tx: any) => {
@@ -35,8 +33,8 @@ export async function DELETE(req: Request) {
           sentMessages: true,
           profile: true,
           accounts: true,
-          sessions: true
-        }
+          sessions: true,
+        },
       })
 
       if (!user) {
@@ -59,7 +57,7 @@ export async function DELETE(req: Request) {
 
       // Delete the user (this cascades to all related records)
       await tx.user.delete({
-        where: { id: userId }
+        where: { id: userId },
       })
 
       // Clean up orphaned conversations
@@ -69,17 +67,17 @@ export async function DELETE(req: Request) {
           where: {
             id: { in: conversationIds },
             participants: {
-              none: {}
-            }
-          }
+              none: {},
+            },
+          },
         })
 
         // Delete orphaned conversations
         if (orphanedConversations.length > 0) {
           await tx.conversation.deleteMany({
             where: {
-              id: { in: orphanedConversations.map((c: any) => c.id) }
-            }
+              id: { in: orphanedConversations.map((c: any) => c.id) },
+            },
           })
         }
       }
@@ -89,7 +87,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: "Your account and all associated data have been permanently deleted"
+        message: "Your account and all associated data have been permanently deleted",
       },
       { status: 200 }
     )

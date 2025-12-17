@@ -1,34 +1,24 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "../../../../../lib/auth"
-import { prisma } from "../../../../../lib/prisma"
-import { createMessageNotification } from "../../../../../lib/notifications"
+import { requireUserId } from "@/lib/auth-api"
+import { prisma } from "@/lib/prisma"
+import { createMessageNotification } from "@/lib/notifications"
 
 // Force dynamic rendering - this route needs to access headers for authentication
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
 
-export async function POST(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    const auth = await requireUserId()
+    if (!auth.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const userId = auth.userId
 
     const body = await req.json()
     const { text } = body
 
     if (!text || text.trim() === "") {
-      return NextResponse.json(
-        { error: "Message text is required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Message text is required" }, { status: 400 })
     }
 
     // Verify user is participant
@@ -40,21 +30,15 @@ export async function POST(
     })
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: "Conversation not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Conversation not found" }, { status: 404 })
     }
 
     const isParticipant = conversation.participants.some(
-      (p: {userId: string}) => p.userId === session.user.id
+      (p: { userId: string }) => p.userId === userId
     )
 
     if (!isParticipant) {
-      return NextResponse.json(
-        { error: "Forbidden" },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     // Check if conversation is ended
@@ -69,7 +53,7 @@ export async function POST(
     const message = await prisma.message.create({
       data: {
         conversationId: params.id,
-        senderId: session.user.id,
+        senderId: userId,
         text: text.trim(),
       },
       include: {
@@ -115,14 +99,14 @@ export async function POST(
         where: { id: conversation.listingId },
       })
       // Only suggest if the sender owns the listing and it's still active
-      if (listing && listing.userId === session.user.id && listing.status === "ACTIVE") {
+      if (listing && listing.userId === userId && listing.status === "ACTIVE") {
         listingId = listing.id
       }
     }
 
     // Create notification for the recipient (don't notify the sender!)
     const recipient = conversation.participants.find(
-      (p: {userId: string}) => p.userId !== session.user.id
+      (p: { userId: string }) => p.userId !== userId
     )
 
     if (recipient) {
@@ -151,9 +135,6 @@ export async function POST(
     })
   } catch (error) {
     console.error("Error sending message:", error)
-    return NextResponse.json(
-      { error: "Failed to send message" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to send message" }, { status: 500 })
   }
 }

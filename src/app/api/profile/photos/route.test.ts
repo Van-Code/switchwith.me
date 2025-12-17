@@ -1,7 +1,7 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals"
 import { NextResponse } from "next/server"
 import { GET, POST, DELETE } from "./route"
-import { getServerSession } from "next-auth"
+
 import { prisma } from "@/lib/prisma"
 
 // Mock dependencies
@@ -38,9 +38,7 @@ describe("Profile Photos API", () => {
     it("should return 401 if not authenticated", async () => {
       ;(getServerSession as jest.Mock).mockResolvedValue(null)
 
-      const request = new Request(
-        "http://localhost/api/profile/photos?order=0&ext=jpg"
-      )
+      const request = new Request("http://localhost/api/profile/photos?order=0&ext=jpg")
       const response = await GET(request)
 
       expect(response.status).toBe(401)
@@ -49,9 +47,7 @@ describe("Profile Photos API", () => {
     it("should return 400 if order is invalid", async () => {
       ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
 
-      const request = new Request(
-        "http://localhost/api/profile/photos?order=5&ext=jpg"
-      )
+      const request = new Request("http://localhost/api/profile/photos?order=5&ext=jpg")
       const response = await GET(request)
 
       expect(response.status).toBe(400)
@@ -65,9 +61,7 @@ describe("Profile Photos API", () => {
         { id: "3", order: 2, url: "test3.jpg" },
       ])
 
-      const request = new Request(
-        "http://localhost/api/profile/photos?order=3&ext=jpg"
-      )
+      const request = new Request("http://localhost/api/profile/photos?order=3&ext=jpg")
       const response = await GET(request)
 
       expect(response.status).toBe(400)
@@ -116,9 +110,7 @@ describe("Profile Photos API", () => {
     it("should return 401 if not authenticated", async () => {
       ;(getServerSession as jest.Mock).mockResolvedValue(null)
 
-      const request = new Request(
-        "http://localhost/api/profile/photos?id=test-photo-id"
-      )
+      const request = new Request("http://localhost/api/profile/photos?id=test-photo-id")
       const response = await DELETE()
 
       expect(response.status).toBe(401)
@@ -133,9 +125,7 @@ describe("Profile Photos API", () => {
         order: 0,
       })
 
-      const request = new Request(
-        "http://localhost/api/profile/photos?id=test-photo-id"
-      )
+      const request = new Request("http://localhost/api/profile/photos?id=test-photo-id")
       const response = await DELETE()
 
       expect(response.status).toBe(403)

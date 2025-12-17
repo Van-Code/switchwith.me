@@ -1,6 +1,5 @@
 import React from "react"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { MessageThreadClient } from "./MessageThreadClient"
@@ -11,11 +10,11 @@ import { ArrowLeft } from "lucide-react"
 import { ConversationHeader } from "./ConversationHeader"
 
 export default async function ConversationPage({ params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions)
-  
-  if (!session?.user?.id) {
+  const auth = await requireUserId()
+  if (!auth.ok) {
     redirect("/auth/signin")
   }
+  const userId = auth.userId
 
   const conversation = await prisma.conversation.findUnique({
     where: { id: params.id },
@@ -51,7 +50,7 @@ export default async function ConversationPage({ params }: { params: { id: strin
 
   // Check if user is participant
   const isParticipant = conversation.participants.some(
-    (p:{userId:string}) => p.userId === session.user.id
+    (p: { userId: string }) => p.userId === userId
   )
 
   if (!isParticipant) {
@@ -59,37 +58,39 @@ export default async function ConversationPage({ params }: { params: { id: strin
   }
 
   const otherParticipant = conversation.participants.find(
-    (p:{userId:string})  => p.userId !== session.user.id
+    (p: { userId: string }) => p.userId !== userId
   )
 
   // Serialize dates
-  const serializedMessages = conversation.messages.map((m:any) => ({
+  const serializedMessages = conversation.messages.map((m: any) => ({
     ...m,
     createdAt: m.createdAt.toISOString(),
     sender: {
       ...m.sender,
       createdAt: m.sender.createdAt.toISOString(),
       updatedAt: m.sender.updatedAt.toISOString(),
-      profile: m.sender.profile ? {
-        ...m.sender.profile,
-        createdAt: m.sender.profile.createdAt.toISOString(),
-        updatedAt: m.sender.profile.updatedAt.toISOString(),
-      } : null
-    }
+      profile: m.sender.profile
+        ? {
+            ...m.sender.profile,
+            createdAt: m.sender.profile.createdAt.toISOString(),
+            updatedAt: m.sender.profile.updatedAt.toISOString(),
+          }
+        : null,
+    },
   }))
 
-  const serializedListing = conversation.listing ? {
-    ...conversation.listing,
-    gameDate: conversation.listing.gameDate.toISOString(),
-    createdAt: conversation.listing.createdAt.toISOString(),
-    updatedAt: conversation.listing.updatedAt.toISOString(),
-  } : null
+  const serializedListing = conversation.listing
+    ? {
+        ...conversation.listing,
+        gameDate: conversation.listing.gameDate.toISOString(),
+        createdAt: conversation.listing.createdAt.toISOString(),
+        updatedAt: conversation.listing.updatedAt.toISOString(),
+      }
+    : null
 
   return (
     <div className="max-w-4xl mx-auto space-y-4">
-      <ConversationHeader
-        otherParticipant={otherParticipant}
-      />
+      <ConversationHeader otherParticipant={otherParticipant} />
 
       {/* Main Content - Side by Side Layout */}
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -98,7 +99,7 @@ export default async function ConversationPage({ params }: { params: { id: strin
           <ConversationSidebar
             listing={serializedListing}
             listingId={conversation.listingId}
-            currentUserId={session.user.id}
+            currentUserId={userId}
           />
 
           {/* Right - Message Thread */}
@@ -106,7 +107,7 @@ export default async function ConversationPage({ params }: { params: { id: strin
             <MessageThreadClient
               conversationId={conversation.id}
               initialMessages={serializedMessages}
-              currentUserId={session.user.id}
+              currentUserId={userId}
               conversationStatus={conversation.status}
               listingId={conversation.listingId}
               otherParticipant={otherParticipant}

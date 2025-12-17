@@ -8,8 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { getUserNotifications, getUnreadCount } from "@/lib/notifications"
 
 // Force dynamic rendering - this route needs to access headers for authentication
@@ -18,12 +17,13 @@ export const dynamic = "force-dynamic"
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
 
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const userId = auth.userId
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams
     const unreadOnly = searchParams.get("unreadOnly") === "true"
@@ -40,13 +40,13 @@ export async function GET(request: NextRequest) {
 
     // Fetch notifications
     const notifications = await getUserNotifications({
-      userId: session.user.id,
+      userId: userId,
       unreadOnly,
-      limit
+      limit,
     })
 
     // Get unread count
-    const unreadCount = await getUnreadCount(session.user.id)
+    const unreadCount = await getUnreadCount(userId)
 
     // Format the response
     const formattedNotifications = notifications.map((notification: any) => ({
@@ -54,12 +54,12 @@ export async function GET(request: NextRequest) {
       type: notification.type,
       data: notification.data,
       isRead: notification.isRead,
-      createdAt: notification.createdAt.toISOString()
+      createdAt: notification.createdAt.toISOString(),
     }))
 
     return NextResponse.json({
       notifications: formattedNotifications,
-      unreadCount
+      unreadCount,
     })
   } catch (error) {
     console.error("Error fetching notifications:", error)

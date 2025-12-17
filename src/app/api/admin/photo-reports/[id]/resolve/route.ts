@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
@@ -9,20 +8,17 @@ export const dynamic = "force-dynamic"
  * POST /api/admin/photo-reports/[id]/resolve
  * Mark a photo report as resolved (admin only)
  */
-export async function POST(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const userId = auth.userId
 
     // Check if user is admin
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { role: true },
     })
 
@@ -41,9 +37,6 @@ export async function POST(
     return NextResponse.json({ success: true, report })
   } catch (error) {
     console.error("Error resolving report:", error)
-    return NextResponse.json(
-      { error: "Failed to resolve report" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to resolve report" }, { status: 500 })
   }
 }

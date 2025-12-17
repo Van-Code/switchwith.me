@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button"
 import { NotificationBell } from "@/components/notification-bell"
 import { ProfileDropdown } from "@/components/profile-dropdown"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { buildAuthOptions } from "@/lib/auth"
 
 export async function Header() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(buildAuthOptions)
 
   // Fetch profile with avatarUrl if user is logged in
   let profile = null

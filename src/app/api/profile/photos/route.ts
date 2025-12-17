@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 import { generateProfilePhotoUploadUrl, deleteProfilePhoto } from "@/lib/s3"
 
@@ -12,11 +11,11 @@ export const dynamic = "force-dynamic"
  */
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const userId = auth.userId
 
     const { searchParams } = new URL(req.url)
     const orderStr = searchParams.get("order")
@@ -31,10 +30,7 @@ export async function GET(req: Request) {
 
     const order = parseInt(orderStr)
     if (order < 0 || order > 2) {
-      return NextResponse.json(
-        { error: "Order must be 0, 1, or 2" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Order must be 0, 1, or 2" }, { status: 400 })
     }
 
     // Validate file extension
@@ -48,21 +44,18 @@ export async function GET(req: Request) {
 
     // Check if user already has 3 photos (and this would be a 4th)
     const existingPhotos = await prisma.profilePhoto.findMany({
-      where: { userId: session.user.id },
+      where: { userId: userId },
     })
 
     const existingPhotoAtOrder = existingPhotos.find((p) => p.order === order)
 
     // If adding a new photo (not replacing), check the limit
     if (!existingPhotoAtOrder && existingPhotos.length >= 3) {
-      return NextResponse.json(
-        { error: "Maximum 3 photos allowed" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Maximum 3 photos allowed" }, { status: 400 })
     }
 
     const { uploadUrl, key } = await generateProfilePhotoUploadUrl(
-      session.user.id,
+      userId,
       order,
       fileExtension.toLowerCase()
     )
@@ -70,10 +63,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ uploadUrl, key, order })
   } catch (error) {
     console.error("Error generating presigned URL:", error)
-    return NextResponse.json(
-      { error: "Failed to generate upload URL" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to generate upload URL" }, { status: 500 })
   }
 }
 
@@ -83,34 +73,27 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-
+    const userId = auth.userId
     const body = await req.json()
     const { key, order } = body
 
     if (!key || order === undefined) {
-      return NextResponse.json(
-        { error: "S3 key and order required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "S3 key and order required" }, { status: 400 })
     }
 
     if (order < 0 || order > 2) {
-      return NextResponse.json(
-        { error: "Order must be 0, 1, or 2" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Order must be 0, 1, or 2" }, { status: 400 })
     }
 
     // Delete old photo at this order if exists
     const existingPhoto = await prisma.profilePhoto.findUnique({
       where: {
         userId_order: {
-          userId: session.user.id,
+          userId: userId,
           order,
         },
       },
@@ -133,7 +116,7 @@ export async function POST(req: Request) {
     // Create new photo record
     const photo = await prisma.profilePhoto.create({
       data: {
-        userId: session.user.id,
+        userId: userId,
         url: key,
         order,
       },
@@ -142,10 +125,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, photo })
   } catch (error) {
     console.error("Error saving photo:", error)
-    return NextResponse.json(
-      { error: "Failed to save photo" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to save photo" }, { status: 500 })
   }
 }
 
@@ -155,11 +135,11 @@ export async function POST(req: Request) {
  */
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const userId = auth.userId
 
     const { searchParams } = new URL(req.url)
     const photoId = searchParams.get("id")
@@ -177,7 +157,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Photo not found" }, { status: 404 })
     }
 
-    if (photo.userId !== session.user.id) {
+    if (photo.userId !== userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -197,9 +177,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting photo:", error)
-    return NextResponse.json(
-      { error: "Failed to delete photo" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to delete photo" }, { status: 500 })
   }
 }

@@ -1,31 +1,23 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 
 // Force dynamic rendering - this route needs to access headers for authentication
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
 
 // POST /api/swap-complete - Mark a swap as complete
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    const auth = await requireUserId()
+    if (!auth.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-
+    const userId = auth.userId
     const body = await req.json()
     const { myListingId, theirListingId } = body
 
     if (!myListingId || !theirListingId) {
-      return NextResponse.json(
-        { error: "Missing listing IDs" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Missing listing IDs" }, { status: 400 })
     }
 
     // Verify ownership of myListing
@@ -33,11 +25,8 @@ export async function POST(req: Request) {
       where: { id: myListingId },
     })
 
-    if (!myListing || myListing.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Forbidden" },
-        { status: 403 }
-      )
+    if (!myListing || myListing.userId !== userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     const theirListing = await prisma.listing.findUnique({
@@ -45,10 +34,7 @@ export async function POST(req: Request) {
     })
 
     if (!theirListing) {
-      return NextResponse.json(
-        { error: "Other listing not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Other listing not found" }, { status: 404 })
     }
 
     // Update both listings to MATCHED status
@@ -64,7 +50,7 @@ export async function POST(req: Request) {
 
     // Increment successfulSwapsCount for both users
     await prisma.profile.update({
-      where: { userId: session.user.id },
+      where: { userId: userId },
       data: {
         successfulSwapsCount: {
           increment: 1,
@@ -84,9 +70,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error completing swap:", error)
-    return NextResponse.json(
-      { error: "Failed to complete swap" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to complete swap" }, { status: 500 })
   }
 }

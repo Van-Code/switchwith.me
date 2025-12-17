@@ -2,13 +2,12 @@ import React from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth-server"
 import { ArrowRight, Shield, MessageSquare, Search, Heart, Users } from "lucide-react"
 import { AccountDeletedMessage } from "@/components/AccountDeletedMessage"
 
 export default async function Home() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
   return (
     <div className="space-y-16 pb-8">

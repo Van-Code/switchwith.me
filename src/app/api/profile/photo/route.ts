@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
-import {
-  generateUploadPresignedUrl,
-  deleteProfilePhoto,
-} from "@/lib/s3"
+import { generateUploadPresignedUrl, deleteProfilePhoto } from "@/lib/s3"
 
 export const dynamic = "force-dynamic"
 
@@ -15,20 +11,18 @@ export const dynamic = "force-dynamic"
  */
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const userId = auth.userId
 
     const { searchParams } = new URL(req.url)
     const fileExtension = searchParams.get("ext")
 
     if (!fileExtension) {
-      return NextResponse.json(
-        { error: "File extension required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "File extension required" }, { status: 400 })
     }
 
     // Validate file extension
@@ -41,17 +35,14 @@ export async function GET(req: Request) {
     }
 
     const { uploadUrl, key } = await generateUploadPresignedUrl(
-      session.user.id,
+      userId,
       fileExtension.toLowerCase()
     )
 
     return NextResponse.json({ uploadUrl, key })
   } catch (error) {
     console.error("Error generating presigned URL:", error)
-    return NextResponse.json(
-      { error: "Failed to generate upload URL" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to generate upload URL" }, { status: 500 })
   }
 }
 
@@ -61,11 +52,11 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const userId = auth.userId
 
     const body = await req.json()
     const { key } = body
@@ -76,7 +67,7 @@ export async function POST(req: Request) {
 
     // Delete old photo if exists
     const profile = await prisma.profile.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: userId },
       select: { avatarUrl: true },
     })
 
@@ -91,17 +82,14 @@ export async function POST(req: Request) {
 
     // Update profile with new S3 key
     await prisma.profile.update({
-      where: { userId: session.user.id },
+      where: { userId: userId },
       data: { avatarUrl: key },
     })
 
     return NextResponse.json({ success: true, key })
   } catch (error) {
     console.error("Error saving photo:", error)
-    return NextResponse.json(
-      { error: "Failed to save photo" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to save photo" }, { status: 500 })
   }
 }
 
@@ -111,22 +99,19 @@ export async function POST(req: Request) {
  */
 export async function DELETE() {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const userId = auth.userId
 
     const profile = await prisma.profile.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: userId },
       select: { avatarUrl: true },
     })
 
     if (!profile?.avatarUrl) {
-      return NextResponse.json(
-        { error: "No photo to delete" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "No photo to delete" }, { status: 404 })
     }
 
     // Delete from S3
@@ -134,16 +119,13 @@ export async function DELETE() {
 
     // Clear avatarUrl in database
     await prisma.profile.update({
-      where: { userId: session.user.id },
+      where: { userId: userId },
       data: { avatarUrl: null },
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting photo:", error)
-    return NextResponse.json(
-      { error: "Failed to delete photo" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to delete photo" }, { status: 500 })
   }
 }

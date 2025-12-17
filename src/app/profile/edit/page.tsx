@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { EditProfileForm } from "./EditProfileForm"
@@ -8,14 +7,14 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
 export default async function EditProfilePage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.id) {
+  const auth = await requireUserId()
+  if (!auth.ok) {
     redirect("/auth/signin")
   }
 
+  const userId = auth.userId
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     include: {
       profile: true,
       profilePhotos: {

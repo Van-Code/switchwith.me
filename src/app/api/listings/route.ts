@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
 import { findMatches } from "@/lib/matching"
 import { createMatchNotification } from "@/lib/notifications"
 import { inferZoneFromSection } from "@/lib/zone-mapping"
 
 // Force dynamic rendering - this route needs to access headers for authentication
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
 // GET /api/listings - Browse/filter listings
 export async function GET(req: Request) {
@@ -23,7 +22,7 @@ export async function GET(req: Request) {
     const teamFilter = searchParams.get("team") // comma-separated team slugs
 
     const where: any = {
-      status: "ACTIVE"
+      status: "ACTIVE",
     }
 
     // Text search across multiple fields
@@ -32,7 +31,7 @@ export async function GET(req: Request) {
         { haveSection: { contains: search, mode: "insensitive" } },
         { haveRow: { contains: search, mode: "insensitive" } },
         { haveSeat: { contains: search, mode: "insensitive" } },
-        { haveZone: { contains: search, mode: "insensitive" } }
+        { haveZone: { contains: search, mode: "insensitive" } },
       ]
     }
 
@@ -53,18 +52,18 @@ export async function GET(req: Request) {
       if (from) {
         // Parse date string to avoid timezone issues
         // Date input provides YYYY-MM-DD, parse it as local time
-        const [year, month, day] = from.split('-').map(Number);
-        const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+        const [year, month, day] = from.split("-").map(Number)
+        const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
         if (!isNaN(fromDate.getTime())) {
-          where.gameDate.gte = fromDate;
+          where.gameDate.gte = fromDate
         }
       }
       if (to) {
         // Parse date string to avoid timezone issues
-        const [year, month, day] = to.split('-').map(Number);
-        const toDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+        const [year, month, day] = to.split("-").map(Number)
+        const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
         if (!isNaN(toDate.getTime())) {
-          where.gameDate.lte = toDate;
+          where.gameDate.lte = toDate
         }
       }
     }
@@ -79,37 +78,37 @@ export async function GET(req: Request) {
       if (teamSlugs.length > 0) {
         where.team = {
           slug: {
-            in: teamSlugs
-          }
+            in: teamSlugs,
+          },
         }
       }
     }
 
-        // Build orderBy based on sort param
-        // Boosted listings always appear first, then apply secondary sort
-        let orderBy: any[] = [
-            { boosted: "desc" }, // Boosted listings first
-        ]
+    // Build orderBy based on sort param
+    // Boosted listings always appear first, then apply secondary sort
+    let orderBy: any[] = [
+      { boosted: "desc" }, // Boosted listings first
+    ]
 
-        switch (sort) {
-            case "createdAsc":
-                orderBy.push({ boostedAt: "desc" }, { createdAt: "asc" })
-                break
-            case "createdDesc":
-                orderBy.push({ boostedAt: "desc" }, { createdAt: "desc" })
-                break
-            case "sectionAsc":
-                orderBy.push({ boostedAt: "desc" }, { haveSection: "asc" })
-                break
-            case "gameSoonest":
-                orderBy.push({ boostedAt: "desc" }, { gameDate: "asc" })
-                break
-            case "gameFarthest":
-                orderBy.push({ boostedAt: "desc" }, { gameDate: "desc" })
-                break
-            default:
-                orderBy.push({ boostedAt: "desc" }, { createdAt: "desc" })
-        }
+    switch (sort) {
+      case "createdAsc":
+        orderBy.push({ boostedAt: "desc" }, { createdAt: "asc" })
+        break
+      case "createdDesc":
+        orderBy.push({ boostedAt: "desc" }, { createdAt: "desc" })
+        break
+      case "sectionAsc":
+        orderBy.push({ boostedAt: "desc" }, { haveSection: "asc" })
+        break
+      case "gameSoonest":
+        orderBy.push({ boostedAt: "desc" }, { gameDate: "asc" })
+        break
+      case "gameFarthest":
+        orderBy.push({ boostedAt: "desc" }, { gameDate: "desc" })
+        break
+      default:
+        orderBy.push({ boostedAt: "desc" }, { createdAt: "desc" })
+    }
 
     const listings = await prisma.listing.findMany({
       where,
@@ -122,10 +121,10 @@ export async function GET(req: Request) {
               select: {
                 firstName: true,
                 lastInitial: true,
-                emailVerified: true
-              }
-            }
-          }
+                emailVerified: true,
+              },
+            },
+          },
         },
         team: {
           select: {
@@ -134,25 +133,25 @@ export async function GET(req: Request) {
             slug: true,
             logoUrl: true,
             primaryColor: true,
-            secondaryColor: true
-          }
-        }
-      }
+            secondaryColor: true,
+          },
+        },
+      },
     })
 
-        // Serialize dates to strings
-        const serializedListings = listings.map((listing: any) => ({
-            ...listing,
-            gameDate: listing.gameDate.toISOString(),
-            createdAt: listing.createdAt.toISOString(),
-            updatedAt: listing.updatedAt.toISOString(),
-            boostedAt: listing.boostedAt ? listing.boostedAt.toISOString() : null,
-            user: listing.user
-                ? {
-                      ...listing.user,
-                  }
-                : undefined,
-        }))
+    // Serialize dates to strings
+    const serializedListings = listings.map((listing: any) => ({
+      ...listing,
+      gameDate: listing.gameDate.toISOString(),
+      createdAt: listing.createdAt.toISOString(),
+      updatedAt: listing.updatedAt.toISOString(),
+      boostedAt: listing.boostedAt ? listing.boostedAt.toISOString() : null,
+      user: listing.user
+        ? {
+            ...listing.user,
+          }
+        : undefined,
+    }))
 
     return NextResponse.json({ listings: serializedListings })
   } catch (error) {
@@ -164,11 +163,11 @@ export async function GET(req: Request) {
 // POST /api/listings - Create a new listing
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
+    const auth = await requireUserId()
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const userId = auth.userId
 
     const body = await req.json()
     const {
@@ -181,7 +180,7 @@ export async function POST(req: Request) {
       haveSeat,
       wantZones,
       wantSections,
-      willingToAddCash
+      willingToAddCash,
     } = body
 
     // Validate required fields
@@ -191,7 +190,10 @@ export async function POST(req: Request) {
 
     // For HAVE listings, seat details are required (zone will be inferred)
     if (listingType === "HAVE" && (!haveSection || !haveRow || !haveSeat)) {
-      return NextResponse.json({ error: "Seat details required for HAVE listings" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Seat details required for HAVE listings" },
+        { status: 400 }
+      )
     }
 
     // Infer zone from section for HAVE listings
@@ -199,7 +201,7 @@ export async function POST(req: Request) {
 
     // Validate that team exists
     const team = await prisma.team.findUnique({
-      where: { id: parseInt(teamId) }
+      where: { id: parseInt(teamId) },
     })
 
     if (!team) {
@@ -211,7 +213,7 @@ export async function POST(req: Request) {
 
     const listing = await prisma.listing.create({
       data: {
-        userId: session.user.id,
+        userId: userId,
         teamId: parseInt(teamId),
         gameId,
         gameDate: parsedGameDate,
@@ -222,13 +224,13 @@ export async function POST(req: Request) {
         haveZone: haveZone || "",
         wantZones: wantZones || [],
         wantSections: wantSections || [],
-        willingToAddCash: willingToAddCash || false
+        willingToAddCash: willingToAddCash || false,
       },
       include: {
         user: {
           include: {
-            profile: true
-          }
+            profile: true,
+          },
         },
         team: {
           select: {
@@ -237,29 +239,29 @@ export async function POST(req: Request) {
             slug: true,
             logoUrl: true,
             primaryColor: true,
-            secondaryColor: true
-          }
-        }
-      }
-    });
+            secondaryColor: true,
+          },
+        },
+      },
+    })
 
     // Find matches for the new listing and notify users
     // Run asynchronously to not block the response
-    (async () => {
+    ;(async () => {
       try {
         // Get all active listings for matching (same team only)
         const allListings = await prisma.listing.findMany({
           where: {
             status: "ACTIVE",
-            teamId: parseInt(teamId)
+            teamId: parseInt(teamId),
           },
           include: {
             user: {
               include: {
-                profile: true
-              }
-            }
-          }
+                profile: true,
+              },
+            },
+          },
         })
 
         // Find matches for the new listing
@@ -275,11 +277,11 @@ export async function POST(req: Request) {
               : "Someone"
 
             await createMatchNotification({
-              userId: session.user.id,
+              userId: userId,
               listingId: listing.id,
               matchedListingId: matchedListing.id,
               matchScore: match.score,
-              description: `Great news! ${matchedUserName} has a seat that matches your listing. ${match.reason}`
+              description: `Great news! ${matchedUserName} has a seat that matches your listing. ${match.reason}`,
             }).catch((error) => {
               console.error("Failed to create match notification:", error)
             })
@@ -290,7 +292,7 @@ export async function POST(req: Request) {
         for (const match of matches.slice(0, 3)) {
           // Notify top 3 matched users
           const matchedListing = allListings.find((l) => l.id === match.listingId)
-          if (matchedListing && matchedListing.userId !== session.user.id) {
+          if (matchedListing && matchedListing.userId !== userId) {
             const newListingUserName = listing.user.profile
               ? `${listing.user.profile.firstName} ${listing.user.profile.lastInitial}.`
               : "Someone"
@@ -300,7 +302,7 @@ export async function POST(req: Request) {
               listingId: matchedListing.id,
               matchedListingId: listing.id,
               matchScore: match.score,
-              description: `Great news! ${newListingUserName} just listed a seat that matches what you're looking for. ${match.reason}`
+              description: `Great news! ${newListingUserName} just listed a seat that matches what you're looking for. ${match.reason}`,
             }).catch((error) => {
               console.error("Failed to create match notification:", error)
             })
