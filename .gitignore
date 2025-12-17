@@ -5,7 +5,7 @@ package-lock.json
 # misc
 *.log
 .DS_Store
-scripts.txt
+1scripts.txt
 .vscode/
 .idea/
 .next/
@@ -17,8 +17,12 @@ dist/
 
 # local env
 .env
-.env.development
-.env.production
+.env.local
+.env.neon
+.env.staging
 
 #testing 
 coverage/
+
+#prisma
+prisma/generated/
