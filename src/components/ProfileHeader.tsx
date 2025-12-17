@@ -7,9 +7,7 @@ interface ProfileHeaderProps {
   firstName: string
   lastInitial?: string | null
   avatarUrl?: string | null
-  bio?: string | null
   successfulSwapsCount?: number
-  favoritePlayer?: string | null
   isEmailVerified?: boolean
 }
 
@@ -17,7 +15,6 @@ export function ProfileHeader({
   firstName,
   lastInitial,
   avatarUrl,
-  bio,
   successfulSwapsCount,
   isEmailVerified,
 }: ProfileHeaderProps) {
@@ -27,7 +24,11 @@ export function ProfileHeader({
     <div className="flex items-start gap-4">
       <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-2xl font-bold">
         {avatarViewUrl ? (
-          <img src={avatarViewUrl} alt="Avatar" className="h-16 w-16 rounded-full object-cover" />
+          <img
+            src={avatarViewUrl}
+            alt="Avatar"
+            className="h-16 w-16 rounded-full object-cover"
+          />
         ) : (
           `${firstName[0]}${lastInitial}`
         )}
@@ -36,7 +37,6 @@ export function ProfileHeader({
         <h2 className="text-2xl font-bold">
           {firstName} {lastInitial}
         </h2>
-        {bio && <p className="text-muted-foreground mt-1">{bio}</p>}
         <div className="mt-2">
           <ProfileBadge
             successfulSwapsCount={successfulSwapsCount}

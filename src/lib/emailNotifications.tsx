@@ -5,7 +5,7 @@
  */
 
 import React, { ReactElement, ReactNode } from "react"
-import { NotificationType } from "@prisma/client"
+import { NotificationType } from "../../prisma/generated/client"
 import type { MessageNotificationData, MatchNotificationData } from "./notifications"
 import MinimalTemplate from "../../react-emails/emails/MinimalTemplate"
 import MatchNotification from "../../react-emails/emails/MatchNotification"
@@ -36,7 +36,7 @@ function buildReactTemplate({
   type: NotificationType
   userName: string
   url: string
-  data?: MessageNotificationData | MatchNotificationData,
+  data?: MessageNotificationData | MatchNotificationData
   description?: string
 }): React.ReactNode {
   switch (type) {
@@ -44,7 +44,7 @@ function buildReactTemplate({
       return <MessageNotification userName={userName} url={url} />
 
     case NotificationType.MATCH:
-      return <MatchNotification userName={userName} url={url} description={description}/>
+      return <MatchNotification userName={userName} url={url} description={description} />
 
     default:
       return <MinimalTemplate userName={userName} url={url} />
@@ -82,11 +82,11 @@ export async function sendNotificationEmail({
       html,
       text,
     })
-  
+
     console.log(`Notification email sent to ${to} (type: ${type})`)
   } catch (err) {
-      console.error("Failed to send notification email:", err)
-      throw(err)
+    console.error("Failed to send notification email:", err)
+    throw err
   }
 }
 

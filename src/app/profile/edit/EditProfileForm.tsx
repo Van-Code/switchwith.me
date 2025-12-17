@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { ProfilePhotosEdit } from "@/components/ProfilePhotosEdit"
+import { redirect } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Upload, Trash2 } from "lucide-react"
+import { Upload, Trash2, ChevronDown } from "lucide-react"
 import { useAvatarUrl } from "@/hooks/useAvatarUrl"
 import {
   Dialog,
@@ -18,18 +19,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+interface ProfilePhoto {
+  id: string
+  url: string
+  order: number
+}
 
 interface EditProfileFormProps {
-  profile: {
-    firstName: string
-    lastInitial: string | null
-    avatarUrl: string | null
-    bio: string | null
-    favoritePlayer: string | null
+  user: {
+    profile: {
+      firstName: string
+      lastInitial: string | null
+      avatarUrl: string | null
+    } | null
+    profilePhotos: ProfilePhoto[]
   }
 }
 
-export function EditProfileForm({ profile }: EditProfileFormProps) {
+export function EditProfileForm({ user }: EditProfileFormProps) {
+  const { profile, profilePhotos } = user
+  if (!user || !profile) {
+    redirect("/auth/signin")
+  }
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [photoLoading, setPhotoLoading] = useState(false)
@@ -37,8 +48,6 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
   const [formData, setFormData] = useState({
     firstName: profile.firstName,
     lastInitial: profile.lastInitial || "",
-    bio: profile.bio || "",
-    favoritePlayer: profile.favoritePlayer || "",
   })
   const [avatarKey, setAvatarKey] = useState(profile.avatarUrl)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -181,29 +190,32 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Profile</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Photo Upload */}
-          <div className="flex items-center gap-6">
-            <Avatar className="h-24 w-24">
+
+        <CardContent className="space-y-4">
+          {/* Avatar + basics */}
+          <div className="flex items-start gap-4">
+            <Avatar className="h-16 w-16">
               <AvatarImage src={previewUrl || currentAvatarUrl || undefined} />
-              <AvatarFallback className="text-2xl">
-                {formData.firstName[0]}
+              <AvatarFallback className="text-lg">
+                {formData.firstName?.[0]}
                 {formData.lastInitial}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 space-y-2">
-              <div className="flex gap-2">
+
+            <div className="flex-1 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <Label htmlFor="photo" className="cursor-pointer">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors border rounded px-3 py-2">
                     <Upload className="h-4 w-4" />
                     <span>{photoLoading ? "Uploading..." : "Change photo"}</span>
                   </div>
                 </Label>
+
                 {avatarKey && (
                   <Button
                     type="button"
@@ -216,7 +228,12 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
                     Delete
                   </Button>
                 )}
+
+                <span className="text-xs text-muted-foreground">
+                  JPEG, PNG or WebP. Max 5MB.
+                </span>
               </div>
+
               <Input
                 id="photo"
                 type="file"
@@ -225,81 +242,52 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
                 disabled={photoLoading}
                 className="hidden"
               />
-              <p className="text-xs text-muted-foreground">
-                JPEG, PNG or WebP. Max 5MB.
-              </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="firstName">First name</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="lastInitial">Last initial</Label>
+                  <Input
+                    id="lastInitial"
+                    value={formData.lastInitial}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        lastInitial: e.target.value.toUpperCase(),
+                      })
+                    }
+                    maxLength={1}
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Sticky footer actions */}
+            <div className="flex gap-2">
+              <Button type="submit" disabled={loading} className="flex-1">
+                {loading ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/profile")}
+              >
+                Cancel
+              </Button>
             </div>
           </div>
 
-          {/* Name Fields */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) =>
-                  setFormData({ ...formData, firstName: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="lastInitial">Last Initial</Label>
-              <Input
-                id="lastInitial"
-                value={formData.lastInitial}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    lastInitial: e.target.value.toUpperCase(),
-                  })
-                }
-                maxLength={1}
-              />
-            </div>
-          </div>
-
-          {/* Favorite Player */}
-          <div>
-            <Label htmlFor="favoritePlayer">Favorite Player</Label>
-            <Input
-              id="favoritePlayer"
-              value={formData.favoritePlayer}
-              onChange={(e) =>
-                setFormData({ ...formData, favoritePlayer: e.target.value })
-              }
-              placeholder="e.g., Satou Sabally"
-            />
-          </div>
-
-          {/* Bio */}
-          <div>
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              value={formData.bio}
-              onChange={(e) =>
-                setFormData({ ...formData, bio: e.target.value })
-              }
-              placeholder="Tell us a bit about yourself..."
-              rows={4}
-            />
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex gap-2">
-            <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? "Saving..." : "Save Changes"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push("/profile")}
-            >
-              Cancel
-            </Button>
-          </div>
+          <ProfilePhotosEdit photos={profilePhotos} />
         </CardContent>
       </Card>
 
@@ -309,7 +297,8 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
           <DialogHeader>
             <DialogTitle>Delete Profile Photo</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete your profile photo? Your avatar will revert to your first initial.
+              Are you sure you want to delete your profile photo? Your avatar will revert
+              to your first initial.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -320,11 +309,7 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
             >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeletePhoto}
-              disabled={deleting}
-            >
+            <Button variant="destructive" onClick={handleDeletePhoto} disabled={deleting}>
               {deleting ? "Deleting..." : "Delete Photo"}
             </Button>
           </DialogFooter>
