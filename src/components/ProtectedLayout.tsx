@@ -42,7 +42,7 @@ export default function ProtectedLayout({ children, session }: Props) {
     onActive,
     onAction,
     //timeout: 10_000,
-    timeout: 5 * 60 * 1000,
+    timeout: 480 * (60 * 1000),
     throttle: 500,
   })
 
