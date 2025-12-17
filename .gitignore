@@ -20,3 +20,6 @@ dist/
 
 #testing 
 coverage/
+
+#prisma
+prisma/generated/
