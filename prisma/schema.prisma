@@ -30,19 +30,19 @@ model User {
   // Admin role
   role UserRole @default(USER)
 
-  profile                Profile?
-  listings               Listing[]
-  sentMessages           Message[]                 @relation("SentMessages")
-  conversations          ConversationParticipant[]
-  reportsSubmitted       Report[]                  @relation("ReportsSubmitted")
-  reportsReceived        Report[]                  @relation("ReportsReceived")
-  notifications          Notification[]
-  accounts               Account[] // For OAuth
-  sessions               Session[] // For NextAuth sessions
-  creditTransactions     CreditTransaction[]
-  profilePhotos          ProfilePhoto[]
-  photoReportsSubmitted  PhotoReport[]             @relation("PhotoReportsSubmitted")
-  photoReportsReceived   PhotoReport[]             @relation("PhotoReportsReceived")
+  profile               Profile?
+  listings              Listing[]
+  sentMessages          Message[]                 @relation("SentMessages")
+  conversations         ConversationParticipant[]
+  reportsSubmitted      Report[]                  @relation("ReportsSubmitted")
+  reportsReceived       Report[]                  @relation("ReportsReceived")
+  notifications         Notification[]
+  accounts              Account[] // For OAuth
+  sessions              Session[] // For NextAuth sessions
+  creditTransactions    CreditTransaction[]
+  profilePhotos         ProfilePhoto[]
+  photoReportsSubmitted PhotoReport[]             @relation("PhotoReportsSubmitted")
+  photoReportsReceived  PhotoReport[]             @relation("PhotoReportsReceived")
 }
 
 // NextAuth OAuth Account model
@@ -91,11 +91,9 @@ model Profile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  firstName      String
-  lastInitial    String?
-  avatarUrl      String? // This already exists, we'll use it for photo
-  bio            String?
-  favoritePlayer String?
+  firstName   String
+  lastInitial String?
+  avatarUrl   String? // This already exists, we'll use it for photo
 
   emailVerified              Boolean @default(false)
   phoneVerified              Boolean @default(false)
@@ -110,8 +108,8 @@ model ProfilePhoto {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  url       String   // S3 key
-  order     Int      // 0, 1, or 2 for the three slots
+  url       String // S3 key
+  order     Int // 0, 1, or 2 for the three slots
   createdAt DateTime @default(now())
 
   photoReports PhotoReport[]
