@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DeleteAccountSection } from './DeleteAccountSection';
+import { signOut } from 'next-auth/react';
 
 // Mock next/navigation
 const mockPush = jest.fn();
@@ -11,9 +12,8 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock next-auth
-const mockSignOut = jest.fn();
 jest.mock('next-auth/react', () => ({
-  signOut: mockSignOut,
+  signOut: jest.fn(),
 }));
 
 // Mock lucide-react icons
@@ -24,6 +24,8 @@ jest.mock('lucide-react', () => ({
 
 // Mock fetch
 global.fetch = jest.fn();
+
+const mockSignOut = signOut as jest.MockedFunction<typeof signOut>;
 
 describe('DeleteAccountSection', () => {
   beforeEach(() => {

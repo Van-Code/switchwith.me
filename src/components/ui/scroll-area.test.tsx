@@ -107,14 +107,14 @@ describe('ScrollArea Components', () => {
     });
 
     it('forwards ref correctly', () => {
-      const ref = jest.fn();
+      const ref = React.createRef<HTMLDivElement>();
       render(
         <ScrollArea ref={ref}>
           <div>Content</div>
         </ScrollArea>
       );
 
-      expect(ref).toHaveBeenCalled();
+      expect(ref.current).toBeInstanceOf(HTMLDivElement);
     });
   });
 
@@ -163,9 +163,9 @@ describe('ScrollArea Components', () => {
     });
 
     it('forwards ref correctly', () => {
-      const ref = jest.fn();
+      const ref = React.createRef<HTMLDivElement>();
       render(<ScrollBar ref={ref} />);
-      expect(ref).toHaveBeenCalled();
+      expect(ref.current).toBeInstanceOf(HTMLDivElement);
     });
   });
 
@@ -202,13 +202,14 @@ describe('ScrollArea Components', () => {
     it('renders with both vertical and horizontal scrollbars', () => {
       render(
         <ScrollArea>
-          <ScrollBar orientation="vertical" />
-          <ScrollBar orientation="horizontal" />
           <div>Content</div>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       );
 
+      // ScrollArea renders a vertical scrollbar by default
       expect(screen.getByTestId('scroll-area-scrollbar-vertical')).toBeInTheDocument();
+      // We explicitly added a horizontal scrollbar
       expect(screen.getByTestId('scroll-area-scrollbar-horizontal')).toBeInTheDocument();
     });
   });

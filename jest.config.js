@@ -6,6 +6,7 @@ export default {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+    "^react-day-picker/dist/style.css$": "identity-obj-proxy",
   },
   resolver: undefined,
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],

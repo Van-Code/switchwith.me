@@ -1,7 +1,10 @@
+/**
+ * @jest-environment node
+ */
 import { describe, it, expect, jest, beforeEach } from "@jest/globals"
 import { NextResponse } from "next/server"
 import { GET, POST, DELETE } from "./route"
-
+import { getServerSession } from "next-auth"
 import { prisma } from "@/lib/prisma"
 
 // Mock dependencies

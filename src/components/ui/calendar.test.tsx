@@ -42,9 +42,6 @@ jest.mock('react-day-picker', () => ({
   },
 }));
 
-// Mock CSS import
-jest.mock('react-day-picker/dist/style.css', () => ({}));
-
 describe('Calendar', () => {
   describe('Rendering', () => {
     it('renders calendar component', () => {

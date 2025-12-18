@@ -3,7 +3,7 @@
  */
 
 import { GET, POST, DELETE } from "./route"
-
+import { getServerSession } from "next-auth"
 import { prisma } from "@/lib/prisma"
 import { generateUploadPresignedUrl, deleteProfilePhoto } from "@/lib/s3"
 
