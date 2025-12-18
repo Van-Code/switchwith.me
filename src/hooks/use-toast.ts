@@ -1,6 +1,7 @@
 import * as React from "react"
+import { useState, useEffect } from "react"
 
-type ToastActionElement = React.ReactElement<any>
+type ToastActionElement = React.ReactNode
 
 type ToastProps = {
   title?: string
@@ -159,9 +160,9 @@ function toast(props: ToastProps) {
 }
 
 function useToast() {
-  const [state, setState] = React.useState<State>(memoryState)
+  const [state, setState] = useState<State>(memoryState)
 
-  React.useEffect(() => {
+  useEffect(() => {
     listeners.push(setState)
     return () => {
       const index = listeners.indexOf(setState)
