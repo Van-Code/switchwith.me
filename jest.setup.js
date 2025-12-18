@@ -1,10 +1,10 @@
 // Jest setup file for React Testing Library
-require('@testing-library/jest-dom');
+import "@testing-library/jest-dom"
 
 // Mock window.matchMedia for components that use it
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -14,7 +14,7 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
   })),
-});
+})
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
@@ -22,10 +22,10 @@ global.IntersectionObserver = class IntersectionObserver {
   disconnect() {}
   observe() {}
   takeRecords() {
-    return [];
+    return []
   }
   unobserve() {}
-};
+}
 
 // Suppress console errors in tests (optional - remove if you want to see them)
 // global.console.error = jest.fn();
