@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/LoadingButton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ProfilePhotosEdit } from "@/components/ProfilePhotosEdit"
@@ -274,9 +275,14 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
             </div>
             {/* Sticky footer actions */}
             <div className="flex gap-2">
-              <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? "Saving..." : "Save"}
-              </Button>
+              <LoadingButton
+                type="submit"
+                isLoading={loading}
+                loadingText="Saving..."
+                className="flex-1"
+              >
+                Save
+              </LoadingButton>
               <Button
                 type="button"
                 variant="outline"
@@ -309,9 +315,14 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeletePhoto} disabled={deleting}>
-              {deleting ? "Deleting..." : "Delete Photo"}
-            </Button>
+            <LoadingButton
+              variant="destructive"
+              onClick={handleDeletePhoto}
+              isLoading={deleting}
+              loadingText="Deleting..."
+            >
+              Delete Photo
+            </LoadingButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

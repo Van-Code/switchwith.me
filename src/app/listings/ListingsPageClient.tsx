@@ -6,6 +6,7 @@ import { ListingsFiltersProvider, useListingsFilters } from "@/contexts/listings
 import ListingsFilters from "@/components/listings-filters";
 import ListingsSortSelect from "@/components/listings-sort-select";
 import { ListingsClient } from "./ListingsClient";
+import { ListingCardSkeleton } from "@/components/ListingCardSkeleton";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
@@ -250,13 +251,10 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
 
               {/* Listings grid or empty state */}
               {isLoading ? (
-                <div className="text-center py-16 bg-white rounded-lg border border-slate-200 shadow-sm">
-                  <div className="max-w-md mx-auto px-4">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-100 to-orange-100 flex items-center justify-center">
-                      <div className="w-8 h-8 border-4 border-cyan-600 border-t-transparent rounded-full animate-spin" />
-                    </div>
-                    <p className="text-lg font-medium text-slate-900 mb-2">Loading listings...</p>
-                  </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <ListingCardSkeleton key={i} />
+                  ))}
                 </div>
               ) : displayedListings.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-lg border border-slate-200 shadow-sm">

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "./ui/button"
+import { LoadingButton } from "./LoadingButton"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Switch } from "./ui/switch"
@@ -240,9 +240,14 @@ export function ListingForm() {
             </Label>
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Creating..." : "Create Listing"}
-          </Button>
+          <LoadingButton
+            type="submit"
+            isLoading={loading}
+            loadingText="Creating..."
+            className="w-full"
+          >
+            Create Listing
+          </LoadingButton>
         </form>
       </CardContent>
     </Card>
