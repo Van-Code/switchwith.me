@@ -1,477 +1,426 @@
-import { render, screen, renderHook, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { render, screen, renderHook, act } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import React from "react"
 import {
   ListingsFiltersProvider,
   useListingsFilters,
   ListingsFilters,
-} from './listings-filters-context';
+} from "./listings-filters-context"
 
-describe('ListingsFiltersContext', () => {
-  describe('ListingsFiltersProvider', () => {
-    it('renders children', () => {
+describe("ListingsFiltersContext", () => {
+  describe("ListingsFiltersProvider", () => {
+    it("renders children", () => {
       render(
         <ListingsFiltersProvider>
           <div>Test Child</div>
         </ListingsFiltersProvider>
-      );
+      )
 
-      expect(screen.getByText('Test Child')).toBeInTheDocument();
-    });
+      expect(screen.getByText("Test Child")).toBeInTheDocument()
+    })
 
-    it('provides context value to children', () => {
+    it("provides context value to children", () => {
       const TestComponent = () => {
-        const { filters } = useListingsFilters();
-        return <div>Filters: {JSON.stringify(filters)}</div>;
-      };
+        const { filters } = useListingsFilters()
+        return <div>Filters: {JSON.stringify(filters)}</div>
+      }
 
       render(
         <ListingsFiltersProvider>
           <TestComponent />
         </ListingsFiltersProvider>
-      );
+      )
 
-      expect(screen.getByText(/Filters:/)).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText(/Filters:/)).toBeInTheDocument()
+    })
+  })
 
-  describe('useListingsFilters hook', () => {
-    it('returns context value', () => {
+  describe("useListingsFilters hook", () => {
+    it("returns context value", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
-      expect(result.current).toHaveProperty('filters');
-      expect(result.current).toHaveProperty('activeFilters');
-      expect(result.current).toHaveProperty('setTeam');
-      expect(result.current).toHaveProperty('setSection');
-      expect(result.current).toHaveProperty('setMinPrice');
-      expect(result.current).toHaveProperty('setMaxPrice');
-      expect(result.current).toHaveProperty('setFromDate');
-      expect(result.current).toHaveProperty('setToDate');
-      expect(result.current).toHaveProperty('setSort');
-      expect(result.current).toHaveProperty('resetFilters');
-      expect(result.current).toHaveProperty('applyFilters');
-    });
+      expect(result.current).toHaveProperty("filters")
+      expect(result.current).toHaveProperty("activeFilters")
+      expect(result.current).toHaveProperty("setTeam")
+      expect(result.current).toHaveProperty("setSection")
+      expect(result.current).toHaveProperty("setFromDate")
+      expect(result.current).toHaveProperty("setToDate")
+      expect(result.current).toHaveProperty("setSort")
+      expect(result.current).toHaveProperty("resetFilters")
+      expect(result.current).toHaveProperty("applyFilters")
+    })
 
-    it('throws error when used outside provider', () => {
+    it("throws error when used outside provider", () => {
       // Suppress console.error for this test
-      const originalError = console.error;
-      console.error = jest.fn();
+      const originalError = console.error
+      console.error = jest.fn()
 
       expect(() => {
-        renderHook(() => useListingsFilters());
-      }).toThrow('useListingsFilters must be used within a ListingsFiltersProvider');
+        renderHook(() => useListingsFilters())
+      }).toThrow("useListingsFilters must be used within a ListingsFiltersProvider")
 
-      console.error = originalError;
-    });
-  });
+      console.error = originalError
+    })
+  })
 
-  describe('Default Filters', () => {
-    it('initializes with default filters', () => {
+  describe("Default Filters", () => {
+    it("initializes with default filters", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       expect(result.current.filters).toEqual({
         team: [],
-        zone: '',
-        section: '',
-        minPrice: '',
-        maxPrice: '',
-        from: '',
-        to: '',
-        sort: 'createdDesc',
-      });
-    });
+        zone: "",
+        section: "",
+        from: "",
+        to: "",
+        sort: "createdDesc",
+      })
+    })
 
-    it('initializes active filters with default values', () => {
+    it("initializes active filters with default values", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       expect(result.current.activeFilters).toEqual({
         team: [],
-        zone: '',
-        section: '',
-        minPrice: '',
-        maxPrice: '',
-        from: '',
-        to: '',
-        sort: 'createdDesc',
-      });
-    });
-  });
+        zone: "",
+        section: "",
+        from: "",
+        to: "",
+        sort: "createdDesc",
+      })
+    })
+  })
 
-  describe('Filter Setters', () => {
-    it('setTeam updates team filter', () => {
+  describe("Filter Setters", () => {
+    it("setTeam updates team filter", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setTeam(['team1', 'team2']);
-      });
+        result.current.setTeam(["team1", "team2"])
+      })
 
-      expect(result.current.filters.team).toEqual(['team1', 'team2']);
-    });
+      expect(result.current.filters.team).toEqual(["team1", "team2"])
+    })
 
-    it('setZone updates zone filter', () => {
+    it("setZone updates zone filter", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setZone('Club');
-      });
+        result.current.setZone("Club")
+      })
 
-      expect(result.current.filters.zone).toBe('Club');
-    });
+      expect(result.current.filters.zone).toBe("Club")
+    })
 
-    it('setSection updates section filter', () => {
+    it("setSection updates section filter", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setSection('Section A');
-      });
+        result.current.setSection("Section A")
+      })
 
-      expect(result.current.filters.section).toBe('Section A');
-    });
+      expect(result.current.filters.section).toBe("Section A")
+    })
 
-    it('setMinPrice updates minPrice filter', () => {
+    it("setFromDate updates from date filter", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setMinPrice('50');
-      });
+        result.current.setFromDate("2024-01-01")
+      })
 
-      expect(result.current.filters.minPrice).toBe('50');
-    });
+      expect(result.current.filters.from).toBe("2024-01-01")
+    })
 
-    it('setMaxPrice updates maxPrice filter', () => {
+    it("setToDate updates to date filter", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setMaxPrice('200');
-      });
+        result.current.setToDate("2024-12-31")
+      })
 
-      expect(result.current.filters.maxPrice).toBe('200');
-    });
+      expect(result.current.filters.to).toBe("2024-12-31")
+    })
 
-    it('setFromDate updates from date filter', () => {
+    it("setSort updates sort filter and applies immediately", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setFromDate('2024-01-01');
-      });
+        result.current.setSort("priceAsc")
+      })
 
-      expect(result.current.filters.from).toBe('2024-01-01');
-    });
-
-    it('setToDate updates to date filter', () => {
-      const { result } = renderHook(() => useListingsFilters(), {
-        wrapper: ListingsFiltersProvider,
-      });
-
-      act(() => {
-        result.current.setToDate('2024-12-31');
-      });
-
-      expect(result.current.filters.to).toBe('2024-12-31');
-    });
-
-    it('setSort updates sort filter and applies immediately', () => {
-      const { result } = renderHook(() => useListingsFilters(), {
-        wrapper: ListingsFiltersProvider,
-      });
-
-      act(() => {
-        result.current.setSort('priceAsc');
-      });
-
-      expect(result.current.filters.sort).toBe('priceAsc');
+      expect(result.current.filters.sort).toBe("priceAsc")
       // Sort applies immediately to activeFilters
-      expect(result.current.activeFilters.sort).toBe('priceAsc');
-    });
-  });
+      expect(result.current.activeFilters.sort).toBe("priceAsc")
+    })
+  })
 
-  describe('Multiple Filter Updates', () => {
-    it('updates multiple filters independently', () => {
+  describe("Multiple Filter Updates", () => {
+    it("updates multiple filters independently", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setTeam(['team1']);
-        result.current.setSection('Section B');
-        result.current.setMinPrice('100');
-        result.current.setMaxPrice('500');
-        result.current.setFromDate('2024-01-15');
-        result.current.setToDate('2024-01-20');
-      });
+        result.current.setTeam(["team1"])
+        result.current.setSection("Section B")
+        result.current.setFromDate("2024-01-15")
+        result.current.setToDate("2024-01-20")
+      })
 
       expect(result.current.filters).toEqual({
-        team: ['team1'],
-        section: 'Section B',
-        minPrice: '100',
-        maxPrice: '500',
-        from: '2024-01-15',
-        to: '2024-01-20',
-        sort: 'createdDesc', // default
-      });
-    });
+        team: ["team1"],
+        section: "Section B",
+        from: "2024-01-15",
+        to: "2024-01-20",
+        sort: "createdDesc", // default
+      })
+    })
 
-    it('preserves other filters when updating one', () => {
+    it("preserves other filters when updating one", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-       result.current.setTeam(['team1']);
-        result.current.setSection('Section A');
-      });
+        result.current.setTeam(["team1"])
+        result.current.setSection("Section A")
+      })
 
-      act(() => {
-        result.current.setMinPrice('100');
-      });
+      expect(result.current.filters.team).toEqual(["team1"])
+      expect(result.current.filters.section).toBe("Section A")
+    })
+  })
 
-      expect(result.current.filters.team).toEqual(['team1']);
-      expect(result.current.filters.section).toBe('Section A');
-      expect(result.current.filters.minPrice).toBe('100');
-    });
-  });
-
-  describe('applyFilters', () => {
-    it('applies draft filters to active filters', () => {
+  describe("applyFilters", () => {
+    it("applies draft filters to active filters", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setTeam(['team1', 'team2']);
-        result.current.setSection('Section C');
-        result.current.setMinPrice('75');
-      });
+        result.current.setTeam(["team1", "team2"])
+        result.current.setSection("Section C")
+      })
 
       // Active filters should still be default
-      expect(result.current.activeFilters.team).toEqual([]);
-      expect(result.current.activeFilters.section).toBe('');
-      expect(result.current.activeFilters.minPrice).toBe('');
+      expect(result.current.activeFilters.team).toEqual([])
+      expect(result.current.activeFilters.section).toBe("")
 
       act(() => {
-        result.current.applyFilters();
-      });
+        result.current.applyFilters()
+      })
 
       // Active filters should now match draft filters
-      expect(result.current.activeFilters.team).toEqual(['team1', 'team2']);
-      expect(result.current.activeFilters.section).toBe('Section C');
-      expect(result.current.activeFilters.minPrice).toBe('75');
-    });
+      expect(result.current.activeFilters.team).toEqual(["team1", "team2"])
+      expect(result.current.activeFilters.section).toBe("Section C")
+    })
 
-    it('does not affect draft filters', () => {
+    it("does not affect draft filters", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setMinPrice('150');
-        result.current.applyFilters();
-      });
+        result.current.setZone("upper")
+        result.current.applyFilters()
+      })
 
-      expect(result.current.filters.minPrice).toBe('150');
-      expect(result.current.activeFilters.minPrice).toBe('150');
+      expect(result.current.filters.zone).toBe("lower")
+      expect(result.current.activeFilters.zone).toBe("lower")
 
       act(() => {
-        result.current.setMinPrice('200');
-      });
+        result.current.setZone("upper")
+      })
 
-      expect(result.current.filters.minPrice).toBe('200');
-      expect(result.current.activeFilters.minPrice).toBe('150'); // Not changed yet
-    });
-  });
+      expect(result.current.filters.zone).toBe("upper")
+      expect(result.current.activeFilters.zone).toBe("lower") // Not changed yet
+    })
+  })
 
-  describe('resetFilters', () => {
-    it('resets all filters to default', () => {
+  describe("resetFilters", () => {
+    it("resets all filters to default", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setTeam(['team1']);
-        result.current.setSection('Section D');
-        result.current.setMinPrice('100');
-        result.current.setMaxPrice('300');
-        result.current.setFromDate('2024-01-01');
-        result.current.setToDate('2024-12-31');
-        result.current.setSort('priceDesc');
-        result.current.applyFilters();
-      });
+        result.current.setTeam(["team1"])
+        result.current.setSection("Section D")
+        result.current.setFromDate("2024-01-01")
+        result.current.setToDate("2024-12-31")
+        result.current.setSort("priceDesc")
+        result.current.applyFilters()
+      })
 
       act(() => {
-        result.current.resetFilters();
-      });
+        result.current.resetFilters()
+      })
 
       expect(result.current.filters).toEqual({
         team: [],
-        zone: '',
-        section: '',
-        minPrice: '',
-        maxPrice: '',
-        from: '',
-        to: '',
-        sort: 'createdDesc',
-      });
-    });
+        zone: "",
+        section: "",
+        from: "",
+        to: "",
+        sort: "createdDesc",
+      })
+    })
 
-    it('resets both draft and active filters', () => {
+    it("resets both draft and active filters", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setTeam(['team1']);
-        result.current.applyFilters();
-        result.current.setSection('Section E');
-      });
+        result.current.setTeam(["team1"])
+        result.current.applyFilters()
+        result.current.setSection("Section E")
+      })
 
       act(() => {
-        result.current.resetFilters();
-      });
+        result.current.resetFilters()
+      })
 
-      expect(result.current.filters.team).toEqual([]);
-      expect(result.current.filters.zone).toBe('');
-      expect(result.current.filters.section).toBe('');
-      expect(result.current.activeFilters.team).toEqual([]);
-      expect(result.current.activeFilters.section).toBe('');
-    });
-  });
+      expect(result.current.filters.team).toEqual([])
+      expect(result.current.filters.zone).toBe("")
+      expect(result.current.filters.section).toBe("")
+      expect(result.current.activeFilters.team).toEqual([])
+      expect(result.current.activeFilters.section).toBe("")
+    })
+  })
 
-  describe('Sort Behavior', () => {
-    it('setSort applies immediately to active filters', () => {
+  describe("Sort Behavior", () => {
+    it("setSort applies immediately to active filters", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setSort('priceAsc');
-      });
+        result.current.setSort("priceAsc")
+      })
 
-      expect(result.current.filters.sort).toBe('priceAsc');
-      expect(result.current.activeFilters.sort).toBe('priceAsc');
-    });
+      expect(result.current.filters.sort).toBe("priceAsc")
+      expect(result.current.activeFilters.sort).toBe("priceAsc")
+    })
 
-    it('setSort also applies other pending filters', () => {
+    it("setSort also applies other pending filters", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       act(() => {
-        result.current.setTeam(['team1']);
-        result.current.setSection('Section F');
-      });
+        result.current.setTeam(["team1"])
+        result.current.setSection("Section F")
+      })
 
       // Active filters should not have these yet
-      expect(result.current.activeFilters.team).toEqual([]);
+      expect(result.current.activeFilters.team).toEqual([])
 
       act(() => {
-        result.current.setSort('priceDesc');
-      });
+        result.current.setSort("priceDesc")
+      })
 
       // Sort applies all current filter state
-      expect(result.current.activeFilters.sort).toBe('priceDesc');
-      expect(result.current.activeFilters.team).toEqual(['team1']);
-      expect(result.current.activeFilters.section).toBe('Section F');
-    });
-  });
+      expect(result.current.activeFilters.sort).toBe("priceDesc")
+      expect(result.current.activeFilters.team).toEqual(["team1"])
+      expect(result.current.activeFilters.section).toBe("Section F")
+    })
+  })
 
-  describe('Real-world Workflow', () => {
-    it('handles complete filter workflow', () => {
+  describe("Real-world Workflow", () => {
+    it("handles complete filter workflow", () => {
       const { result } = renderHook(() => useListingsFilters(), {
         wrapper: ListingsFiltersProvider,
-      });
+      })
 
       // User sets draft filters
       act(() => {
-        result.current.setTeam(['Lakers', 'Celtics']);
-        result.current.setMinPrice('50');
-        result.current.setMaxPrice('200');
-        result.current.setFromDate('2024-06-01');
-        result.current.setToDate('2024-06-30');
-      });
+        result.current.setTeam(["Lakers", "Celtics"])
+        result.current.setFromDate("2024-06-01")
+        result.current.setToDate("2024-06-30")
+      })
 
       // Draft filters are set, but not active
-      expect(result.current.activeFilters.team).toEqual([]);
+      expect(result.current.activeFilters.team).toEqual([])
 
       // User applies filters
       act(() => {
-        result.current.applyFilters();
-      });
+        result.current.applyFilters()
+      })
 
       // Active filters now match
-      expect(result.current.activeFilters.team).toEqual(['Lakers', 'Celtics']);
-      expect(result.current.activeFilters.minPrice).toBe('50');
+      expect(result.current.activeFilters.team).toEqual(["Lakers", "Celtics"])
 
       // User changes sort (applies immediately)
       act(() => {
-        result.current.setSort('priceAsc');
-      });
+        result.current.setSort("priceAsc")
+      })
 
-      expect(result.current.activeFilters.sort).toBe('priceAsc');
+      expect(result.current.activeFilters.sort).toBe("priceAsc")
 
       // User resets everything
       act(() => {
-        result.current.resetFilters();
-      });
+        result.current.resetFilters()
+      })
 
       expect(result.current.filters).toEqual({
         team: [],
-        zone: '',
-        section: '',
-        minPrice: '',
-        maxPrice: '',
-        from: '',
-        to: '',
-        sort: 'createdDesc',
-      });
-    });
-  });
+        zone: "",
+        section: "",
+        minPrice: "",
+        maxPrice: "",
+        from: "",
+        to: "",
+        sort: "createdDesc",
+      })
+    })
+  })
 
-  describe('Component Integration', () => {
-    it('works with multiple consuming components', () => {
+  describe("Component Integration", () => {
+    it("works with multiple consuming components", () => {
       const FilterDisplay = () => {
-        const { filters } = useListingsFilters();
-        return <div data-testid="filter-display">{filters.minPrice || 'No min price'}</div>;
-      };
+        const { filters } = useListingsFilters()
+        return <div data-testid="filter-display">{filters.zone || "Any zone"}</div>
+      }
 
       const FilterSetter = () => {
-        const { setMinPrice } = useListingsFilters();
-        return (
-          <button onClick={() => setMinPrice('100')}>Set Min Price</button>
-        );
-      };
+        const { setZone } = useListingsFilters()
+        return <button onClick={() => setZone("upper")}>Set Zone</button>
+      }
 
       render(
         <ListingsFiltersProvider>
           <FilterDisplay />
           <FilterSetter />
         </ListingsFiltersProvider>
-      );
+      )
 
-      expect(screen.getByTestId('filter-display')).toHaveTextContent('No min price');
+      expect(screen.getByTestId("filter-display")).toHaveTextContent("Any zone")
 
-      const button = screen.getByText('Set Min Price');
-      userEvent.click(button);
+      const button = screen.getByText("Set Zone")
+      userEvent.click(button)
 
       // Note: This won't work in this test setup due to async state updates
       // In real integration tests, you'd use waitFor
-    });
-  });
-});
+    })
+  })
+})

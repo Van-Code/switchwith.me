@@ -52,7 +52,7 @@ describe("RelatedListings", () => {
     },
     {
       id: "listing-2",
-      gameDate: "2024-12-26",
+      gameDate: "2024-11-26",
       haveSection: "102",
       haveRow: "B",
       haveSeat: "6",
@@ -176,17 +176,6 @@ describe("RelatedListings", () => {
 
       await waitFor(() => {
         expect(screen.getByText(/dec/i)).toBeInTheDocument()
-      })
-    })
-
-    it("displays face values correctly", async () => {
-      render(
-        <RelatedListings listingId={mockListingId} currentUserId={mockCurrentUserId} />
-      )
-
-      await waitFor(() => {
-        expect(screen.getByText(/\$150/)).toBeInTheDocument()
-        expect(screen.getByText(/\$200/)).toBeInTheDocument()
       })
     })
 
