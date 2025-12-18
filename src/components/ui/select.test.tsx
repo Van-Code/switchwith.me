@@ -126,7 +126,7 @@ describe('Select Components', () => {
     });
 
     it('forwards ref correctly', () => {
-      const ref = jest.fn();
+      const ref = React.createRef<HTMLDivElement>();
       render(
         <Select>
           <SelectTrigger ref={ref}>
@@ -135,7 +135,7 @@ describe('Select Components', () => {
         </Select>
       );
 
-      expect(ref).toHaveBeenCalled();
+      expect(ref.current).toBeTruthy();
     });
   });
 
@@ -179,7 +179,7 @@ describe('Select Components', () => {
     });
 
     it('forwards ref correctly', () => {
-      const ref = jest.fn();
+      const ref = React.createRef<HTMLDivElement>();
       render(
         <Select>
           <SelectContent ref={ref}>
@@ -188,7 +188,7 @@ describe('Select Components', () => {
         </Select>
       );
 
-      expect(ref).toHaveBeenCalled();
+      expect(ref.current).toBeTruthy();
     });
   });
 
@@ -245,7 +245,7 @@ describe('Select Components', () => {
     });
 
     it('forwards ref correctly', () => {
-      const ref = jest.fn();
+      const ref = React.createRef<HTMLDivElement>();
       render(
         <Select>
           <SelectContent>
@@ -256,7 +256,7 @@ describe('Select Components', () => {
         </Select>
       );
 
-      expect(ref).toHaveBeenCalled();
+      expect(ref.current).toBeTruthy();
     });
   });
 
@@ -287,7 +287,7 @@ describe('Select Components', () => {
     });
 
     it('forwards ref correctly', () => {
-      const ref = jest.fn();
+      const ref = React.createRef<HTMLDivElement>();
       render(
         <Select>
           <SelectContent>
@@ -296,7 +296,7 @@ describe('Select Components', () => {
         </Select>
       );
 
-      expect(ref).toHaveBeenCalled();
+      expect(ref.current).toBeTruthy();
     });
   });
 
@@ -329,7 +329,7 @@ describe('Select Components', () => {
     });
 
     it('forwards ref correctly', () => {
-      const ref = jest.fn();
+      const ref = React.createRef<HTMLDivElement>();
       render(
         <Select>
           <SelectContent>
@@ -338,7 +338,7 @@ describe('Select Components', () => {
         </Select>
       );
 
-      expect(ref).toHaveBeenCalled();
+      expect(ref.current).toBeTruthy();
     });
   });
 
@@ -393,15 +393,15 @@ describe('Select Components', () => {
     });
 
     it('forwards ref correctly for scroll up button', () => {
-      const ref = jest.fn();
+      const ref = React.createRef<HTMLDivElement>();
       render(<SelectScrollUpButton ref={ref} />);
-      expect(ref).toHaveBeenCalled();
+      expect(ref.current).toBeTruthy();
     });
 
     it('forwards ref correctly for scroll down button', () => {
-      const ref = jest.fn();
+      const ref = React.createRef<HTMLDivElement>();
       render(<SelectScrollDownButton ref={ref} />);
-      expect(ref).toHaveBeenCalled();
+      expect(ref.current).toBeTruthy();
     });
   });
 });
