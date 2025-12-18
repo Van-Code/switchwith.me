@@ -8,13 +8,7 @@ import { cn } from "@/lib/utils"
 
 const Dialog = DialogPrimitive.Root
 
-// const DialogTrigger = DialogPrimitive.Trigger
-const DialogTrigger = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Trigger>
->((className) => <DialogPrimitive.Trigger role="dialog" />)
-
-DialogTrigger.displayName = DialogPrimitive.Overlay.displayName
+const DialogTrigger = DialogPrimitive.Trigger
 
 const DialogPortal = DialogPrimitive.Portal
 
