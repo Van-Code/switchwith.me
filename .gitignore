@@ -5,7 +5,7 @@ package-lock.json
 # misc
 *.log
 .DS_Store
-scripts.txt
+1-scripts.txt
 .vscode/
 .idea/
 .next/
@@ -16,9 +16,7 @@ dist/
 *.tsbuildinfo
 
 # local env
-.env
-.env.development
-.env.production
+.env.*
 
 #testing 
 coverage/
