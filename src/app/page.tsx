@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { auth } from "@/lib/auth-server"
-import { ArrowRight, Shield, MessageSquare, Search, Heart, Users } from "lucide-react"
+import { Shield, MessageSquare, Search, Heart } from "lucide-react"
 import AccountDeletedMessage from "@/components/AccountDeletedMessage"
+import Image from "next/image"
+import HomeHeroText from "@/components/HomeHeroText"
 
 export default async function Home() {
   const session = await auth()
@@ -13,54 +15,28 @@ export default async function Home() {
     <div className="space-y-16 pb-8">
       <AccountDeletedMessage />
 
-      <section className="text-center space-y-6 py-16 px-4 bg-gradient-to-b from-amber-50/50 via-white to-transparent">
-        <div className="max-w-3xl mx-auto space-y-5">
-          <h1 className="text-6xl font-bold text-slate-900 tracking-tight">
-            Switch With Me
-          </h1>
-          <div className="h-1 w-24 mx-auto bg-gradient-to-r from-cyan-500 to-amber-500 rounded-full"></div>
-          <p className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            You want their seats. They want someone else’s. We make it work.{" "}
-          </p>
-          <p className="text-l text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            Switch With Me connects fans through multi person seat swaps so everyone gets
-            where they want to sit.{" "}
-          </p>
-          <p className="text-sm text-amber-700 italic">Built for fans, not brokers </p>
-        </div>
-        <div className="flex gap-4 justify-center pt-6">
-          {session ? (
-            <>
-              <Link href="/listings">
-                <Button
-                  size="lg"
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-md"
-                >
-                  Browse Listings
-                </Button>
-              </Link>
-              <Link href="/listings/new">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-slate-300 text-slate-700 hover:bg-slate-50"
-                >
-                  Create Listing
-                </Button>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/auth/signin">
-                <Button
-                  size="lg"
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-md"
-                >
-                  Sign In
-                </Button>
-              </Link>
-            </>
-          )}
+      <section className="relative overflow-hidden rounded-2xl bg-neutral-900/5">
+        <div className="relative grid items-center gap-8 px-6 py-10 sm:px-8 lg:grid-cols-2 lg:px-10">
+          {/* Text lane */}
+          <div className="relative z-10">
+            <div className="rounded-2xl bg-black/55 p-6 backdrop-blur-sm sm:p-8 max-w-2xl">
+              <HomeHeroText />
+            </div>
+          </div>
+
+          {/* Image lane */}
+          <div className="relative h-[260px] sm:h-[340px] lg:h-[420px]">
+            <Image
+              src="/images/hero.png"
+              alt="Fans swapping seats and celebrating together"
+              fill
+              priority
+              className="object-contain"
+            />
+            <div className="absolute bottom-3 right-4 text-xs sm:text-sm text-slate-600/80">
+              Three fans. Three seats. Everyone wins.
+            </div>
+          </div>
         </div>
       </section>
 
