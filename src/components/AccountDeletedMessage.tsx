@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { CheckCircle2, X } from "lucide-react"
 
-export function AccountDeletedMessage() {
+export default function AccountDeletedMessage() {
   const searchParams = useSearchParams()
   const [show, setShow] = useState(false)
 
