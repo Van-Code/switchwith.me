@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { auth } from "@/lib/auth-server"
 import { ArrowRight, Shield, MessageSquare, Search, Heart, Users } from "lucide-react"
-import { AccountDeletedMessage } from "@/components/AccountDeletedMessage"
+import AccountDeletedMessage from "@/components/AccountDeletedMessage"
 
 export default async function Home() {
   const session = await auth()

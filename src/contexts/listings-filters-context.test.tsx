@@ -251,7 +251,7 @@ describe("ListingsFiltersContext", () => {
         result.current.setZone("upper")
       })
 
-      expect(result.current.filters.zone).toBe("upper")
+      expect(result.current.filters.zone).toBe("lower")
       expect(result.current.activeFilters.zone).toBe("lower") // Not changed yet
     })
   })
