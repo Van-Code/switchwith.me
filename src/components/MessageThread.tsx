@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "./ui/button"
+import { LoadingButton } from "./LoadingButton"
 import { Textarea } from "./ui/textarea"
 import { Card, CardContent } from "./ui/card"
 import { ArrowDown, MoreVertical, XCircle, Flag } from "lucide-react"
@@ -390,9 +391,14 @@ export function MessageThread({
               className="resize-none"
               rows={2}
             />
-            <Button onClick={handleSend} disabled={sending || !newMessage.trim()}>
-              {sending ? "..." : "Send"}
-            </Button>
+            <LoadingButton
+              onClick={handleSend}
+              disabled={!newMessage.trim()}
+              isLoading={sending}
+              loadingText="..."
+            >
+              Send
+            </LoadingButton>
           </div>
         )}
       </div>

@@ -33,7 +33,7 @@ export default async function Home() {
               priority
               className="object-contain"
             />
-            <div className="absolute bottom-3 right-4 text-xs sm:text-sm text-slate-600/80">
+            <div className="absolute bottom-3 flex justify-center items-center w-full lg:w-fit lg:right-4 text-xs sm:text-sm text-slate-600/80">
               Three fans. Three seats. Everyone wins.
             </div>
           </div>
