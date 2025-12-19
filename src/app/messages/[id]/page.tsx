@@ -23,7 +23,21 @@ export default async function ConversationPage({ params }: { params: { id: strin
         include: {
           user: {
             include: {
-              profile: true,
+              profile: {
+                select: {
+                  firstName: true,
+                  lastInitial: true,
+                  avatarUrl: true,
+                  emailVerified: true,
+                  phoneVerified: true,
+                  seasonTicketHolderVerified: true,
+                  successfulSwapsCount: true,
+                  createdAt: true,
+                  updatedAt: true,
+                  id: true,
+                  userId: true,
+                },
+              },
             },
           },
         },
@@ -100,6 +114,7 @@ export default async function ConversationPage({ params }: { params: { id: strin
             listing={serializedListing}
             listingId={conversation.listingId}
             currentUserId={userId}
+            participants={conversation.participants}
           />
 
           {/* Right - Message Thread */}
