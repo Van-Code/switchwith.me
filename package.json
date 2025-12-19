@@ -4,9 +4,11 @@
     "private": true,
     "scripts": {
         "build:local": "next build",
+        "build:preview": "env-cmd -f .env.preview -- next build",
         "build:prod": "env-cmd -f .env.neon -- next build",
         "build": "next build",
         "start:local": "env-cmd -f .env.local node server.js",
+        "start:preview": "env-cmd -f .env.preview node server.js",
         "start:prod": "env-cmd -f .env.neon node server.js",
         "start": "NODE_ENV=production node server.js",
         "lint": "next lint",
