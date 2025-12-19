@@ -87,7 +87,7 @@ export default function HomeHeroText() {
                 size="lg"
                 className="rounded-xl bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 hover:bg-cyan-400 active:scale-[0.98] transition"
               >
-                <Link href="/browse">Switch With Me</Link>
+                <Link href="/listings">Switch With Me</Link>
               </Button>
             </AnimatedLine>
           </div>
