@@ -1,11 +1,18 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { MatchCard, type MatchCardListing } from "@/components/MatchCard"
+
+interface MatchData {
+  myListing: MatchCardListing
+  matchedListing: MatchCardListing
+  score: number
+  reason: string
+}
 
 interface MatchesClientProps {
   currentUserId: string
@@ -13,7 +20,7 @@ interface MatchesClientProps {
 
 export function MatchesClient({ currentUserId }: MatchesClientProps) {
   const router = useRouter()
-  const [matches, setMatches] = useState<any[]>([])
+  const [matches, setMatches] = useState<MatchData[]>([])
   const [loading, setLoading] = useState(true)
   const [messagingLoading, setMessagingLoading] = useState<string | null>(null)
 
@@ -70,7 +77,7 @@ export function MatchesClient({ currentUserId }: MatchesClientProps) {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Your Matches</h1>
-        <p className="text-slate-600">Potential swaps based on your listings</p>
+        <p className="text-slate-600">Matches and requests based on your listings</p>
       </div>
 
       {matches.length === 0 ? (
@@ -84,48 +91,19 @@ export function MatchesClient({ currentUserId }: MatchesClientProps) {
         </Card>
       ) : (
         <div className="space-y-4">
-          {matches.map((match: any, index: number) => (
-            <Card key={index} className="border-slate-200 hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg text-slate-900">Match Score: {match.score}</CardTitle>
-                  <Badge className="bg-amber-100 text-amber-800 border-amber-200">{match.reason}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-sm font-semibold mb-2 text-slate-900">Your Listing:</p>
-                    <p className="text-sm text-slate-700">
-                      Section {match.myListing.haveSection}, Row {match.myListing.haveRow}, Seat {match.myListing.haveSeat}
-                    </p>
-                    <p className="text-xs text-slate-500">{match.myListing.haveZone}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold mb-2 text-slate-900">Their Listing:</p>
-                    <p className="text-sm text-slate-700">
-                      Section {match.matchedListing.haveSection}, Row {match.matchedListing.haveRow}, Seat {match.matchedListing.haveSeat}
-                    </p>
-                    <p className="text-xs text-slate-500">{match.matchedListing.haveZone}</p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Owner: {match.matchedListing.user.profile.firstName} {match.matchedListing.user.profile.lastInitial}.
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4">
-                <Button
-                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
-                  onClick={() => handleMessageOwner(
-                    match.matchedListing.user.id,
-                    match.matchedListing.id // Pass listing ID
-                  )}
-                  disabled={messagingLoading === match.matchedListing.user.id}
-                >
-                  {messagingLoading === match.matchedListing.user.id ? "Opening..." : "Message Owner"}
-                </Button>
-                </div>
-              </CardContent>
-            </Card>
+          {matches.map((match, index) => (
+            <MatchCard
+              key={index}
+              myListing={match.myListing}
+              matchedListing={match.matchedListing}
+              score={match.score}
+              reason={match.reason}
+              onMessageClick={() => handleMessageOwner(
+                match.matchedListing.user!.id,
+                match.matchedListing.id
+              )}
+              isLoading={messagingLoading === match.matchedListing.user?.id}
+            />
           ))}
         </div>
       )}
