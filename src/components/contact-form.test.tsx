@@ -137,7 +137,7 @@ describe("ContactForm", () => {
       render(<ContactForm />)
 
       await user.type(screen.getByLabelText(/name/i), "John")
-      await user.type(screen.getByLabelText(/email/i), "invalid-email")
+      await user.type(screen.getByLabelText(/email/i), "invalid-email@c")
       await user.type(screen.getByLabelText(/message/i), "Message")
 
       await user.click(screen.getByRole("button", { name: /send message/i }))

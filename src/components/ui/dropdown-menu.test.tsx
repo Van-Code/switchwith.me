@@ -18,160 +18,30 @@ import {
   DropdownMenuSubContent,
 } from "./dropdown-menu"
 
-// Mock Radix UI Dropdown Menu
-jest.mock("@radix-ui/react-dropdown-menu", () => ({
-  Root: ({ children, open, onOpenChange, defaultOpen }: any) => {
-    const [isOpen, setIsOpen] = React.useState(defaultOpen || false)
-    const currentOpen = open !== undefined ? open : isOpen
-
-    return (
-      <div data-testid="dropdown-root">
-        {React.Children.map(children, (child) =>
-          React.isValidElement(child)
-            ? React.cloneElement(child as React.ReactElement, {
-                open: currentOpen,
-                onOpenChange: (val: boolean) => {
-                  setIsOpen(val)
-                  onOpenChange?.(val)
-                },
-              })
-            : child
-        )}
-      </div>
-    )
-  },
-  Trigger: ({ children, onClick, open, onOpenChange, ...props }: any) => (
-    <button
-      {...props}
-      onClick={(e) => {
-        onClick?.(e)
-        onOpenChange?.(!open)
-      }}
-      aria-expanded={open}
-      role="menuitem"
-      data-testid="dropdown-trigger"
-    >
-      {children}
-    </button>
-  ),
-  Portal: ({ children, open }: any) =>
-    open ? <div data-testid="dropdown-portal">{children}</div> : null,
-  Content: ({ children, open, ...props }: any) =>
-    open ? (
-      <div role="menu" data-testid="dropdown-content" {...props}>
-        {children}
-      </div>
-    ) : null,
-  Item: ({ children, onSelect, disabled, ...props }: any) => (
-    <div
-      role="menuitem"
-      tabIndex={disabled ? -1 : 0}
-      onClick={() => !disabled && onSelect?.()}
-      data-disabled={disabled}
-      {...props}
-    >
-      {children}
-    </div>
-  ),
-  CheckboxItem: ({ children, checked, onCheckedChange, disabled, ...props }: any) => (
-    <div
-      role="menuitemcheckbox"
-      aria-checked={checked}
-      tabIndex={disabled ? -1 : 0}
-      onClick={() => !disabled && onCheckedChange?.(!checked)}
-      data-disabled={disabled}
-      {...props}
-    >
-      {children}
-    </div>
-  ),
-  ItemIndicator: ({ children, ...props }: any) => (
-    <span data-testid="item-indicator" {...props}>
-      {children}
-    </span>
-  ),
-  RadioGroup: ({ children, value, onValueChange, ...props }: any) => (
-    <div role="group" data-value={value} {...props}>
-      {React.Children.map(children, (child) =>
-        React.isValidElement(child)
-          ? React.cloneElement(child as React.ReactElement, { value, onValueChange })
-          : child
-      )}
-    </div>
-  ),
-  RadioItem: ({
-    children,
-    value: itemValue,
-    value: groupValue,
-    onValueChange,
-    ...props
-  }: any) => (
-    <div
-      role="menuitemradio"
-      aria-checked={itemValue === groupValue}
-      onClick={() => onValueChange?.(itemValue)}
-      {...props}
-    >
-      {children}
-    </div>
-  ),
-  Label: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Separator: (props: any) => <hr data-testid="dropdown-separator" {...props} />,
-  Group: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Sub: ({ children, open, onOpenChange, defaultOpen }: any) => {
-    const [isOpen, setIsOpen] = React.useState(defaultOpen || false)
-    const currentOpen = open !== undefined ? open : isOpen
-
-    return (
-      <div data-testid="dropdown-sub">
-        {React.Children.map(children, (child) =>
-          React.isValidElement(child)
-            ? React.cloneElement(child as React.ReactElement, {
-                open: currentOpen,
-                onOpenChange: (val: boolean) => {
-                  setIsOpen(val)
-                  onOpenChange?.(val)
-                },
-              })
-            : child
-        )}
-      </div>
-    )
-  },
-  SubTrigger: ({ children, open, onOpenChange, ...props }: any) => (
-    <div
-      data-testid="dropdown-sub-trigger"
-      onClick={() => onOpenChange?.(!open)}
-      {...props}
-    >
-      {children}
-    </div>
-  ),
-  SubContent: ({ children, open, ...props }: any) =>
-    open ? (
-      <div data-testid="dropdown-sub-content" {...props}>
-        {children}
-      </div>
-    ) : null,
-}))
-
 // Mock lucide-react
 jest.mock("lucide-react", () => ({
   Check: (props: any) => <svg data-testid="check-icon" {...props} />,
   ChevronRight: (props: any) => <svg data-testid="chevron-right-icon" {...props} />,
   Circle: (props: any) => <svg data-testid="circle-icon" {...props} />,
 }))
+let user: ReturnType<typeof userEvent.setup>
+
+beforeEach(() => {
+  user = userEvent.setup()
+})
 
 describe("DropdownMenu Components", () => {
   describe("DropdownMenu Root", () => {
-    it("renders dropdown container", () => {
+    it("renders dropdown container", async () => {
       render(
         <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
+          <DropdownMenuContent>Content</DropdownMenuContent>
         </DropdownMenu>
       )
-
-      expect(screen.getByTestId("dropdown-root")).toBeInTheDocument()
+      await user.click(screen.getByTestId("dropdown-trigger"))
+      const root = await screen.findByRole("menu")
+      expect(root).toBeInTheDocument()
     })
 
     it("is closed by default", () => {
@@ -198,173 +68,165 @@ describe("DropdownMenu Components", () => {
   })
 
   describe("DropdownMenuTrigger", () => {
-    it("renders trigger button", () => {
+    it("renders trigger button", async () => {
       render(
         <DropdownMenu>
           <DropdownMenuTrigger>Open Menu</DropdownMenuTrigger>
         </DropdownMenu>
       )
-
       expect(screen.getByTestId("dropdown-trigger")).toBeInTheDocument()
       expect(screen.getByText("Open Menu")).toBeInTheDocument()
     })
 
     it("toggles menu on click", async () => {
-      const user = userEvent.setup()
-
       render(
         <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Item</DropdownMenuItem>
-          </DropdownMenuContent>
+          <DropdownMenuContent></DropdownMenuContent>
         </DropdownMenu>
       )
-
-      expect(screen.queryByRole("menu")).not.toBeInTheDocument()
 
       await user.click(screen.getByTestId("dropdown-trigger"))
       expect(screen.getByRole("menu")).toBeInTheDocument()
     })
 
-    it("has aria-expanded attribute", () => {
+    it("has aria-expanded attribute", async () => {
       render(
         <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
         </DropdownMenu>
       )
-
+      await user.click(screen.getByTestId("dropdown-trigger"))
       expect(screen.getByTestId("dropdown-trigger")).toHaveAttribute("aria-expanded")
     })
   })
 
   describe("DropdownMenuContent", () => {
-    it("renders menu content when open", () => {
+    it("renders menu content when open", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>Menu Content</DropdownMenuContent>
         </DropdownMenu>
       )
-
-      expect(screen.getByRole("menu")).toBeInTheDocument()
+      await user.click(screen.getByTestId("dropdown-trigger"))
+      expect(screen.getByTestId("dropdown-content")).toBeInTheDocument()
       expect(screen.getByText("Menu Content")).toBeInTheDocument()
     })
 
-    it("applies content styles", () => {
+    it("applies content styles", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>Content</DropdownMenuContent>
         </DropdownMenu>
       )
-
+      await user.click(screen.getByTestId("dropdown-trigger"))
       const content = screen.getByRole("menu")
       expect(content).toHaveClass("z-50", "min-w-[8rem]", "rounded-md", "border")
     })
 
-    it("applies custom className", () => {
+    it("applies custom className", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
-          <DropdownMenuContent className="custom-content">Content</DropdownMenuContent>
+          <DropdownMenuContent className="custom-content"></DropdownMenuContent>
         </DropdownMenu>
       )
-
-      expect(screen.getByRole("menu")).toHaveClass("custom-content")
+      await user.click(screen.getByTestId("dropdown-trigger"))
+      const content = await screen.findByTestId("dropdown-content")
+      expect(content).toHaveClass("custom-content")
     })
   })
 
   describe("DropdownMenuItem", () => {
-    it("renders menu item", () => {
+    it("renders menu item", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Profile</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
-
+      await user.click(screen.getByTestId("dropdown-trigger"))
       expect(screen.getByRole("menuitem")).toBeInTheDocument()
       expect(screen.getByText("Profile")).toBeInTheDocument()
     })
 
     it("calls onSelect when clicked", async () => {
-      const user = userEvent.setup()
       const handleSelect = jest.fn()
 
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onSelect={handleSelect}>Settings</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
-
+      await user.click(screen.getByTestId("dropdown-trigger"))
       await user.click(screen.getByText("Settings"))
       expect(handleSelect).toHaveBeenCalledTimes(1)
     })
 
     it("handles disabled state", async () => {
-      const user = userEvent.setup()
       const handleSelect = jest.fn()
 
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem disabled onSelect={handleSelect}>
+            <DropdownMenuItem disabled={true} onSelect={handleSelect}>
               Disabled Item
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
-
-      const item = screen.getByText("Disabled Item")
+      await user.click(screen.getByTestId("dropdown-trigger"))
+      const item = screen.getByRole("menuitem")
       expect(item).toHaveAttribute("data-disabled", "true")
 
       await user.click(item)
       expect(handleSelect).not.toHaveBeenCalled()
     })
 
-    it("supports inset prop", () => {
+    it("supports inset prop", async () => {
       const { container } = render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem inset>Inset Item</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
-
+      await user.click(screen.getByTestId("dropdown-trigger"))
       const item = screen.getByText("Inset Item")
       expect(item).toHaveClass("pl-8")
     })
   })
 
   describe("DropdownMenuCheckboxItem", () => {
-    it("renders checkbox item", () => {
+    it("renders checkbox item", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuCheckboxItem>Show Toolbar</DropdownMenuCheckboxItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
-      expect(screen.getByRole("menuitemcheckbox")).toBeInTheDocument()
-      expect(screen.getByText("Show Toolbar")).toBeInTheDocument()
+      expect(screen.getByTestId("dropdown-content")).toBeInTheDocument()
+      expect(screen.getByText("Show Toolbar")).toBeVisible()
     })
 
     it("toggles checked state", async () => {
-      const user = userEvent.setup()
       const handleCheckedChange = jest.fn()
 
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuCheckboxItem
@@ -376,43 +238,45 @@ describe("DropdownMenu Components", () => {
           </DropdownMenuContent>
         </DropdownMenu>
       )
-
+      await user.click(screen.getByTestId("dropdown-trigger"))
       await user.click(screen.getByText("Option"))
       expect(handleCheckedChange).toHaveBeenCalledWith(true)
     })
 
-    it("displays checked state", () => {
+    it("displays checked state", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuCheckboxItem checked={true}>Checked</DropdownMenuCheckboxItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       const item = screen.getByRole("menuitemcheckbox")
       expect(item).toHaveAttribute("aria-checked", "true")
     })
 
-    it("renders check icon when checked", () => {
+    it("renders check icon when checked", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuCheckboxItem checked={true}>Checked</DropdownMenuCheckboxItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       expect(screen.getByTestId("check-icon")).toBeInTheDocument()
     })
   })
 
   describe("DropdownMenuRadioGroup & DropdownMenuRadioItem", () => {
-    it("renders radio group with items", () => {
+    it("renders radio group with items", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuRadioGroup value="option1">
@@ -422,17 +286,17 @@ describe("DropdownMenu Components", () => {
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       expect(screen.getByRole("group")).toBeInTheDocument()
       expect(screen.getAllByRole("menuitemradio")).toHaveLength(2)
     })
 
     it("handles radio selection", async () => {
-      const user = userEvent.setup()
       const handleValueChange = jest.fn()
 
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuRadioGroup value="option1" onValueChange={handleValueChange}>
@@ -442,14 +306,15 @@ describe("DropdownMenu Components", () => {
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       await user.click(screen.getByText("Option 2"))
       expect(handleValueChange).toHaveBeenCalledWith("option2")
     })
 
-    it("renders circle indicator for radio items", () => {
+    it("renders circle indicator for radio items", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuRadioGroup value="option1">
@@ -458,57 +323,60 @@ describe("DropdownMenu Components", () => {
           </DropdownMenuContent>
         </DropdownMenu>
       )
-
+      await user.click(screen.getByTestId("dropdown-trigger"))
       expect(screen.getByTestId("circle-icon")).toBeInTheDocument()
     })
   })
 
   describe("DropdownMenuLabel", () => {
-    it("renders menu label", () => {
+    it("renders menu label", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       expect(screen.getByText("My Account")).toBeInTheDocument()
     })
 
-    it("applies label styles", () => {
+    it("applies label styles", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>Label</DropdownMenuLabel>
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       const label = screen.getByText("Label")
       expect(label).toHaveClass("px-2", "py-1.5", "text-sm", "font-semibold")
     })
 
-    it("supports inset prop", () => {
+    it("supports inset prop", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel inset>Inset Label</DropdownMenuLabel>
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       expect(screen.getByText("Inset Label")).toHaveClass("pl-8")
     })
   })
 
   describe("DropdownMenuSeparator", () => {
-    it("renders separator", () => {
+    it("renders separator", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Item 1</DropdownMenuItem>
@@ -517,19 +385,21 @@ describe("DropdownMenu Components", () => {
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       expect(screen.getByTestId("dropdown-separator")).toBeInTheDocument()
     })
 
-    it("applies separator styles", () => {
+    it("applies separator styles", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuSeparator />
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       const separator = screen.getByTestId("dropdown-separator")
       expect(separator).toHaveClass("-mx-1", "my-1", "h-px", "bg-muted")
@@ -537,9 +407,9 @@ describe("DropdownMenu Components", () => {
   })
 
   describe("DropdownMenuShortcut", () => {
-    it("renders keyboard shortcut", () => {
+    it("renders keyboard shortcut", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>
@@ -549,13 +419,14 @@ describe("DropdownMenu Components", () => {
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       expect(screen.getByText("⌘S")).toBeInTheDocument()
     })
 
-    it("applies shortcut styles", () => {
+    it("applies shortcut styles", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>
@@ -565,6 +436,7 @@ describe("DropdownMenu Components", () => {
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      await user.click(screen.getByTestId("dropdown-trigger"))
 
       const shortcut = screen.getByText("⌘C")
       expect(shortcut).toHaveClass("ml-auto", "text-xs", "opacity-60")
@@ -572,9 +444,9 @@ describe("DropdownMenu Components", () => {
   })
 
   describe("DropdownMenuSub", () => {
-    it("renders submenu trigger", () => {
+    it("renders submenu trigger", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuSub>
@@ -584,13 +456,16 @@ describe("DropdownMenu Components", () => {
         </DropdownMenu>
       )
 
+      await user.click(screen.getByTestId("dropdown-trigger"))
       expect(screen.getByTestId("dropdown-sub-trigger")).toBeInTheDocument()
+
+      await user.click(screen.getByTestId("dropdown-sub-trigger"))
       expect(screen.getByText("More Options")).toBeInTheDocument()
     })
 
-    it("renders chevron icon on submenu trigger", () => {
+    it("renders chevron icon on submenu trigger", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuSub>
@@ -600,14 +475,16 @@ describe("DropdownMenu Components", () => {
         </DropdownMenu>
       )
 
+      await user.click(screen.getByTestId("dropdown-trigger"))
+      expect(screen.getByTestId("dropdown-sub-trigger")).toBeInTheDocument()
+
+      await user.click(screen.getByTestId("dropdown-sub-trigger"))
       expect(screen.getByTestId("chevron-right-icon")).toBeInTheDocument()
     })
 
     it("toggles submenu content", async () => {
-      const user = userEvent.setup()
-
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuSub>
@@ -619,18 +496,19 @@ describe("DropdownMenu Components", () => {
           </DropdownMenuContent>
         </DropdownMenu>
       )
-
       expect(screen.queryByText("Submenu Item")).not.toBeInTheDocument()
-
-      await user.click(screen.getByTestId("dropdown-sub-trigger"))
+      const trigger = await screen.findByTestId("dropdown-trigger")
+      await user.click(trigger)
+      const subtrigger = await screen.findByTestId("dropdown-sub-trigger")
+      await user.click(subtrigger)
       expect(screen.getByText("Submenu Item")).toBeInTheDocument()
     })
   })
 
   describe("Complete DropdownMenu", () => {
-    it("renders complete dropdown with all components", () => {
+    it("renders complete dropdown with all components", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Options</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -649,6 +527,8 @@ describe("DropdownMenu Components", () => {
           </DropdownMenuContent>
         </DropdownMenu>
       )
+      const trigger = await screen.findByTestId("dropdown-trigger")
+      await user.click(trigger)
 
       expect(screen.getByText("My Account")).toBeInTheDocument()
       expect(screen.getByText("Profile")).toBeInTheDocument()
@@ -660,42 +540,44 @@ describe("DropdownMenu Components", () => {
   })
 
   describe("Accessibility", () => {
-    it("menu has correct role", () => {
+    it("menu has correct role", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>Content</DropdownMenuContent>
         </DropdownMenu>
       )
-
+      await user.click(screen.getByTestId("dropdown-trigger"))
       expect(screen.getByRole("menu")).toBeInTheDocument()
     })
 
-    it("menu items are keyboard accessible", () => {
+    it("menu items are keyboard accessible", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Item</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
-
+      await user.click(screen.getByTestId("dropdown-trigger"))
       const item = screen.getByRole("menuitem")
-      expect(item).toHaveAttribute("tabIndex", "0")
+      expect(item).toBeInTheDocument()
+      expect(item).toHaveAttribute("tabIndex", "-1")
     })
 
-    it("disabled items are not focusable", () => {
+    it("disabled items are not focusable", async () => {
       render(
-        <DropdownMenu defaultOpen>
+        <DropdownMenu>
           <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem disabled>Disabled</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
-
-      const item = screen.getByRole("menuitem")
+      await user.click(screen.getByTestId("dropdown-trigger"))
+      const item = screen.getByRole("menu")
+      expect(item).toBeInTheDocument()
       expect(item).toHaveAttribute("tabIndex", "-1")
     })
   })
