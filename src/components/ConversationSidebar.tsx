@@ -45,7 +45,11 @@ export function ConversationSidebar({
   return (
     <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
       {/* Current Listing */}
-      <ConversationListingHeader listing={listing} />
+      <ConversationListingHeader
+        listing={listing}
+        participants={participants}
+        currentUserId={currentUserId}
+      />
 
       {/* People in this swap */}
       {participants && participants.length > 0 && (

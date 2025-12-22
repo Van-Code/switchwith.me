@@ -38,6 +38,24 @@ export default async function ConversationPage({ params }: { params: { id: strin
                   userId: true,
                 },
               },
+              listings: {
+                where: {
+                  status: "ACTIVE",
+                },
+                select: {
+                  id: true,
+                  listingType: true,
+                  haveSection: true,
+                  haveRow: true,
+                  haveSeat: true,
+                  haveZone: true,
+                  wantZones: true,
+                  wantSections: true,
+                  flexible: true,
+                  teamId: true,
+                  gameDate: true,
+                },
+              },
             },
           },
         },
@@ -54,7 +72,11 @@ export default async function ConversationPage({ params }: { params: { id: strin
           createdAt: "asc",
         },
       },
-      listing: true, // Include listing
+      listing: {
+        include: {
+          team: true,
+        },
+      }, // Include listing with team info
     },
   })
 
