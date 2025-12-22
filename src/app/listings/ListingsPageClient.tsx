@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { ListingsFiltersProvider, useListingsFilters } from "@/contexts/listings-filters-context";
 import ListingsFilters from "@/components/listings-filters";
 import ListingsSortSelect from "@/components/listings-sort-select";
+import { ListingsTabs } from "@/components/ListingsTabs";
 import { ListingsClient } from "./ListingsClient";
 import { ListingCardSkeleton } from "@/components/ListingCardSkeleton";
 import Link from "next/link";
@@ -12,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
 import { LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { filterListingsByTab, TabValue } from "@/lib/listings/filterListings";
+import { getListingBadges } from "@/lib/listings/getListingBadges";
 
 interface ListingsPageClientProps {
   currentUserId?: string;
@@ -21,6 +24,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
   const { activeFilters } = useListingsFilters();
   const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabValue>("all");
   const isAuthenticated = !!currentUserId;
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -131,9 +135,33 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
     fetchListings();
   }, [activeFilters]);
 
+  // Filter listings by active tab (client-side)
+  const filteredListings = useMemo(() => {
+    return filterListingsByTab(listings, activeTab);
+  }, [listings, activeTab]);
+
+  // Calculate tab counts
+  const tabCounts = useMemo(() => {
+    const counts = {
+      all: listings.length,
+      "for-sale": 0,
+      "looking-for": 0,
+      swap: 0,
+    };
+
+    listings.forEach((listing) => {
+      const badges = getListingBadges(listing);
+      if (badges.primary === "For Sale") counts["for-sale"]++;
+      if (badges.primary === "Looking For") counts["looking-for"]++;
+      if (badges.primary === "Swap") counts.swap++;
+    });
+
+    return counts;
+  }, [listings]);
+
   // For unauthenticated users, limit to first 6 listings
-  const displayedListings = !isAuthenticated ? listings.slice(0, 6) : listings;
-  const totalListings = listings.length;
+  const displayedListings = !isAuthenticated ? filteredListings.slice(0, 6) : filteredListings;
+  const totalListings = filteredListings.length;
 
   const hasFilters = !!(
     activeFilters.team.length > 0 ||
@@ -162,7 +190,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-cyan-700 bg-clip-text text-transparent">
                   Browse Listings
                 </h1>
-                <p className="text-slate-600 mt-1">Find tickets to swap</p>
+                <p className="text-slate-600 mt-1">Matches and requests based on your listings</p>
               </div>
               <Link href="/listings/new">
                 <Button className="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-md">
@@ -171,6 +199,15 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="container mx-auto px-4">
+          <ListingsTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            counts={tabCounts}
+          />
         </div>
 
         {/* Main content: Sidebar + Listings grid */}
@@ -190,7 +227,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                     <div className="text-white">
                       <h3 className="font-bold text-lg mb-1">You're viewing a preview of real listings</h3>
                       <p className="text-cyan-50 text-sm">
-                        Sign in with Google to unlock full details, see all {totalListings} listings, and start swapping seats for free.
+                        Sign in with Google to unlock full details, see all {listings.length} listings, and start swapping seats for free.
                       </p>
                     </div>
                     <Button
@@ -209,7 +246,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                 <div className="text-sm text-slate-600">
                   {isLoading ? (
                     "Loading..."
-                  ) : hasFilters ? (
+                  ) : hasFilters || activeTab !== "all" ? (
                     <>
                       {!isAuthenticated && totalListings > displayedListings.length ? (
                         <>
@@ -251,7 +288,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
 
               {/* Listings grid or empty state */}
               {isLoading ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <ListingCardSkeleton key={i} />
                   ))}
@@ -270,19 +307,19 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                       </svg>
                     </div>
                     <p className="text-lg font-medium text-slate-900 mb-2">
-                      {hasFilters ? "No listings found" : "No active listings yet"}
+                      {hasFilters || activeTab !== "all" ? "No listings found" : "No active listings yet"}
                     </p>
                     <p className="text-slate-600 mb-6">
-                      {hasFilters ? "Try adjusting your filters or search criteria." : "Be the first to create a listing!"}
+                      {hasFilters || activeTab !== "all" ? "Try adjusting your filters or search criteria." : "Be the first to create a listing!"}
                     </p>
-                    {!hasFilters && isAuthenticated && (
+                    {!hasFilters && activeTab === "all" && isAuthenticated && (
                       <Link href="/listings/new">
                         <Button className="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white">
                           Create a Listing
                         </Button>
                       </Link>
                     )}
-                    {!hasFilters && !isAuthenticated && (
+                    {!hasFilters && activeTab === "all" && !isAuthenticated && (
                       <Button
                         onClick={() => signIn("google", { callbackUrl: "/listings" })}
                         className="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white"
@@ -294,7 +331,11 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                   </div>
                 </div>
               ) : (
-                <ListingsClient listings={displayedListings} currentUserId={currentUserId} />
+                <ListingsClient
+                  listings={displayedListings}
+                  currentUserId={currentUserId}
+                  badgeVariant={activeTab === "all" ? "primary" : "subtle"}
+                />
               )}
             </div>
           </div>

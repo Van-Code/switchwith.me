@@ -66,6 +66,7 @@ export default function ListingsFilters() {
     setListingType,
     setFromDate,
     setToDate,
+    setSeatCount,
     resetFilters,
     applyFilters,
     activeFilters,
@@ -192,7 +193,8 @@ export default function ListingsFilters() {
     activeFilters.section ||
     activeFilters.listingType ||
     activeFilters.from ||
-    activeFilters.to
+    activeFilters.to ||
+    (activeFilters.seatCount && activeFilters.seatCount !== "any")
   );
 
   return (
@@ -273,6 +275,22 @@ export default function ListingsFilters() {
             <option value="">All listings</option>
             <option value="HAVE">Has tickets</option>
             <option value="WANT">Wants tickets</option>
+          </select>
+        </div>
+
+        {/* Seat Count filter */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold text-slate-700">Seats needed</Label>
+          <select
+            value={filters.seatCount}
+            onChange={(e) => setSeatCount(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-cyan-200 bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2"
+          >
+            <option value="any">Any</option>
+            <option value="1">1 seat</option>
+            <option value="2">2 seats</option>
+            <option value="3">3 seats</option>
+            <option value="4">4 seats</option>
           </select>
         </div>
 

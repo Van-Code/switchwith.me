@@ -11,9 +11,10 @@ import { useToast } from "@/hooks/use-toast"
 interface ListingsClientProps {
   listings: any[]
   currentUserId?: string
+  badgeVariant?: "primary" | "subtle"
 }
 
-export function ListingsClient({ listings, currentUserId }: ListingsClientProps) {
+export function ListingsClient({ listings, currentUserId, badgeVariant = "primary" }: ListingsClientProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [loading, setLoading] = useState<string | null>(null)
@@ -103,12 +104,13 @@ export function ListingsClient({ listings, currentUserId }: ListingsClientProps)
 
   return (
     <>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
         {listings.map((listing) => (
           <ListingCard
             key={listing.id}
             listing={listing}
             isAuthenticated={!!currentUserId}
+            badgeVariant={badgeVariant}
             onMessage={
               currentUserId && listing.user?.id !== currentUserId
                 ? () => handleMessageOwner(listing)

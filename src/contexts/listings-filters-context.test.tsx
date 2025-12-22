@@ -48,6 +48,7 @@ describe("ListingsFiltersContext", () => {
       expect(result.current).toHaveProperty("setFromDate")
       expect(result.current).toHaveProperty("setToDate")
       expect(result.current).toHaveProperty("setSort")
+      expect(result.current).toHaveProperty("setSeatCount")
       expect(result.current).toHaveProperty("resetFilters")
       expect(result.current).toHaveProperty("applyFilters")
     })
@@ -75,9 +76,11 @@ describe("ListingsFiltersContext", () => {
         team: [],
         zone: "",
         section: "",
+        listingType: "",
         from: "",
         to: "",
         sort: "createdDesc",
+        seatCount: "any",
       })
     })
 
@@ -90,9 +93,11 @@ describe("ListingsFiltersContext", () => {
         team: [],
         zone: "",
         section: "",
+        listingType: "",
         from: "",
         to: "",
         sort: "createdDesc",
+        seatCount: "any",
       })
     })
   })
@@ -188,10 +193,13 @@ describe("ListingsFiltersContext", () => {
 
       expect(result.current.filters).toEqual({
         team: ["team1"],
+        zone: "",
         section: "Section B",
+        listingType: "",
         from: "2024-01-15",
         to: "2024-01-20",
         sort: "createdDesc", // default
+        seatCount: "any",
       })
     })
 
@@ -241,18 +249,21 @@ describe("ListingsFiltersContext", () => {
 
       act(() => {
         result.current.setZone("upper")
+      })
+
+      act(() => {
         result.current.applyFilters()
       })
 
-      expect(result.current.filters.zone).toBe("lower")
-      expect(result.current.activeFilters.zone).toBe("lower")
+      expect(result.current.filters.zone).toBe("upper")
+      expect(result.current.activeFilters.zone).toBe("upper")
 
       act(() => {
-        result.current.setZone("upper")
+        result.current.setZone("lower")
       })
 
       expect(result.current.filters.zone).toBe("lower")
-      expect(result.current.activeFilters.zone).toBe("lower") // Not changed yet
+      expect(result.current.activeFilters.zone).toBe("upper") // Not changed yet
     })
   })
 
@@ -279,9 +290,11 @@ describe("ListingsFiltersContext", () => {
         team: [],
         zone: "",
         section: "",
+        listingType: "",
         from: "",
         to: "",
         sort: "createdDesc",
+        seatCount: "any",
       })
     })
 
@@ -386,11 +399,11 @@ describe("ListingsFiltersContext", () => {
         team: [],
         zone: "",
         section: "",
-        minPrice: "",
-        maxPrice: "",
+        listingType: "",
         from: "",
         to: "",
         sort: "createdDesc",
+        seatCount: "any",
       })
     })
   })

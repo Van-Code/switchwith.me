@@ -29,6 +29,9 @@ export function ListingForm() {
     wantZones: "",
     wantSections: "",
     willingToAddCash: false,
+    price: "",
+    seatCount: "",
+    flexible: false,
   })
 
   useEffect(() => {
@@ -43,6 +46,9 @@ export function ListingForm() {
     setLoading(true)
 
     try {
+      const priceCents = formData.price ? Math.round(parseFloat(formData.price) * 100) : null
+      const seatCount = formData.seatCount ? parseInt(formData.seatCount) : null
+
       const response = await fetch("/api/listings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,6 +65,9 @@ export function ListingForm() {
             .split(",")
             .map((s) => s.trim())
             .filter(Boolean),
+          priceCents,
+          seatCount,
+          flexible: formData.flexible,
         }),
       })
 
@@ -225,6 +234,38 @@ export function ListingForm() {
             </p>
           </div>
 
+          <div>
+            <Label htmlFor="price">Selling Price (optional)</Label>
+            <Input
+              id="price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Leave empty if not selling for a specific price
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="seatCount">Number of Seats</Label>
+            <Input
+              id="seatCount"
+              type="number"
+              min="1"
+              max="10"
+              placeholder="1"
+              value={formData.seatCount}
+              onChange={(e) => setFormData({ ...formData, seatCount: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              How many seats are you listing?
+            </p>
+          </div>
+
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -237,6 +278,21 @@ export function ListingForm() {
             />
             <Label htmlFor="willingToAddCash" className="font-normal">
               Willing to add cash for upgrade
+            </Label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="flexible"
+              checked={formData.flexible}
+              onChange={(e) =>
+                setFormData({ ...formData, flexible: e.target.checked })
+              }
+              className="h-4 w-4"
+            />
+            <Label htmlFor="flexible" className="font-normal">
+              Flexible (open to options outside exact wants)
             </Label>
           </div>
 

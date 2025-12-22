@@ -10,6 +10,7 @@ export interface ListingsFilters {
   from: string; // ISO YYYY-MM-DD
   to: string; // ISO YYYY-MM-DD
   sort: string;
+  seatCount: string; // "any" or "1", "2", "3", "4"
 }
 
 interface ListingsFiltersContextType {
@@ -21,6 +22,7 @@ interface ListingsFiltersContextType {
   setFromDate: (value: string) => void;
   setToDate: (value: string) => void;
   setSort: (value: string) => void;
+  setSeatCount: (value: string) => void;
   resetFilters: () => void;
   applyFilters: () => void;
   activeFilters: ListingsFilters;
@@ -34,6 +36,7 @@ const defaultFilters: ListingsFilters = {
   from: "",
   to: "",
   sort: "createdDesc",
+  seatCount: "any",
 };
 
 const ListingsFiltersContext = createContext<
@@ -78,6 +81,10 @@ export function ListingsFiltersProvider({ children }: { children: ReactNode }) {
     setActiveFilters(newFilters);
   };
 
+  const setSeatCount = (value: string) => {
+    setFilters((prev) => ({ ...prev, seatCount: value }));
+  };
+
   const resetFilters = () => {
     setFilters(defaultFilters);
     setActiveFilters(defaultFilters);
@@ -98,6 +105,7 @@ export function ListingsFiltersProvider({ children }: { children: ReactNode }) {
         setFromDate,
         setToDate,
         setSort,
+        setSeatCount,
         resetFilters,
         applyFilters,
         activeFilters,

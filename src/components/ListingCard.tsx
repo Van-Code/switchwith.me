@@ -16,6 +16,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { ShareListingButton } from "./ShareListingButton"
+import { getListingBadges } from "@/lib/listings/getListingBadges"
+import { getVisibleWantsPills } from "@/lib/listings/getVisibleWantsPills"
 
 interface ListingCardProps {
   listing: {
@@ -31,6 +33,9 @@ interface ListingCardProps {
     status: string
     boosted?: boolean
     boostedAt?: Date | string | null
+    priceCents?: number | null
+    seatCount?: number | null
+    flexible?: boolean
     team?: {
       id: number
       name: string
@@ -48,12 +53,14 @@ interface ListingCardProps {
   }
   onMessage?: () => void
   isAuthenticated?: boolean
+  badgeVariant?: "primary" | "subtle"
 }
 
 export function ListingCard({
   listing,
   onMessage,
   isAuthenticated = false,
+  badgeVariant = "primary",
 }: ListingCardProps) {
   const [isSigningIn, setIsSigningIn] = useState(false)
   const gameDate = new Date(listing.gameDate)
@@ -89,13 +96,42 @@ export function ListingCard({
     return "General Seating"
   }
 
+  // Get badges
+  const badges = getListingBadges(listing)
+
+  // Format price
+  const formatPrice = (priceCents: number | null | undefined): string | null => {
+    if (!priceCents || priceCents <= 0) return null
+    const dollars = priceCents / 100
+    // Format without decimals if whole number, otherwise 2 decimals
+    return dollars % 1 === 0 ? `$${dollars}` : `$${dollars.toFixed(2)}`
+  }
+
+  const priceDisplay = formatPrice(listing.priceCents)
+
+  // Get visible wants pills with truncation
+  const allWants = [...listing.wantZones, ...listing.wantSections]
+  const { visible: visibleWants, overflowCount } = getVisibleWantsPills(allWants)
+
+  // Badge styling based on variant
+  const getBadgeClassName = (isPrimary: boolean) => {
+    if (badgeVariant === "subtle") {
+      return isPrimary
+        ? "bg-cyan-100 text-cyan-700 hover:bg-cyan-200 text-xs"
+        : "bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs"
+    }
+    return isPrimary
+      ? "bg-cyan-600 text-white hover:bg-cyan-700"
+      : "bg-slate-500 text-white hover:bg-slate-600 text-xs"
+  }
+
   return (
     <Card
-      className={
+      className={`flex flex-col h-full ${
         isBoostEnabled() && listing.boosted
           ? "border-2 border-amber-400 bg-gradient-to-br from-amber-50/50 to-transparent shadow-lg"
           : ""
-      }
+      }`}
     >
       <CardHeader>
         {listing.team && (
@@ -113,23 +149,17 @@ export function ListingCard({
             <span className="text-sm font-semibold text-slate-700">
               {listing.team.name}
             </span>
-            {listing.listingType && (
-              <Badge
-                variant={listing.listingType === "HAVE" ? "default" : "outline"}
-                className={
-                  listing.listingType === "HAVE"
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "border-blue-600 text-blue-600"
-                }
-              >
-                {listing.listingType === "HAVE" ? "Has tickets" : "Wants tickets"}
-              </Badge>
+            {/* Primary badge */}
+            <Badge className={getBadgeClassName(true)}>{badges.primary}</Badge>
+            {/* Secondary badge */}
+            {badges.secondary && (
+              <Badge className={getBadgeClassName(false)}>{badges.secondary}</Badge>
             )}
           </div>
         )}
         <div className="flex items-start justify-between">
           <div>
-            {listing.listingType === "HAVE" ? (
+            {listing.listingType === "HAVE" || badges.primary !== "Looking For" ? (
               <>
                 <CardTitle className="text-lg">
                   {isAuthenticated ? (
@@ -160,6 +190,10 @@ export function ListingCard({
                 </p>
               </>
             )}
+            {/* Price display */}
+            {priceDisplay && (
+              <p className="text-lg font-bold text-cyan-700 mt-1">{priceDisplay}</p>
+            )}
           </div>
           <div className="flex flex-col gap-1.5 items-end">
             {isBoostEnabled() && listing.boosted && (
@@ -177,37 +211,37 @@ export function ListingCard({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 flex-1">
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           <span>{formatGameDate(gameDate)}</span>
         </div>
 
-        <div className="space-y-1">
-          <p className="text-sm font-medium">
-            {listing.listingType === "HAVE" ? "Wants:" : "Interested in:"}
-          </p>
-          <div className="flex flex-wrap gap-1">
-            {listing.wantZones.length > 0 ? (
-              listing.wantZones.map((zone, i) => (
-                <Badge key={i} variant="outline" className="text-xs">
-                  {zone}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-sm text-muted-foreground">Any zone</span>
-            )}
-          </div>
-          {listing.wantSections.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {listing.wantSections.map((section, i) => (
-                <Badge key={i} variant="outline" className="text-xs">
-                  Section {section}
-                </Badge>
-              ))}
+        {(visibleWants.length > 0 || overflowCount > 0) && (
+          <div className="space-y-1">
+            <p className="text-sm font-medium">
+              {badges.primary === "Looking For" ? "Looking for:" : "Wants:"}
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {visibleWants.length > 0 ? (
+                <>
+                  {visibleWants.map((want, i) => (
+                    <Badge key={i} variant="outline" className="text-xs">
+                      {want}
+                    </Badge>
+                  ))}
+                  {overflowCount > 0 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{overflowCount}
+                    </Badge>
+                  )}
+                </>
+              ) : (
+                <span className="text-sm text-muted-foreground">Any zone</span>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {isAuthenticated && listing.user?.profile && (
           <div className="pt-3 border-t">
@@ -239,7 +273,7 @@ export function ListingCard({
       </CardContent>
 
       {listing.status === "ACTIVE" && (
-        <CardFooter className="flex gap-2">
+        <CardFooter className="flex gap-2 mt-auto">
           {!isAuthenticated ? (
             <>
               <Button

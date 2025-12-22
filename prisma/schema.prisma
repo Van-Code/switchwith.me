@@ -205,6 +205,11 @@ model Listing {
   wantSections     String[]
   willingToAddCash Boolean  @default(false)
 
+  // Selling price and seat information
+  priceCents Int? // Price in cents (optional, for selling)
+  seatCount  Int? // Number of seats available/needed
+  flexible   Boolean @default(false) // Open to options outside exact wants
+
   status ListingStatus @default(ACTIVE)
 
   // Boosted listings (paid feature)

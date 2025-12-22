@@ -181,6 +181,9 @@ export async function POST(req: Request) {
       wantZones,
       wantSections,
       willingToAddCash,
+      priceCents,
+      seatCount,
+      flexible,
     } = body
 
     // Validate required fields
@@ -225,6 +228,9 @@ export async function POST(req: Request) {
         wantZones: wantZones || [],
         wantSections: wantSections || [],
         willingToAddCash: willingToAddCash || false,
+        priceCents: priceCents ?? null,
+        seatCount: seatCount ?? null,
+        flexible: flexible || false,
       },
       include: {
         user: {
