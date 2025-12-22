@@ -19,6 +19,39 @@ import { ShareListingButton } from "./ShareListingButton"
 import { getListingBadges } from "@/lib/listings/getListingBadges"
 import { getVisibleWantsPills } from "@/lib/listings/getVisibleWantsPills"
 
+type BadgeIntent = "swap" | "forSale" | "lookingFor" | "flexible"
+type BadgeVariant = "primary" | "subtle"
+
+const badgeVariants: Record<BadgeIntent, Record<BadgeVariant, string>> = {
+  swap: {
+    primary:
+      "bg-violet-600 text-white hover:bg-violet-700 border border-violet-600",
+    subtle:
+      "bg-violet-50 text-violet-800 border border-violet-200 text-xs",
+  },
+
+  forSale: {
+    primary:
+      "bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-600",
+    subtle:
+      "bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs",
+  },
+
+  lookingFor: {
+    primary:
+      "bg-white text-slate-900 border border-slate-300 hover:bg-slate-50",
+    subtle:
+      "bg-white text-slate-700 border border-slate-200 text-xs",
+  },
+
+  flexible: {
+    primary:
+      "bg-slate-600 text-white hover:bg-slate-700 border border-slate-600 text-xs",
+    subtle:
+      "bg-slate-100 text-slate-700 border border-slate-200 text-xs",
+  },
+}
+
 interface ListingCardProps {
   listing: {
     id: string
@@ -113,16 +146,19 @@ export function ListingCard({
   const allWants = [...listing.wantZones, ...listing.wantSections]
   const { visible: visibleWants, overflowCount } = getVisibleWantsPills(allWants)
 
-  // Badge styling based on variant
-  const getBadgeClassName = (isPrimary: boolean) => {
-    if (badgeVariant === "subtle") {
-      return isPrimary
-        ? "bg-cyan-100 text-cyan-700 hover:bg-cyan-200 text-xs"
-        : "bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs"
-    }
-    return isPrimary
-      ? "bg-cyan-600 text-white hover:bg-cyan-700"
-      : "bg-slate-500 text-white hover:bg-slate-600 text-xs"
+  // Map badge label to intent for color lookup
+  const getBadgeIntent = (label: string): BadgeIntent => {
+    if (label === "Swap") return "swap"
+    if (label === "For Sale") return "forSale"
+    if (label === "Looking For") return "lookingFor"
+    if (label === "Flexible") return "flexible"
+    return "lookingFor" // fallback
+  }
+
+  // Get badge className based on intent and variant
+  const getBadgeClassName = (label: string, variant: BadgeVariant = badgeVariant) => {
+    const intent = getBadgeIntent(label)
+    return badgeVariants[intent][variant]
   }
 
   return (
@@ -150,10 +186,10 @@ export function ListingCard({
               {listing.team.name}
             </span>
             {/* Primary badge */}
-            <Badge className={getBadgeClassName(true)}>{badges.primary}</Badge>
+            <Badge className={getBadgeClassName(badges.primary)}>{badges.primary}</Badge>
             {/* Secondary badge */}
             {badges.secondary && (
-              <Badge className={getBadgeClassName(false)}>{badges.secondary}</Badge>
+              <Badge className={getBadgeClassName(badges.secondary)}>{badges.secondary}</Badge>
             )}
           </div>
         )}
@@ -192,7 +228,7 @@ export function ListingCard({
             )}
             {/* Price display */}
             {priceDisplay && (
-              <p className="text-lg font-bold text-cyan-700 mt-1">{priceDisplay}</p>
+              <p className="text-lg font-bold text-emerald-700 mt-1">{priceDisplay}</p>
             )}
           </div>
           <div className="flex flex-col gap-1.5 items-end">
@@ -217,31 +253,34 @@ export function ListingCard({
           <span>{formatGameDate(gameDate)}</span>
         </div>
 
-        {(visibleWants.length > 0 || overflowCount > 0) && (
-          <div className="space-y-1">
-            <p className="text-sm font-medium">
-              {badges.primary === "Looking For" ? "Looking for:" : "Wants:"}
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {visibleWants.length > 0 ? (
-                <>
-                  {visibleWants.map((want, i) => (
-                    <Badge key={i} variant="outline" className="text-xs">
-                      {want}
-                    </Badge>
-                  ))}
-                  {overflowCount > 0 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{overflowCount}
-                    </Badge>
-                  )}
-                </>
-              ) : (
-                <span className="text-sm text-muted-foreground">Any zone</span>
-              )}
+        {/* Wants pills section with min-height for consistent card heights */}
+        <div className="min-h-[60px]">
+          {(visibleWants.length > 0 || overflowCount > 0) && (
+            <div className="space-y-1">
+              <p className="text-sm font-medium">
+                {badges.primary === "Looking For" ? "Looking for:" : "Wants:"}
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {visibleWants.length > 0 ? (
+                  <>
+                    {visibleWants.map((want, i) => (
+                      <Badge key={i} variant="outline" className="text-xs">
+                        {want}
+                      </Badge>
+                    ))}
+                    {overflowCount > 0 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{overflowCount}
+                      </Badge>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Any zone</span>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {isAuthenticated && listing.user?.profile && (
           <div className="pt-3 border-t">
