@@ -48,6 +48,7 @@
         "@react-email/render": "2.0.0",
         "@react-input/mask": "^2.0.4",
         "@types/dotenv-webpack": "^7.0.8",
+        "@vercel/edge-config": "^1.4.3",
         "autoprefixer": "^10.4.22",
         "bcryptjs": "^2.4.3",
         "class-variance-authority": "^0.7.0",
