@@ -27,6 +27,24 @@ export default async function MessagesPage() {
           user: {
             include: {
               profile: true,
+              listings: {
+                where: {
+                  status: "ACTIVE",
+                },
+                select: {
+                  id: true,
+                  listingType: true,
+                  haveSection: true,
+                  haveRow: true,
+                  haveSeat: true,
+                  haveZone: true,
+                  wantZones: true,
+                  wantSections: true,
+                  flexible: true,
+                  teamId: true,
+                  gameDate: true,
+                },
+              },
             },
           },
         },
@@ -37,7 +55,11 @@ export default async function MessagesPage() {
         },
         take: 1,
       },
-      listing: true, // Include listing
+      listing: {
+        include: {
+          team: true,
+        },
+      }, // Include listing with team info
     },
     orderBy: {
       updatedAt: "desc",
@@ -64,6 +86,10 @@ export default async function MessagesPage() {
               updatedAt: p.user.profile.updatedAt.toISOString(),
             }
           : null,
+        listings: p.user.listings?.map((listing: any) => ({
+          ...listing,
+          gameDate: listing.gameDate.toISOString(),
+        })) || [],
       },
     })),
     messages: conv.messages.map((m: any) => ({

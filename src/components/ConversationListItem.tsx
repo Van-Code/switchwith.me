@@ -2,6 +2,47 @@ import { Card, CardContent } from "./ui/card"
 import { Badge } from "./ui/badge"
 import Link from "next/link"
 import { Calendar, MapPin, XCircle } from "lucide-react"
+import { getInteractionIntent } from "@/lib/listings/getInteractionIntent"
+
+type BadgeIntent = "swap" | "forSale" | "lookingFor" | "flexible"
+type BadgeVariant = "primary" | "subtle"
+
+const badgeVariants: Record<BadgeIntent, Record<BadgeVariant, string>> = {
+  swap: {
+    primary:
+      "bg-violet-600 text-white hover:bg-violet-700 border border-violet-600",
+    subtle:
+      "bg-violet-50 text-violet-800 border border-violet-200 text-xs",
+  },
+
+  forSale: {
+    primary:
+      "bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-600",
+    subtle:
+      "bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs",
+  },
+
+  lookingFor: {
+    primary:
+      "bg-white text-slate-900 border border-slate-300 hover:bg-slate-50",
+    subtle:
+      "bg-white text-slate-700 border border-slate-200 text-xs",
+  },
+
+  flexible: {
+    primary:
+      "bg-slate-600 text-white hover:bg-slate-700 border border-slate-600 text-xs",
+    subtle:
+      "bg-slate-100 text-slate-700 border border-slate-200 text-xs",
+  },
+}
+
+const intentLabels: Record<BadgeIntent, string> = {
+  swap: "Swap",
+  forSale: "For Sale",
+  lookingFor: "Looking For",
+  flexible: "Flexible",
+}
 
 interface ConversationListItemProps {
   conversation: {
@@ -15,6 +56,19 @@ interface ConversationListItemProps {
           firstName: string
           lastInitial: string | null
         } | null
+        listings?: Array<{
+          id: string
+          listingType?: "HAVE" | "WANT"
+          haveSection: string
+          haveRow: string
+          haveSeat: string
+          haveZone: string
+          wantZones?: string[]
+          wantSections?: string[]
+          flexible?: boolean
+          teamId: number
+          gameDate: string
+        }>
       }
     }>
     messages: Array<{
@@ -27,6 +81,11 @@ interface ConversationListItemProps {
       haveSeat: string
       haveZone: string
       gameDate: Date | string
+      teamId?: number
+      listingType?: "HAVE" | "WANT"
+      wantZones?: string[]
+      wantSections?: string[]
+      flexible?: boolean
     } | null
   }
   currentUserId: string
@@ -39,8 +98,46 @@ export function ConversationListItem({
   const otherParticipant = conversation.participants.find(
     (p: any) => p.user.id !== currentUserId
   )
+  const currentUserParticipant = conversation.participants.find(
+    (p: any) => p.user.id === currentUserId
+  )
   const lastMessage = conversation.messages[0]
   const isEnded = conversation.status === "ENDED"
+
+  // Find the listings for both participants matching this conversation's game
+  const conversationListing = conversation.listing
+  const conversationTeamId = conversationListing?.teamId
+  const conversationGameDate = conversationListing?.gameDate
+
+  // Find the viewer's listing for this game/team
+  const viewerListing = currentUserParticipant?.user.listings?.find(
+    (l) => l.teamId === conversationTeamId &&
+      new Date(l.gameDate).toDateString() === new Date(conversationGameDate || "").toDateString()
+  )
+
+  // Find the other user's listing for this game/team
+  const otherListing = otherParticipant?.user.listings?.find(
+    (l) => l.teamId === conversationTeamId &&
+      new Date(l.gameDate).toDateString() === new Date(conversationGameDate || "").toDateString()
+  )
+
+  // Calculate interaction intent if we have both listings
+  let interactionIntent: "swap" | "forSale" | "lookingFor" | null = null
+  if (viewerListing && otherListing) {
+    interactionIntent = getInteractionIntent({
+      viewerListing,
+      otherListing,
+    })
+  } else if (conversationListing) {
+    // Fallback: infer from conversation listing alone
+    // If current user owns the listing, it's likely "forSale" or "swap"
+    // If other user owns it, current user is likely "lookingFor"
+    if (viewerListing) {
+      interactionIntent = viewerListing.wantZones && viewerListing.wantZones.length > 0 ? "swap" : "forSale"
+    } else if (otherListing) {
+      interactionIntent = "lookingFor"
+    }
+  }
 
   return (
     <Link href={`/messages/${conversation.id}`}>
@@ -91,9 +188,11 @@ export function ConversationListItem({
                 </span>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="secondary" className="text-xs">
-                  {conversation.listing.haveZone}
-                </Badge>
+                {interactionIntent && (
+                  <Badge className={badgeVariants[interactionIntent].subtle}>
+                    {intentLabels[interactionIntent]}
+                  </Badge>
+                )}
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="h-3 w-3" />
                   {new Date(conversation.listing.gameDate).toLocaleDateString("en-US", {

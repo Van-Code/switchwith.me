@@ -16,6 +16,48 @@ import {
   isNewMember,
   type MatchTransactionType,
 } from "@/lib/matchUtils"
+import { getInteractionIntent } from "@/lib/listings/getInteractionIntent"
+import { getListingBadges } from "@/lib/listings/getListingBadges"
+
+type BadgeIntent = "swap" | "forSale" | "lookingFor" | "flexible"
+type BadgeVariant = "primary" | "subtle"
+
+const badgeVariants: Record<BadgeIntent, Record<BadgeVariant, string>> = {
+  swap: {
+    primary:
+      "bg-violet-600 text-white hover:bg-violet-700 border border-violet-600",
+    subtle:
+      "bg-violet-50 text-violet-800 border border-violet-200 text-xs",
+  },
+
+  forSale: {
+    primary:
+      "bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-600",
+    subtle:
+      "bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs",
+  },
+
+  lookingFor: {
+    primary:
+      "bg-white text-slate-900 border border-slate-300 hover:bg-slate-50",
+    subtle:
+      "bg-white text-slate-700 border border-slate-200 text-xs",
+  },
+
+  flexible: {
+    primary:
+      "bg-slate-600 text-white hover:bg-slate-700 border border-slate-600 text-xs",
+    subtle:
+      "bg-slate-100 text-slate-700 border border-slate-200 text-xs",
+  },
+}
+
+const intentLabels: Record<BadgeIntent, string> = {
+  swap: "Swap",
+  forSale: "For Sale",
+  lookingFor: "Looking For",
+  flexible: "Flexible",
+}
 
 export interface MatchCardListing {
   id: string
@@ -26,6 +68,7 @@ export interface MatchCardListing {
   haveZone: string
   wantZones?: string[]
   wantSections?: string[]
+  flexible?: boolean
   user?: {
     id: string
     createdAt?: Date | string
@@ -75,6 +118,19 @@ export function MatchCard({
   const isVerified = matchedListing.user?.profile?.emailVerified || matchedListing.user?.profile?.phoneVerified
   const memberIsNew = matchedListing.user?.createdAt ? isNewMember(matchedListing.user.createdAt) : false
 
+  // Calculate interaction intent
+  const interactionIntent = getInteractionIntent({
+    viewerListing: myListing,
+    otherListing: matchedListing,
+  })
+
+  // Get badges for both listings (to check for Flexible)
+  const myBadges = getListingBadges(myListing)
+  const matchedBadges = getListingBadges(matchedListing)
+
+  // Show Flexible badge if either listing is flexible
+  const showFlexibleBadge = myBadges.secondary === "Flexible" || matchedBadges.secondary === "Flexible"
+
   if (transactionType === "SWAP") {
     return <SwapLayout {...{
       myListing,
@@ -91,6 +147,8 @@ export function MatchCard({
       memberIsNew,
       onMessageClick,
       isLoading,
+      interactionIntent,
+      showFlexibleBadge,
     }} />
   }
 
@@ -110,6 +168,8 @@ export function MatchCard({
     transactionType,
     onMessageClick,
     isLoading,
+    interactionIntent,
+    showFlexibleBadge,
   }} />
 }
 
@@ -129,6 +189,8 @@ interface LayoutProps {
   transactionType?: MatchTransactionType
   onMessageClick: () => void
   isLoading: boolean
+  interactionIntent: "swap" | "forSale" | "lookingFor"
+  showFlexibleBadge: boolean
 }
 
 function SwapLayout({
@@ -146,16 +208,28 @@ function SwapLayout({
   memberIsNew,
   onMessageClick,
   isLoading,
+  interactionIntent,
+  showFlexibleBadge,
 }: LayoutProps) {
   return (
     <Card className="border-slate-200 hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <CardTitle className="text-lg text-slate-900 mb-1 flex items-center gap-2">
-              <ArrowLeftRight className="h-4 w-4 text-cyan-600" />
-              {headerText}
-            </CardTitle>
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="text-lg text-slate-900 flex items-center gap-2">
+                <ArrowLeftRight className="h-4 w-4 text-cyan-600" />
+                {headerText}
+              </CardTitle>
+              <Badge className={badgeVariants[interactionIntent].primary}>
+                {intentLabels[interactionIntent]}
+              </Badge>
+              {showFlexibleBadge && (
+                <Badge className={badgeVariants.flexible.primary}>
+                  {intentLabels.flexible}
+                </Badge>
+              )}
+            </div>
             <p className="text-sm text-slate-600">{subtext}</p>
           </div>
           <div className="text-right">
@@ -229,6 +303,8 @@ function VerticalLayout({
   transactionType,
   onMessageClick,
   isLoading,
+  interactionIntent,
+  showFlexibleBadge,
 }: LayoutProps) {
   const isSell = transactionType === "SELL"
 
@@ -237,7 +313,17 @@ function VerticalLayout({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <CardTitle className="text-lg text-slate-900 mb-1">{headerText}</CardTitle>
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="text-lg text-slate-900">{headerText}</CardTitle>
+              <Badge className={badgeVariants[interactionIntent].primary}>
+                {intentLabels[interactionIntent]}
+              </Badge>
+              {showFlexibleBadge && (
+                <Badge className={badgeVariants.flexible.primary}>
+                  {intentLabels.flexible}
+                </Badge>
+              )}
+            </div>
             <p className="text-sm text-slate-600">{subtext}</p>
           </div>
           <div className="text-right">
