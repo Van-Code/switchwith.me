@@ -14,7 +14,11 @@ interface ListingsClientProps {
   badgeVariant?: "primary" | "subtle"
 }
 
-export function ListingsClient({ listings, currentUserId, badgeVariant = "primary" }: ListingsClientProps) {
+export function ListingsClient({
+  listings,
+  currentUserId,
+  badgeVariant = "primary",
+}: ListingsClientProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [loading, setLoading] = useState<string | null>(null)
@@ -67,7 +71,7 @@ export function ListingsClient({ listings, currentUserId, badgeVariant = "primar
         method: "POST",
         body: JSON.stringify({
           otherUserId: listing.user.id,
-          listingId: listing.id // Pass the listing ID
+          listingId: listing.id, // Pass the listing ID
         }),
       })
 

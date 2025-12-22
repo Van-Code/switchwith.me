@@ -64,6 +64,24 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { otherUserId, listingId } = body
 
+    if (listingId) {
+      const clickedListing = await prisma.listing.findUnique({
+        where: { id: listingId },
+        select: { id: true, userId: true },
+      })
+
+      if (!clickedListing) {
+        return NextResponse.json({ error: "Listing not found" }, { status: 404 })
+      }
+
+      if (clickedListing.userId !== otherUserId) {
+        return NextResponse.json(
+          { error: "listingId does not belong to otherUserId" },
+          { status: 400 }
+        )
+      }
+    }
+
     if (!otherUserId) {
       return NextResponse.json({ error: "Missing otherUserId" }, { status: 400 })
     }
@@ -75,34 +93,24 @@ export async function POST(req: Request) {
         where: {
           listingId,
           participants: {
-            some: {
-              userId: userId,
-            },
+            some: { userId },
           },
-        },
-        include: {
-          participants: {
-            include: {
-              user: {
-                include: {
-                  profile: true,
-                },
+          AND: [
+            {
+              participants: {
+                some: { userId: otherUserId },
               },
             },
-          },
-          messages: {
-            orderBy: {
-              createdAt: "asc",
-            },
-          },
+          ],
+        },
+        include: {
+          participants: { include: { user: { include: { profile: true } } } },
+          messages: { orderBy: { createdAt: "asc" } },
           listing: true,
         },
       })
 
       if (existingListingConversation) {
-        console.log(
-          `[DUPLICATE_PREVENTION] Found existing conversation for listing ${listingId} and user ${userId}`
-        )
         return NextResponse.json({ conversation: existingListingConversation })
       }
     }
@@ -111,37 +119,14 @@ export async function POST(req: Request) {
     const existingConversation = await prisma.conversation.findFirst({
       where: {
         AND: [
-          {
-            participants: {
-              some: {
-                userId: userId,
-              },
-            },
-          },
-          {
-            participants: {
-              some: {
-                userId: otherUserId,
-              },
-            },
-          },
+          { participants: { some: { userId } } },
+          { participants: { some: { userId: otherUserId } } },
+          ...(listingId ? [{ listingId }] : []),
         ],
       },
       include: {
-        participants: {
-          include: {
-            user: {
-              include: {
-                profile: true,
-              },
-            },
-          },
-        },
-        messages: {
-          orderBy: {
-            createdAt: "asc",
-          },
-        },
+        participants: { include: { user: { include: { profile: true } } } },
+        messages: { orderBy: { createdAt: "asc" } },
         listing: true,
       },
     })
@@ -231,7 +216,7 @@ export async function POST(req: Request) {
           data: {
             ...(listingId && { listingId }),
             participants: {
-              create: [{ userId: userId }, { userId: otherUserId }],
+              create: [{ userId }, { userId: otherUserId }],
             },
           },
           include: {
@@ -305,7 +290,7 @@ export async function POST(req: Request) {
       data: {
         ...(listingId && { listingId }), // Only include if listingId exists
         participants: {
-          create: [{ userId: userId }, { userId: otherUserId }],
+          create: [{ userId }, { userId: otherUserId }],
         },
       },
       include: {

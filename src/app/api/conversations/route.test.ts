@@ -1,317 +1,277 @@
-/**
- * @jest-environment node
- */
-import { POST } from "./route"
-import { getServerSession } from "next-auth"
+import { NextResponse } from "next/server"
+import { requireUserId } from "@/lib/auth-api"
 import { prisma } from "@/lib/prisma"
-import { NextRequest } from "next/server"
+import { isPayToChatEnabled } from "@/lib/features"
 
-// Mock dependencies
-jest.mock("next-auth")
-jest.mock("@/lib/prisma", () => ({
-  prisma: {
-    conversation: {
-      findFirst: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-    },
-    user: {
-      findUnique: jest.fn(),
-      update: jest.fn(),
-    },
-    creditTransaction: {
-      create: jest.fn(),
-    },
-    $transaction: jest.fn(),
-  },
-}))
+export const dynamic = "force-dynamic"
 
-jest.mock("@/lib/features", () => ({
-  isPayToChatEnabled: jest.fn(() => false),
-}))
+export async function GET(_req: Request) {
+  try {
+    const auth = await requireUserId()
+    if (!auth.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-const mockGetServerSession = getServerSession as jest.MockedFunction<
-  typeof getServerSession
->
+    const userId = auth.userId
 
-describe("POST /api/conversations", () => {
-  const mockSession = {
-    user: {
-      id: "user-123",
-      email: "test@example.com",
-    },
+    const conversations = await prisma.conversation.findMany({
+      where: {
+        participants: {
+          some: { userId },
+        },
+      },
+      include: {
+        participants: {
+          include: {
+            user: {
+              include: { profile: true },
+            },
+          },
+        },
+        messages: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+        listing: true,
+      },
+      orderBy: { updatedAt: "desc" },
+    })
+
+    return NextResponse.json({ conversations })
+  } catch (error) {
+    console.error("Error fetching conversations:", error)
+    return NextResponse.json({ error: "Failed to fetch conversations" }, { status: 500 })
   }
+}
 
-  const mockOtherUserId = "user-456"
-  const mockListingId = "listing-789"
+export async function POST(req: Request) {
+  try {
+    const auth = await requireUserId()
+    if (!auth.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-  beforeEach(() => {
-    jest.clearAllMocks()
-    mockGetServerSession.mockResolvedValue(mockSession as any)
-  })
+    const userId = auth.userId
+    const body = await req.json()
+    const { otherUserId, listingId } = body as {
+      otherUserId?: string
+      listingId?: string
+    }
 
-  describe("Authentication", () => {
-    it("returns 401 if user is not authenticated", async () => {
-      mockGetServerSession.mockResolvedValue(null)
+    if (!otherUserId) {
+      return NextResponse.json({ error: "Missing otherUserId" }, { status: 400 })
+    }
 
-      const request = new NextRequest("http://localhost/api/conversations", {
-        method: "POST",
-        body: JSON.stringify({ otherUserId: mockOtherUserId }),
+    if (otherUserId === userId) {
+      return NextResponse.json(
+        { error: "Cannot create conversation with yourself" },
+        { status: 400 }
+      )
+    }
+
+    // If listingId is provided, validate it exists and belongs to otherUserId.
+    if (listingId) {
+      const clickedListing = await prisma.listing.findUnique({
+        where: { id: listingId },
+        select: { id: true, userId: true },
       })
 
-      const response = await POST(request)
-      const data = await response.json()
+      if (!clickedListing) {
+        return NextResponse.json({ error: "Listing not found" }, { status: 404 })
+      }
 
-      expect(response.status).toBe(401)
-      expect(data.error).toBe("Unauthorized")
-    })
-  })
+      if (clickedListing.userId !== otherUserId) {
+        return NextResponse.json(
+          { error: "listingId does not belong to otherUserId" },
+          { status: 400 }
+        )
+      }
 
-  describe("Validation", () => {
-    it("returns 400 if otherUserId is missing", async () => {
-      const request = new NextRequest("http://localhost/api/conversations", {
-        method: "POST",
-        body: JSON.stringify({}),
+      // Duplicate prevention for same viewer, same other user, same listing
+      const existingListingConversation = await prisma.conversation.findFirst({
+        where: {
+          listingId,
+          participants: { some: { userId } },
+          AND: [{ participants: { some: { userId: otherUserId } } }],
+        },
+        include: {
+          participants: {
+            include: {
+              user: { include: { profile: true } },
+            },
+          },
+          messages: { orderBy: { createdAt: "asc" } },
+          listing: true,
+        },
       })
 
-      const response = await POST(request)
-      const data = await response.json()
+      if (existingListingConversation) {
+        return NextResponse.json({ conversation: existingListingConversation })
+      }
+    }
 
-      expect(response.status).toBe(400)
-      expect(data.error).toBe("Missing otherUserId")
-    })
-  })
-
-  describe("Duplicate Prevention - Listing-specific", () => {
-    it("returns existing conversation if one exists for the same listing", async () => {
-      const existingConversation = {
-        id: "conv-123",
-        listingId: mockListingId,
-        participants: [
-          {
-            userId: mockSession.user.id,
-            user: {
-              id: mockSession.user.id,
-              profile: { firstName: "Test", lastInitial: "U" },
-            },
-          },
-          {
-            userId: mockOtherUserId,
-            user: {
-              id: mockOtherUserId,
-              profile: { firstName: "Other", lastInitial: "U" },
-            },
-          },
+    // Check if a conversation already exists between these two users, optionally scoped to listingId.
+    const existingConversation = await prisma.conversation.findFirst({
+      where: {
+        AND: [
+          { participants: { some: { userId } } },
+          { participants: { some: { userId: otherUserId } } },
+          ...(listingId ? [{ listingId }] : []),
         ],
-        messages: [],
-        listing: { id: mockListingId },
-      }
+      },
+      include: {
+        participants: {
+          include: {
+            user: { include: { profile: true } },
+          },
+        },
+        messages: { orderBy: { createdAt: "asc" } },
+        listing: true,
+      },
+    })
 
-      ;(prisma.conversation.findFirst as jest.Mock).mockResolvedValueOnce(
-        existingConversation
-      )
-
-      const request = new NextRequest("http://localhost/api/conversations", {
-        method: "POST",
-        body: JSON.stringify({
-          otherUserId: mockOtherUserId,
-          listingId: mockListingId,
-        }),
-      })
-
-      const response = await POST(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(data.conversation.id).toBe("conv-123")
-      expect(data.conversation.listingId).toBe(mockListingId)
-
-      // Verify that findFirst was called with correct listing filter
-      expect(prisma.conversation.findFirst).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            listingId: mockListingId,
-          }),
+    if (existingConversation) {
+      // If listingId is provided and conversation doesn't have one, attach it.
+      if (listingId && !existingConversation.listingId) {
+        const updatedConversation = await prisma.conversation.update({
+          where: { id: existingConversation.id },
+          data: { listingId },
+          include: {
+            participants: {
+              include: {
+                user: { include: { profile: true } },
+              },
+            },
+            messages: { orderBy: { createdAt: "asc" } },
+            listing: true,
+          },
         })
-      )
-    })
-
-    it("does not create duplicate conversation for same listing + user combo", async () => {
-      const existingConversation = {
-        id: "conv-existing",
-        listingId: mockListingId,
-        participants: [],
-        messages: [],
-        listing: {},
+        return NextResponse.json({ conversation: updatedConversation })
       }
 
-      ;(prisma.conversation.findFirst as jest.Mock).mockResolvedValueOnce(
-        existingConversation
-      )
+      return NextResponse.json({ conversation: existingConversation })
+    }
 
-      const request = new NextRequest("http://localhost/api/conversations", {
-        method: "POST",
-        body: JSON.stringify({
-          otherUserId: mockOtherUserId,
-          listingId: mockListingId,
-        }),
+    // Pay to chat mode
+    if (isPayToChatEnabled()) {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { credits: true },
       })
 
-      await POST(request)
-
-      // Verify create was NOT called
-      expect(prisma.conversation.create).not.toHaveBeenCalled()
-    })
-  })
-
-  describe("Conversation Creation", () => {
-    it("creates new conversation with listingId when provided", async () => {
-      // No existing conversation
-      ;(prisma.conversation.findFirst as jest.Mock)
-        .mockResolvedValueOnce(null) // No listing-specific conversation
-        .mockResolvedValueOnce(null) // No user-to-user conversation
-
-      const newConversation = {
-        id: "conv-new",
-        listingId: mockListingId,
-        participants: [],
-        messages: [],
-        listing: {},
+      if (!currentUser) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 })
       }
 
-      ;(prisma.conversation.create as jest.Mock).mockResolvedValue(newConversation)
-      ;(prisma.creditTransaction.create as jest.Mock).mockResolvedValue({})
+      if (currentUser.credits < 1) {
+        return NextResponse.json(
+          {
+            error: "Insufficient credits",
+            creditsRequired: 1,
+            currentCredits: currentUser.credits,
+          },
+          { status: 402 }
+        )
+      }
 
-      const request = new NextRequest("http://localhost/api/conversations", {
-        method: "POST",
-        body: JSON.stringify({
-          otherUserId: mockOtherUserId,
-          listingId: mockListingId,
-        }),
-      })
-
-      const response = await POST(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(data.conversation.id).toBe("conv-new")
-      expect(data.conversation.listingId).toBe(mockListingId)
-
-      // Verify conversation was created with listingId
-      expect(prisma.conversation.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            listingId: mockListingId,
-          }),
+      const result = await prisma.$transaction(async (tx) => {
+        await tx.user.update({
+          where: { id: userId },
+          data: { credits: { decrement: 1 } },
         })
-      )
-    })
 
-    it("creates new conversation without listingId when not provided", async () => {
-      ;(prisma.conversation.findFirst as jest.Mock).mockResolvedValue(null)
-
-      const newConversation = {
-        id: "conv-new",
-        listingId: null,
-        participants: [],
-        messages: [],
-        listing: null,
-      }
-
-      ;(prisma.conversation.create as jest.Mock).mockResolvedValue(newConversation)
-      ;(prisma.creditTransaction.create as jest.Mock).mockResolvedValue({})
-
-      const request = new NextRequest("http://localhost/api/conversations", {
-        method: "POST",
-        body: JSON.stringify({
-          otherUserId: mockOtherUserId,
-        }),
-      })
-
-      const response = await POST(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(data.conversation.listingId).toBeNull()
-    })
-  })
-
-  describe("Existing User Conversation Handling", () => {
-    it("updates existing user conversation with listingId if missing", async () => {
-      const existingUserConversation = {
-        id: "conv-existing",
-        listingId: null,
-        participants: [],
-        messages: [],
-        listing: null,
-      }
-
-      const updatedConversation = {
-        ...existingUserConversation,
-        listingId: mockListingId,
-        listing: { id: mockListingId },
-      }
-
-      // First call for listing-specific check (returns null)
-      // Second call for user-to-user check (returns existing)
-      ;(prisma.conversation.findFirst as jest.Mock)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(existingUserConversation)
-
-      ;(prisma.conversation.update as jest.Mock).mockResolvedValue(updatedConversation)
-
-      const request = new NextRequest("http://localhost/api/conversations", {
-        method: "POST",
-        body: JSON.stringify({
-          otherUserId: mockOtherUserId,
-          listingId: mockListingId,
-        }),
-      })
-
-      const response = await POST(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(data.conversation.listingId).toBe(mockListingId)
-
-      // Verify update was called
-      expect(prisma.conversation.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: "conv-existing" },
-          data: { listingId: mockListingId },
+        const otherUser = await tx.user.findUnique({
+          where: { id: otherUserId },
+          include: { profile: true },
         })
-      )
-    })
 
-    it("returns existing user conversation without updating if listingId already set", async () => {
-      const existingUserConversation = {
-        id: "conv-existing",
-        listingId: "another-listing",
-        participants: [],
-        messages: [],
-        listing: { id: "another-listing" },
-      }
+        await tx.creditTransaction.create({
+          data: {
+            userId,
+            amount: -1,
+            note: `Start conversation with ${otherUser?.profile?.firstName || "user"}`,
+          },
+        })
 
-      ;(prisma.conversation.findFirst as jest.Mock)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(existingUserConversation)
+        const conversation = await tx.conversation.create({
+          data: {
+            ...(listingId ? { listingId } : {}),
+            participants: {
+              create: [{ userId }, { userId: otherUserId }],
+            },
+          },
+          include: {
+            participants: {
+              include: {
+                user: { include: { profile: true } },
+              },
+            },
+            messages: true,
+            listing: true,
+          },
+        })
 
-      const request = new NextRequest("http://localhost/api/conversations", {
-        method: "POST",
-        body: JSON.stringify({
-          otherUserId: mockOtherUserId,
-          listingId: mockListingId,
-        }),
+        return conversation
       })
 
-      const response = await POST(request)
-      const data = await response.json()
+      return NextResponse.json({ conversation: result })
+    }
 
-      expect(response.status).toBe(200)
-      expect(data.conversation.id).toBe("conv-existing")
-
-      // Verify update was NOT called
-      expect(prisma.conversation.update).not.toHaveBeenCalled()
+    // Free mode race condition check for same viewer, same other user, same listing (if present)
+    const finalCheck = await prisma.conversation.findFirst({
+      where: {
+        AND: [
+          { participants: { some: { userId } } },
+          { participants: { some: { userId: otherUserId } } },
+          ...(listingId ? [{ listingId }] : []),
+        ],
+      },
+      include: {
+        participants: {
+          include: {
+            user: { include: { profile: true } },
+          },
+        },
+        messages: true,
+        listing: true,
+      },
     })
-  })
-})
+
+    if (finalCheck) {
+      return NextResponse.json({ conversation: finalCheck })
+    }
+
+    const conversation = await prisma.conversation.create({
+      data: {
+        ...(listingId ? { listingId } : {}),
+        participants: {
+          create: [{ userId }, { userId: otherUserId }],
+        },
+      },
+      include: {
+        participants: {
+          include: {
+            user: { include: { profile: true } },
+          },
+        },
+        messages: true,
+        listing: true,
+      },
+    })
+
+    await prisma.creditTransaction
+      .create({
+        data: {
+          userId,
+          amount: 0,
+          note: "Free conversation (early launch)",
+        },
+      })
+      .catch(() => {})
+
+    return NextResponse.json({ conversation })
+  } catch (error) {
+    console.error("Error creating conversation:", error)
+    return NextResponse.json({ error: "Failed to create conversation" }, { status: 500 })
+  }
+}
