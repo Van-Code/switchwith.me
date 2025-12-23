@@ -42,6 +42,17 @@ export function ConversationSidebar({
   currentUserId,
   participants,
 }: ConversationSidebarProps) {
+  if (!listing) {
+    return (
+      <div className="max-w-2xl mx-auto py-12 text-center">
+        <h2 className="text-lg font-semibold">Missing listing</h2>
+        <p className="text-sm text-muted-foreground mt-2">
+          This conversation is missing its associated listing.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
       {/* Current Listing */}

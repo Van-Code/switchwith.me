@@ -24,31 +24,23 @@ type BadgeVariant = "primary" | "subtle"
 
 const badgeVariants: Record<BadgeIntent, Record<BadgeVariant, string>> = {
   swap: {
-    primary:
-      "bg-violet-600 text-white hover:bg-violet-700 border border-violet-600",
-    subtle:
-      "bg-violet-50 text-violet-800 border border-violet-200 text-xs",
+    primary: "bg-violet-600 text-white hover:bg-violet-700 border border-violet-600",
+    subtle: "bg-violet-50 text-violet-800 border border-violet-200 text-xs",
   },
 
   forSale: {
-    primary:
-      "bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-600",
-    subtle:
-      "bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs",
+    primary: "bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-600",
+    subtle: "bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs",
   },
 
   lookingFor: {
-    primary:
-      "bg-white text-slate-900 border border-slate-300 hover:bg-slate-50",
-    subtle:
-      "bg-white text-slate-700 border border-slate-200 text-xs",
+    primary: "bg-white text-slate-900 border border-slate-300 hover:bg-slate-50",
+    subtle: "bg-white text-slate-700 border border-slate-200 text-xs",
   },
 
   flexible: {
-    primary:
-      "bg-slate-600 text-white hover:bg-slate-700 border border-slate-600 text-xs",
-    subtle:
-      "bg-slate-100 text-slate-700 border border-slate-200 text-xs",
+    primary: "bg-slate-600 text-white hover:bg-slate-700 border border-slate-600 text-xs",
+    subtle: "bg-slate-100 text-slate-700 border border-slate-200 text-xs",
   },
 }
 
@@ -189,7 +181,9 @@ export function ListingCard({
             <Badge className={getBadgeClassName(badges.primary)}>{badges.primary}</Badge>
             {/* Secondary badge */}
             {badges.secondary && (
-              <Badge className={getBadgeClassName(badges.secondary)}>{badges.secondary}</Badge>
+              <Badge className={getBadgeClassName(badges.secondary)}>
+                {badges.secondary}
+              </Badge>
             )}
           </div>
         )}

@@ -63,6 +63,17 @@ export function ConversationListingHeader({
   participants,
   currentUserId,
 }: ConversationListingHeaderProps) {
+  if (!listing) {
+    return (
+      <div className="max-w-2xl mx-auto py-12 text-center">
+        <h2 className="text-lg font-semibold">Missing listing</h2>
+        <p className="text-sm text-muted-foreground mt-2">
+          This conversation is missing its associated listing.
+        </p>
+      </div>
+    )
+  }
+
   if (!participants || !currentUserId) {
     return (
       <Card className="bg-muted/50">
