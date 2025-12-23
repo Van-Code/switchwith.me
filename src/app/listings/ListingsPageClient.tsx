@@ -1,38 +1,41 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
-import { ListingsFiltersProvider, useListingsFilters } from "@/contexts/listings-filters-context";
-import ListingsFilters from "@/components/listings-filters";
-import ListingsSortSelect from "@/components/listings-sort-select";
-import { ListingsTabs } from "@/components/ListingsTabs";
-import { ListingsClient } from "./ListingsClient";
-import { ListingCardSkeleton } from "@/components/ListingCardSkeleton";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
-import { LogIn } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { filterListingsByTab, TabValue } from "@/lib/listings/filterListings";
-import { getListingBadges } from "@/lib/listings/getListingBadges";
+import { useState, useEffect, useMemo } from "react"
+import { useSearchParams } from "next/navigation"
+import {
+  ListingsFiltersProvider,
+  useListingsFilters,
+} from "@/contexts/listings-filters-context"
+import ListingsFilters from "@/components/listings-filters"
+import ListingsSortSelect from "@/components/listings-sort-select"
+import { ListingsTabs } from "@/components/ListingsTabs"
+import { ListingsClient } from "./ListingsClient"
+import { ListingCardSkeleton } from "@/components/ListingCardSkeleton"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { signIn } from "next-auth/react"
+import { LogIn } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { filterListingsByTab, TabValue } from "@/lib/listings/filterListings"
+import { getListingBadges } from "@/lib/listings/getListingBadges"
 
 interface ListingsPageClientProps {
-  currentUserId?: string;
+  currentUserId?: string
 }
 
 function ListingsContent({ currentUserId }: ListingsPageClientProps) {
-  const { activeFilters } = useListingsFilters();
-  const [listings, setListings] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabValue>("all");
-  const isAuthenticated = !!currentUserId;
-  const searchParams = useSearchParams();
-  const { toast } = useToast();
+  const { activeFilters } = useListingsFilters()
+  const [listings, setListings] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<TabValue>("all")
+  const isAuthenticated = !!currentUserId
+  const searchParams = useSearchParams()
+  const { toast } = useToast()
 
   // Handle error query params and show toast notifications
   useEffect(() => {
-    const error = searchParams.get("error");
-    if (!error) return;
+    const error = searchParams.get("error")
+    if (!error) return
 
     switch (error) {
       case "missing_listing":
@@ -40,105 +43,108 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
           title: "Invalid Request",
           description: "The listing you're trying to access is invalid or missing.",
           variant: "destructive",
-        });
-        break;
+        })
+        break
       case "listing_not_found":
         toast({
           title: "Listing Not Found",
-          description: "That listing is no longer available, but here are similar options.",
+          description:
+            "That listing is no longer available, but here are similar options.",
           variant: "destructive",
-        });
-        break;
+        })
+        break
       case "listing_inactive":
         toast({
           title: "Listing No Longer Available",
           description: "That listing is no longer active, but here are similar options.",
           variant: "destructive",
-        });
-        break;
+        })
+        break
       case "own_listing":
         toast({
           title: "Cannot Message Own Listing",
           description: "You cannot start a conversation with yourself.",
           variant: "destructive",
-        });
-        break;
+        })
+        break
       case "server_error":
         toast({
           title: "Server Error",
           description: "Something went wrong. Please try again later.",
           variant: "destructive",
-        });
-        break;
+        })
+        break
       case "insufficient_credits":
-        const required = searchParams.get("required") || "1";
-        const current = searchParams.get("current") || "0";
+        const required = searchParams.get("required") || "1"
+        const current = searchParams.get("current") || "0"
         toast({
           title: "Insufficient Credits",
           description: `You need ${required} credit(s) to start a conversation, but you only have ${current}.`,
           variant: "destructive",
-        });
-        break;
+        })
+        break
       case "missing_params":
         toast({
           title: "Invalid Request",
           description: "Missing required parameters. Please try again.",
           variant: "destructive",
-        });
-        break;
+        })
+        break
       default:
-        break;
+        break
     }
 
     // Clean up URL by removing error params (optional, for better UX)
     if (error) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete("error");
-      url.searchParams.delete("team");
-      url.searchParams.delete("required");
-      url.searchParams.delete("current");
-      window.history.replaceState({}, "", url.toString());
+      const url = new URL(window.location.href)
+      url.searchParams.delete("error")
+      url.searchParams.delete("team")
+      url.searchParams.delete("required")
+      url.searchParams.delete("current")
+      window.history.replaceState({}, "", url.toString())
     }
-  }, [searchParams, toast]);
+  }, [searchParams, toast])
 
   // Fetch listings whenever active filters change
   useEffect(() => {
     const fetchListings = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        const params = new URLSearchParams();
+        const params = new URLSearchParams()
 
-        if (activeFilters.team.length > 0) params.set("team", activeFilters.team.join(","));
-        if (activeFilters.section) params.set("section", activeFilters.section);
-        if (activeFilters.listingType) params.set("listingType", activeFilters.listingType);
-        if (activeFilters.from) params.set("from", activeFilters.from);
-        if (activeFilters.to) params.set("to", activeFilters.to);
-        if (activeFilters.sort) params.set("sort", activeFilters.sort);
+        if (activeFilters.team.length > 0)
+          params.set("team", activeFilters.team.join(","))
+        if (activeFilters.section) params.set("section", activeFilters.section)
+        if (activeFilters.listingType)
+          params.set("listingType", activeFilters.listingType)
+        if (activeFilters.from) params.set("from", activeFilters.from)
+        if (activeFilters.to) params.set("to", activeFilters.to)
+        if (activeFilters.sort) params.set("sort", activeFilters.sort)
 
-        const query = params.toString();
-        const url = query ? `/api/listings?${query}` : "/api/listings";
+        const query = params.toString()
+        const url = query ? `/api/listings?${query}` : "/api/listings"
 
-        const response = await fetch(url);
+        const response = await fetch(url)
         if (response.ok) {
-          const data = await response.json();
-          setListings(data.listings || []);
+          const data = await response.json()
+          setListings(data.listings || [])
         } else {
-          console.error("Failed to fetch listings");
+          console.error("Failed to fetch listings")
         }
       } catch (error) {
-        console.error("Error fetching listings:", error);
+        console.error("Error fetching listings:", error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchListings();
-  }, [activeFilters]);
+    fetchListings()
+  }, [activeFilters])
 
   // Filter listings by active tab (client-side)
   const filteredListings = useMemo(() => {
-    return filterListingsByTab(listings, activeTab);
-  }, [listings, activeTab]);
+    return filterListingsByTab(listings, activeTab)
+  }, [listings, activeTab])
 
   // Calculate tab counts
   const tabCounts = useMemo(() => {
@@ -147,21 +153,23 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
       "for-sale": 0,
       "looking-for": 0,
       swap: 0,
-    };
+    }
 
     listings.forEach((listing) => {
-      const badges = getListingBadges(listing);
-      if (badges.primary === "For Sale") counts["for-sale"]++;
-      if (badges.primary === "Looking For") counts["looking-for"]++;
-      if (badges.primary === "Swap") counts.swap++;
-    });
+      const badges = getListingBadges(listing)
+      if (badges.primary === "For Sale") counts["for-sale"]++
+      if (badges.primary === "Looking For") counts["looking-for"]++
+      if (badges.primary === "Swap") counts.swap++
+    })
 
-    return counts;
-  }, [listings]);
+    return counts
+  }, [listings])
 
   // For unauthenticated users, limit to first 6 listings
-  const displayedListings = !isAuthenticated ? filteredListings.slice(0, 6) : filteredListings;
-  const totalListings = filteredListings.length;
+  const displayedListings = !isAuthenticated
+    ? filteredListings.slice(0, 6)
+    : filteredListings
+  const totalListings = filteredListings.length
 
   const hasFilters = !!(
     activeFilters.team.length > 0 ||
@@ -169,7 +177,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
     activeFilters.listingType ||
     activeFilters.from ||
     activeFilters.to
-  );
+  )
 
   const filterCount = [
     activeFilters.team.length > 0,
@@ -177,7 +185,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
     activeFilters.listingType,
     activeFilters.from,
     activeFilters.to,
-  ].filter(Boolean).length;
+  ].filter(Boolean).length
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-orange-50">
@@ -190,7 +198,9 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-cyan-700 bg-clip-text text-transparent">
                   Browse Listings
                 </h1>
-                <p className="text-slate-600 mt-1">Matches and requests based on your listings</p>
+                <p className="text-slate-600 mt-1">
+                  Matches and requests based on your listings
+                </p>
               </div>
               <Link href="/listings/new">
                 <Button className="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-md">
@@ -225,9 +235,12 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                 <div className="bg-gradient-to-r from-cyan-600 to-cyan-700 rounded-lg border border-cyan-800 px-6 py-4 shadow-lg">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="text-white">
-                      <h3 className="font-bold text-lg mb-1">You're viewing a preview of real listings</h3>
+                      <h3 className="font-bold text-lg mb-1">
+                        You're viewing a preview of real listings
+                      </h3>
                       <p className="text-cyan-50 text-sm">
-                        Sign in with Google to unlock full details, see all {listings.length} listings, and start swapping seats for free.
+                        Sign in with Google to unlock full details, see all{" "}
+                        {listings.length} listings, and start swapping seats for free.
                       </p>
                     </div>
                     <Button
@@ -250,17 +263,29 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                     <>
                       {!isAuthenticated && totalListings > displayedListings.length ? (
                         <>
-                          Showing <span className="font-semibold text-slate-900">{displayedListings.length}</span> of{" "}
-                          <span className="font-semibold text-slate-900">{totalListings}</span> {totalListings === 1 ? "listing" : "listings"}
+                          Showing{" "}
+                          <span className="font-semibold text-slate-900">
+                            {displayedListings.length}
+                          </span>{" "}
+                          of{" "}
+                          <span className="font-semibold text-slate-900">
+                            {totalListings}
+                          </span>{" "}
+                          {totalListings === 1 ? "listing" : "listings"}
                         </>
                       ) : (
                         <>
-                          Found <span className="font-semibold text-slate-900">{displayedListings.length}</span>{" "}
+                          Found{" "}
+                          <span className="font-semibold text-slate-900">
+                            {displayedListings.length}
+                          </span>{" "}
                           {displayedListings.length === 1 ? "listing" : "listings"}
                           {filterCount > 0 && (
                             <>
                               {" "}
-                              with <span className="font-semibold">{filterCount}</span>{" "}
+                              with <span className="font-semibold">
+                                {filterCount}
+                              </span>{" "}
                               {filterCount === 1 ? "filter" : "filters"} applied
                             </>
                           )}
@@ -271,12 +296,22 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                     <>
                       {!isAuthenticated && totalListings > displayedListings.length ? (
                         <>
-                          Showing <span className="font-semibold text-slate-900">{displayedListings.length}</span> of{" "}
-                          <span className="font-semibold text-slate-900">{totalListings}</span> {totalListings === 1 ? "listing" : "listings"}
+                          Showing{" "}
+                          <span className="font-semibold text-slate-900">
+                            {displayedListings.length}
+                          </span>{" "}
+                          of{" "}
+                          <span className="font-semibold text-slate-900">
+                            {totalListings}
+                          </span>{" "}
+                          {totalListings === 1 ? "listing" : "listings"}
                         </>
                       ) : (
                         <>
-                          Showing <span className="font-semibold text-slate-900">{displayedListings.length}</span>{" "}
+                          Showing{" "}
+                          <span className="font-semibold text-slate-900">
+                            {displayedListings.length}
+                          </span>{" "}
                           {displayedListings.length === 1 ? "listing" : "listings"}
                         </>
                       )}
@@ -297,7 +332,12 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                 <div className="text-center py-16 bg-white rounded-lg border border-slate-200 shadow-sm">
                   <div className="max-w-md mx-auto px-4">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-100 to-orange-100 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-8 h-8 text-cyan-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -307,10 +347,14 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
                       </svg>
                     </div>
                     <p className="text-lg font-medium text-slate-900 mb-2">
-                      {hasFilters || activeTab !== "all" ? "No listings found" : "No active listings yet"}
+                      {hasFilters || activeTab !== "all"
+                        ? "No listings found"
+                        : "No active listings yet"}
                     </p>
                     <p className="text-slate-600 mb-6">
-                      {hasFilters || activeTab !== "all" ? "Try adjusting your filters or search criteria." : "Be the first to create a listing!"}
+                      {hasFilters || activeTab !== "all"
+                        ? "Try adjusting your filters or search criteria."
+                        : "Be the first to create a listing!"}
                     </p>
                     {!hasFilters && activeTab === "all" && isAuthenticated && (
                       <Link href="/listings/new">
@@ -342,7 +386,7 @@ function ListingsContent({ currentUserId }: ListingsPageClientProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 // Wrapper component that provides the context
@@ -351,5 +395,5 @@ export function ListingsPageClient({ currentUserId }: ListingsPageClientProps) {
     <ListingsFiltersProvider>
       <ListingsContent currentUserId={currentUserId} />
     </ListingsFiltersProvider>
-  );
+  )
 }
