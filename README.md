@@ -77,7 +77,7 @@ Before setting up the project, ensure you have:
 
    ```bash
    git clone <repository-url>
-   cd kidney-swap
+   cd switch-with-me
    ```
 
 2. **Install dependencies**
@@ -98,7 +98,7 @@ Before setting up the project, ensure you have:
 
    ```bash
    # Database
-   DATABASE_URL="postgresql://user:password@localhost:5432/valkyries_seat_swap"
+   DATABASE_URL="postgresql://user:password@localhost:5432/the_database"
 
    # NextAuth - Generate a secret with: openssl rand -base64 32
    NEXTAUTH_SECRET="your-generated-secret-key"
@@ -107,10 +107,6 @@ Before setting up the project, ensure you have:
    # Google OAuth
    GOOGLE_CLIENT_ID="your-google-client-id"
    GOOGLE_CLIENT_SECRET="your-google-client-secret"
-
-   # Facebook OAuth (optional)
-   FACEBOOK_CLIENT_ID="your-facebook-app-id"
-   FACEBOOK_CLIENT_SECRET="your-facebook-app-secret"
 
    # Feature Flags
    NEXT_PUBLIC_FEATURE_SEAT_MAP_ENABLED="true"
@@ -121,7 +117,7 @@ Before setting up the project, ensure you have:
    Create the database:
 
    ```bash
-   createdb valkyries_seat_swap
+   createdb the_database
    ```
 
    Push the schema to the database:
@@ -147,7 +143,7 @@ Before setting up the project, ensure you have:
 ### Development Mode
 
 ```bash
-npm run start:dev
+npm run start:local
 ```
 
 The application will be available at `http://localhost:3000`
@@ -212,7 +208,7 @@ kidney-swap/
 │   │   ├── matching.ts    # Matching algorithm
 │   │   ├── notifications.ts # Notification utilities
 │   └── types/             # TypeScript type definitions
-├── server.js              # Custom Node.js server 
+├── server.js              # Custom Node.js server
 ├── package.json
 ├── tsconfig.json
 └── tailwind.config.js
@@ -283,27 +279,15 @@ See `prisma/schema.prisma` for the complete schema definition.
 
 The project supports multiple environment configurations:
 
-- **Development**: `npm run build:dev` / `npm run start:dev`
+- **Development**: `npm run build:local` / `npm run start:local`
+- **Preview**: `npm run build:preview` / `npm run start:preview`
 - **Production**: `npm run build:prod` / `npm run start:prod`
 
 Environment files:
 
-- `.env.development` - Development environment
-- `.env.production` - Production environment
-
-## Contributing
-
-This is currently a one-person project. For feedback, questions, or collaboration inquiries, contact:
-
-**Van** - bonsaitrees@gmail.com
-
-## Support the Project
-
-Switch With Me is built and maintained by one person. If the platform helps you find better seats, consider supporting with a small donation:
-
-[Support on Ko-fi](https://ko-fi.com/van889926)
-
-For sponsorship or partnership opportunities, email bonsaitrees@gmail.com
+- `.env.local` - Development environment
+- `.env.preview` - Preview environment
+- `.env.neon` - Production environment
 
 ## License
 
