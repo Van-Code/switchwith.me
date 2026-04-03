@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
-const RESEND_FROM = process.env.RESEND_FROM || "support@switchwith.me"
+const RESEND_TO = process.env.RESEND_TO
+
+const RESEND_FROM = process.env.RESEND_FROM
 const APP_BASE_URL = process.env.NEXTAUTH_URL || "https://switchwith.me"
 
 const resend = new Resend(RESEND_API_KEY)
@@ -44,8 +46,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!RESEND_API_KEY || !RESEND_FROM) {
-      console.error("SpaceMail environment variables are not configured")
+    if (!RESEND_API_KEY || !RESEND_FROM || !RESEND_TO) {
+      console.error("Resend environment variables are not configured")
       return NextResponse.json(
         { error: "Email service is not configured. Please try again later." },
         { status: 500 }
@@ -71,7 +73,7 @@ Sent at: ${new Date().toISOString()}
 
     const { data: response, error } = await resend.emails.send({
       from: RESEND_FROM,
-      to: [RESEND_FROM],
+      to: [RESEND_TO],
       subject: emailSubject,
       html: emailBody,
       replyTo: body.email,

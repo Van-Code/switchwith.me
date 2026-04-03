@@ -138,7 +138,7 @@ export default async function Home() {
       </section>
 
       {/* Support Card */}
-      <section className="max-w-xl mx-auto">
+      {/* <section className="max-w-xl mx-auto">
         <div className="text-center space-y-3 p-6 rounded-2xl bg-gradient-to-b from-white to-amber-50/60 border border-amber-100 shadow-sm">
           <h3 className="text-xl font-semibold flex items-center justify-center gap-2 text-slate-800">
             <Heart className="h-5 w-5 text-teal-500" />
@@ -163,7 +163,7 @@ export default async function Home() {
             Powered by Ko-fi, a simple tip jar for creators.
           </p>
         </div>
-      </section>
+      </section> */}
     </div>
   )
 }
