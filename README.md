@@ -177,32 +177,55 @@ npm run db:push
 ## Project Structure
 
 ```
-kidney-swap/
+switchwith.me/
 ├── prisma/
+|── |── migrations/          # Migration files
 │   ├── schema.prisma        # Database schema
 │   └── seed.ts              # Database seeding script
 ├── public/
 │   └── images/              # Static images
+│── react-emails/             # Email templates
+│    ├── components/
+│    ├── emails/
+|    └── static/
 ├── src/
 │   ├── app/                 # Next.js app directory
-│   │   ├── api/            # API routes
+│   │   │── admin/
+│   │   └── api/            # API routes
+│   │   │   ├── account/
+│   │   │   ├── admin/
 │   │   │   ├── auth/       # Authentication endpoints
+│   │   │   ├── conversations/    # Chat
+│   │   │   ├── credits/    # Credit operations
+│   │   │   ├── matches/    # Matching algorithm
 │   │   │   ├── listings/   # Listing CRUD operations
 │   │   │   ├── messages/   # Messaging endpoints
 │   │   │   ├── matches/    # Matching algorithm
-│   │   │   └── notifications/ # Notification system
+│   │   │   ├── notifications/    # Notification system
+│   │   │   ├── profile/    # User profile
+│   │   │   ├── reports/    # Reporting feature
+│   │   │   ├── settings/    # Settings routes
+│   │   │   └── teams/       # Team route
+│   │   ├── auth/            # Auth routes
 │   │   ├── listings/       # Listing pages
 │   │   ├── messages/       # Messaging interface
 │   │   ├── profile/        # User profile pages
 │   │   ├── settings/       # User settings
 │   │   ├── about/          # About page
+│   │   ├── admin/          # Admin page
+│   │   ├── users/          # User page
 │   │   └── page.tsx        # Homepage
+│   │   └── layout.tsx      #
+│   │   └── global.css      # Styles
+│   │   └── ...
+│   ├── config/            # Config files
 │   ├── components/         # React components
 │   │   ├── ui/            # Reusable UI components
 │   │   └── ...            # Feature components
 │   ├── contexts/          # React contexts
 │   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Utility libraries
+│   │   ├── listings/      # Listing utilities
 │   │   ├── auth.ts        # NextAuth configuration
 │   │   ├── db.ts          # Database utilities
 │   │   ├── matching.ts    # Matching algorithm
@@ -212,6 +235,7 @@ kidney-swap/
 ├── package.json
 ├── tsconfig.json
 └── tailwind.config.js
+└── ...
 ```
 
 ## Key Features Implementation
