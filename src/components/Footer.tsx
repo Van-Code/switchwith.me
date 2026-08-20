@@ -104,7 +104,14 @@ export default function Footer() {
         </div>
         {/* Copyright */}
         <div className="text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Switch With Me. Built with care for the community.
+          © {new Date().getFullYear()} Switch With Me. Built by Van •{" "}
+          <Link
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            href="https://github.com/Van-Code/switchwith.me"
+          >
+            View Source
+          </Link>
+          .
         </div>
       </div>
     </footer>

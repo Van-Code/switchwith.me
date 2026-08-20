@@ -2,6 +2,12 @@
 
 A community-powered seat swap platform for W+ sports fans. Trade single seats, a few games, or your whole season with fans who actually care about the culture. Browse open tickets, try new sections, or let someone awesome take that extra seat off your hands.
 
+## About This Project
+
+Switch With Me is an independently built product and portfolio project designed to explore real-world product and engineering challenges in a community-driven marketplace.
+
+The goal was to go beyond a basic demo and build something that reflects production-minded decisions around architecture, user experience, and trust between users.
+
 ## Overview
 
 Switch With Me is a modern web application designed to facilitate ticket swaps between season ticket holders and sports fans. Built with a focus on community, safety, and ease of use, the platform helps fans find better seats through direct peer-to-peer exchanges.
@@ -39,6 +45,24 @@ The platform was created specifically for Golden State Valkyries fans and the br
 - **User Controls**: End conversations and archive chats as needed
 - **Session Management**: Automatic sign-out after 5 minutes of inactivity
 - **Robust Error Handling**: Graceful handling of session expiration with user feedback
+
+## What This Project Demonstrates
+
+- End-to-end product design and implementation
+- Full-stack architecture using Next.js and PostgreSQL
+- Authentication and session management with OAuth
+- Real-time style messaging and notification systems
+- Matching algorithms for user-to-user interactions
+- Thoughtful UX for trust, safety, and community features
+- Scalable project structure and modular code organization
+
+## Key Product Decisions & Tradeoffs
+
+- Focused on core swap and messaging flows over secondary features to keep the product cohesive
+- Used OAuth-only authentication to reduce friction and improve trust
+- Prioritized simplicity and clarity in the UI over feature density
+- Built modular API routes and utilities to keep the system maintainable as it grows
+- Designed for community trust (profiles, verification, history) rather than anonymous transactions
 
 ## Tech Stack
 
@@ -324,3 +348,7 @@ Built with care for the Golden State Valkyries community and all women's and gen
 ---
 
 _Because we're better when we sit together._
+
+## Note
+
+This project is actively maintained as part of my portfolio and ongoing product work.
